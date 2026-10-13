@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cucú · salas para estudiar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F7; --surface:#FFFFFF; --ink:#18202E; --muted:#5C677A; --line:#D7DEE8; --soft:#F4F6FA;
+  --focus:#2B4C7E; --break:#3F8F63; --long:#7653B0; --bird:#F4B731; --beak:#E0761F; --danger:#B4423A; --afk:#9AA4B4;
+  --phase:var(--focus); --onphase:#FFFFFF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141C; --surface:#18202B; --ink:#E9EEF5; --muted:#97A3B6; --line:#2A3544; --soft:#141B24;
+    --focus:#86A9E6; --break:#7FCB98; --long:#BBA0EA; --bird:#F7C64F; --beak:#F09A4A; --danger:#E07A72; --afk:#5E6878; --onphase:#0F141C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F141C; --surface:#18202B; --ink:#E9EEF5; --muted:#97A3B6; --line:#2A3544; --soft:#141B24;
+  --focus:#86A9E6; --break:#7FCB98; --long:#BBA0EA; --bird:#F7C64F; --beak:#F09A4A; --danger:#E07A72; --afk:#5E6878; --onphase:#0F141C;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;color:var(--ink);background:var(--bg);
+  font:400 16px/1.5 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+.sky{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-color:color-mix(in srgb,var(--phase) 10%,var(--bg));transition:background-color 1.2s ease}
+.sky::before{content:"";position:absolute;left:50%;top:-30vh;width:120vw;height:90vh;transform:translateX(-50%);
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--phase) 24%,transparent),transparent)}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;margin:0;letter-spacing:-.02em}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:not-allowed;opacity:.45}
+a{color:var(--phase)}
+:focus-visible{outline:3px solid var(--bird);outline-offset:2px}
+.hidden{display:none!important}
+.banner{display:flex;flex-direction:column;gap:2px;background:color-mix(in srgb,var(--bird) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--bird) 55%,var(--line));border-radius:16px;padding:12px 16px;margin:-4px 0 18px;font-size:15px}
+.banner b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:17px}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 18px 56px}
+
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:4px 6px 4px 0;border-radius:12px}
+.brand h1{font-size:26px;font-weight:800}
+.brand .tag{color:var(--muted);font-size:14px;margin-left:4px}
+@media (max-width:560px){.brand .tag{display:none}}
+.iconbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:18px;height:18px}
+
+.btn{border:0;border-radius:14px;padding:12px 20px;font-weight:700;background:var(--ink);color:var(--surface);transition:transform .12s ease}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:8px 14px;font-size:14px;border-radius:11px}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 40%,transparent)}
+input.t{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft)}
+input.t:focus{border-color:var(--phase);outline:none;background:var(--surface)}
+label.f{display:block;font-size:14px;color:var(--muted);margin:14px 0 6px}
+.err{color:var(--danger);font-size:14px;margin-top:6px;min-height:1.2em;text-align:center}
+.muted{color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.steppers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stepper{background:var(--soft);border:1.5px solid var(--line);border-radius:14px;padding:8px 4px 6px;text-align:center}
+.stepper .lab{font-size:13px;color:var(--muted)}
+.stepper .ctl{display:flex;align-items:center;justify-content:center;gap:2px}
+.stepper button{width:28px;height:28px;border-radius:50%;border:0;background:var(--surface);font-weight:700;font-size:17px;line-height:1;box-shadow:0 0 0 1px var(--line)}
+.stepper output{min-width:40px;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:22px;font-variant-numeric:tabular-nums}
+.stepper .u{font-size:12px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:14px;color:var(--muted)}
+.chip[aria-pressed="true"]{border-color:var(--phase);color:var(--ink);background:color-mix(in srgb,var(--phase) 13%,transparent);font-weight:700}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.toggle:first-of-type,h4+.toggle{border-top:0}
+.toggle small{display:block;color:var(--muted);font-size:13px}
+.sw{appearance:none;-webkit-appearance:none;width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;flex:none;cursor:pointer;transition:background .2s;margin:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw:checked{background:var(--phase)}
+.sw:checked::after{transform:translateX(18px)}
+.sw:disabled{opacity:.5;cursor:not-allowed}
+input[type=range]{width:100%;accent-color:var(--phase)}
+
+/* lobby */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;margin:8px 0 30px}
+@media (max-width:820px){.hero{grid-template-columns:1fr}.hero .houseHero{order:-1;max-width:230px;margin:0 auto}}
+.hero h2{font-size:clamp(34px,5.4vw,54px);line-height:1.02;font-weight:800}
+.hero p{color:var(--muted);font-size:18px;max-width:46ch;margin:14px 0 0}
+.lobby{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+@media (max-width:820px){.lobby{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px}
+.card h3{font-size:20px;font-weight:700}
+.joinrow{display:flex;gap:8px;margin-top:12px}
+.joinrow input{flex:1;letter-spacing:.3em;font-weight:700;text-transform:lowercase;font-size:20px;text-align:center}
+.rooms{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.rooms li button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:var(--soft);border:1px solid transparent;border-radius:14px;padding:10px 12px}
+.rooms li button:hover{border-color:var(--line);background:var(--surface)}
+.rooms .mini{width:38px;height:38px;flex:none}
+.rooms .rn{font-weight:700;display:block}
+.rooms .rc{color:var(--muted);font-size:13px}
+.rooms .go{margin-left:auto;color:var(--muted);font-size:13px;letter-spacing:.1em}
+.empty{color:var(--muted);font-size:15px;padding:8px 2px}
+
+/* room */
+.roomhead{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.roomhead h2{font-size:clamp(26px,4vw,36px);font-weight:800}
+.roomhead .meta{color:var(--muted);font-size:15px}
+.headr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lockb{font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.codepill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 6px 6px 14px}
+.codepill .c{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:20px;letter-spacing:.22em}
+.stage{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:20px;align-items:start}
+.stage>*{min-width:0}
+@media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
+.goalrow input{min-width:0}
+@media (max-width:420px){.reactbar .sep{display:none}}
+.clockcard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:16px 16px 20px;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.clockcard.ping{animation:ping .9s ease-out 2}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--bird) 80%,transparent)}100%{box-shadow:0 0 0 22px transparent}}
+.cardtop{width:100%;display:flex;justify-content:center;align-items:center;position:relative}
+.cardtop #zenBtn{position:absolute;right:0}
+.phasepick{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:14px;border:1px solid var(--line)}
+.phasepick button{border:0;background:transparent;border-radius:10px;padding:8px 13px;font-size:14px;color:var(--muted);font-weight:700}
+.phasepick button[aria-pressed="true"]{background:var(--phase);color:var(--onphase)}
+@media (max-width:520px){.cardtop{justify-content:flex-start}.phasepick button{padding:7px 9px;font-size:13px}}
+.house{width:min(360px,84vw);margin-top:6px;cursor:pointer;user-select:none}
+.house svg{width:100%;height:auto;display:block;overflow:visible}
+.dots{display:flex;gap:8px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line);transition:background .3s,transform .3s}
+.dots i.on{background:var(--phase);transform:scale(1.15)}
+.goal{width:min(380px,100%);margin-top:12px;font-size:14px}
+.goal .gt{display:flex;justify-content:space-between;gap:10px}
+.goal .gt b{font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:999px;background:var(--soft);border:1px solid var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:0;background:var(--phase);border-radius:999px;transition:width .6s}
+.controls{display:flex;gap:12px;margin-top:14px;align-items:center;justify-content:center}
+.play{width:76px;height:76px;border-radius:50%;border:0;background:var(--phase);color:var(--onphase);display:grid;place-items:center;box-shadow:0 10px 26px -10px var(--phase);transition:transform .15s}
+.play:not(:disabled):hover{transform:scale(1.05)}.play:not(:disabled):active{transform:scale(.95)}
+.play svg{width:30px;height:30px}
+.round{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink)}
+.round svg{width:20px;height:20px}
+.ctrlnote{font-size:13px;color:var(--muted);margin-top:8px;min-height:1.2em;text-align:center}
+.bubbles{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;max-width:440px}
+.bub{width:54px;height:54px;border-radius:50%;border:1.5px solid var(--line);background:var(--soft);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:19px;transition:transform .15s,border-color .15s,background .15s}
+.bub:not(:disabled):hover{transform:scale(1.12);border-color:var(--phase);background:var(--surface)}
+.bub.wide{width:auto;padding:0 16px;border-radius:999px;font-family:"Atkinson Hyperlegible",sans-serif;font-size:14px;font-weight:700}
+.reactbar{display:flex;gap:4px;margin-top:16px;padding:5px;border-radius:999px;background:var(--soft);border:1px solid var(--line);align-items:center;flex-wrap:wrap;justify-content:center}
+.reactbar button{width:40px;height:40px;border:0;border-radius:50%;background:transparent;font-size:21px;transition:transform .15s,background .15s}
+.reactbar button:hover{background:var(--surface);transform:translateY(-3px) scale(1.1)}
+.reactbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+.reactbar #nudgeAll{width:auto;padding:0 12px;border-radius:999px;font-size:14px;font-weight:700;display:flex;gap:6px;align-items:center}
+.keys{color:var(--muted);font-size:13px;margin-top:10px;text-align:center}
+.keys kbd{font:inherit;font-weight:700;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:0 5px;background:var(--soft)}
+@media (hover:none){.keys{display:none}}
+.floaters{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.floater{position:absolute;bottom:70px;font-size:30px;animation:rise 2.6s ease-out forwards;display:flex;flex-direction:column;align-items:center}
+.floater small{font-size:11px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 6px;font-family:"Atkinson Hyperlegible",sans-serif}
+@keyframes rise{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-30px) scale(1.1)}100%{transform:translateY(-340px) scale(1);opacity:0}}
+
+/* side */
+.side{display:flex;flex-direction:column;gap:14px}
+.statuspick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.statuspick button{border:1.5px solid var(--line);background:var(--soft);border-radius:12px;padding:8px 10px;text-align:left;font-size:14px;display:flex;gap:8px;align-items:center}
+.statuspick button[aria-pressed="true"]{border-color:var(--sc,var(--phase));background:color-mix(in srgb,var(--sc,var(--phase)) 14%,var(--surface));font-weight:700}
+.tabs{padding:0;overflow:hidden}
+.tablist{display:flex;border-bottom:1px solid var(--line);background:var(--soft)}
+.tablist button{flex:1;border:0;background:transparent;padding:11px 4px 10px;font-size:13px;font-weight:700;color:var(--muted);position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tablist button .ic{font-size:17px;line-height:1}
+.tablist button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--phase);background:var(--surface)}
+.badge{position:absolute;top:5px;right:calc(50% - 22px);min-width:18px;height:18px;border-radius:999px;background:var(--danger);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 5px}
+.tabpanel{padding:16px 18px 18px}
+.tabpanel h4{font-size:15px;font-weight:700;margin:16px 0 8px}
+.tabpanel h4:first-child{margin-top:0}
+
+.chatlist{height:330px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px;overscroll-behavior:contain}
+.msg{max-width:88%;align-self:flex-start}
+.msg.mine{align-self:flex-end;text-align:right}
+.msg .mh{font-size:12px;color:var(--muted)}
+.msg .mh b{font-size:13px}
+.msg .mb{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:7px 11px;font-size:15px;overflow-wrap:anywhere;text-align:left}
+.msg.mine .mb{background:color-mix(in srgb,var(--phase) 16%,var(--surface));border-color:color-mix(in srgb,var(--phase) 30%,var(--line));border-radius:14px 14px 4px 14px}
+.chatform{display:flex;gap:8px;margin-top:12px}
+.chatform input{flex:1}
+
+.people{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.people li{display:flex;gap:11px;align-items:center;padding:8px;border-radius:14px}
+.people li.me{background:var(--soft)}
+.av{position:relative;width:40px;height:40px;flex:none}
+.av img{width:40px;height:40px;border-radius:50%;display:block;background:var(--soft)}
+.av::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2.5px solid var(--sc,var(--focus))}
+.av .se{position:absolute;right:-6px;bottom:-4px;font-size:14px;background:var(--surface);border-radius:50%;width:20px;height:20px;display:grid;place-items:center;box-shadow:0 0 0 1px var(--line)}
+.people .pb{flex:1;min-width:0}
+.people .who{font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--phase);color:var(--onphase)}
+.pill.alt{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.people .task{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.people .acts{display:flex;gap:4px;flex:none}
+.people .acts button{border:1px solid var(--line);background:var(--surface);border-radius:10px;height:32px;min-width:32px;padding:0 8px;font-size:13px}
+
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.tile b{display:block;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile span{font-size:13px;color:var(--muted)}
+.rank{list-style:none;margin:0;padding:0;counter-reset:r}
+.rank li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.rank li:first-child{border-top:0}
+.rank li span:last-child{color:var(--muted);white-space:nowrap}
+.timeline{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--line);max-height:240px;overflow-y:auto}
+.timeline li{position:relative;padding:4px 0 10px 4px;font-size:14px}
+.timeline li::before{content:"";position:absolute;left:-21px;top:9px;width:12px;height:12px;border-radius:50%;background:var(--focus);border:2px solid var(--surface)}
+.timeline li b{font-variant-numeric:tabular-nums}
+.musiclink{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--soft);border:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:700;margin-bottom:8px}
+.goalrow{display:flex;gap:8px;align-items:center}
+.goalrow .stepper{flex:none;width:118px}
+
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--surface);padding:11px 18px;border-radius:14px;font-size:15px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:20;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* zen */
+.zenexit{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:10;display:none}
+body.zen .zenexit{display:block}
+body.zen header.top,body.zen .roomhead,body.zen .side,body.zen .phasepick,body.zen #zenBtn,body.zen .controls,body.zen .bubbles,body.zen .reactbar,body.zen .keys,body.zen .ctrlnote{display:none!important}
+body.zen .stage{grid-template-columns:1fr}
+body.zen .clockcard{min-height:calc(100vh - 60px);justify-content:center;background:transparent;border-color:transparent}
+body.zen .house{width:min(500px,62vh,90vw)}
+
+/* cuckoo bits */
+#door{transform-box:fill-box;transform-origin:left center;transition:transform .35s cubic-bezier(.3,1.4,.6,1)}
+#birdG{transform-box:fill-box;transform-origin:center;transform:scale(.85);transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
+.house.out #door{transform:scaleX(-.15)}
+.house.out #birdG{transform:translateY(-3px) scale(1.35)}
+.house.out #beakG{animation:chirp .32s ease-in-out 3}
+@keyframes chirp{50%{transform:rotate(-14deg)}}
+#beakG{transform-box:fill-box;transform-origin:left center}
+#pend{transform-box:view-box;transform-origin:150px 330px}
+.house.running #pend{animation:swing 2s ease-in-out infinite}
+@keyframes swing{0%,100%{transform:rotate(9deg)}50%{transform:rotate(-9deg)}}
+#arc{transition:stroke-dashoffset .25s linear}
+#weightR{transition:transform .25s linear}
+@media (prefers-reduced-motion:reduce){
+  .house.running #pend,.clockcard.ping{animation:none}.floater{animation-duration:.01s}
+  #door,#birdG,#arc,#weightR,.sky{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<div class="wrap">
+  <header class="top">
+    <button class="brand" id="home" aria-label="Volver al inicio">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M4 18 20 5l16 13v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="var(--phase)"/>
+        <circle cx="20" cy="24" r="8" fill="var(--surface)"/>
+        <path d="M20 24V19M20 24l3.5 2" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="20" cy="12.5" r="3" fill="var(--bird)"/>
+      </svg>
+      <h1>Cucú</h1><span class="tag">salas para estudiar juntos</span>
+    </button>
+    <button class="iconbtn" id="themeBtn" aria-label="Cambiar tema claro u oscuro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>
+    </button>
+  </header>
+  <div class="banner hidden" id="accessBanner" role="status"><b id="bannerTitle"></b><span id="bannerText"></span></div>
+
+  <!-- LOBBY -->
+  <main id="lobby">
+    <section class="hero">
+      <div>
+        <h2>Estudiá al mismo ritmo que tu grupo.</h2>
+        <p>Creá una sala, pasá el link y todos comparten el mismo reloj, el chat y la meta del día. Cuando termina un bloque, sale el cucú.</p>
+      </div>
+      <div class="houseHero" id="heroSlot"></div>
+    </section>
+    <div class="lobby">
+      <section class="card">
+        <h3>Crear una sala</h3>
+        <label class="f" for="newName">Nombre</label>
+        <input class="t" id="newName" maxlength="40" placeholder="Ej: Parcial de Análisis II">
+        <label class="f" for="newGoal">Meta de la sala (opcional)</label>
+        <input class="t" id="newGoal" maxlength="80" placeholder="Ej: Terminar la guía 3">
+        <label class="f">Ritmo</label>
+        <div class="chips" id="newPresets"></div>
+        <div class="steppers" id="newSteps" style="margin-top:10px"></div>
+        <div style="margin-top:18px"><button class="btn" id="createBtn">Crear sala</button></div>
+        <div class="err" id="createErr" style="text-align:left"></div>
+      </section>
+      <section class="card">
+        <h3>Entrar con código</h3>
+        <div class="joinrow">
+          <input class="t" id="joinCode" maxlength="8" placeholder="•••••" autocomplete="off" aria-label="Código de sala">
+          <button class="btn" id="joinBtn">Entrar</button>
+        </div>
+        <div class="err" id="joinErr" style="text-align:left"></div>
+        <p class="muted hidden" id="ownerHint" data-unused="1" style="font-size:14px;margin:0 0 10px">Si alguien entra y no puede tocar nada, invitalo por email como Editor desde Compartir. Con el acceso por link activado, la gente de afuera entra solo a mirar.</p>
+        <h3 style="font-size:17px;margin-top:6px">Salas recientes</h3>
+        <ul class="rooms" id="roomList"><li class="empty">Cargando…</li></ul>
+        <p class="muted hidden" id="soloNote" style="font-size:14px;margin-top:14px">Esta vista no puede guardar datos compartidos: las salas, el chat y las estadísticas funcionan solo en este dispositivo.</p>
+      </section>
+    </div>
+  </main>
+
+  <!-- ROOM -->
+  <main id="room" class="hidden">
+    <div class="roomhead">
+      <div>
+        <h2 id="roomName">Sala</h2>
+        <div class="meta" id="roomMeta"></div>
+      </div>
+      <div class="headr">
+        <span class="lockb hidden" id="lockBadge">🔒 Reloj solo para anfitrión y moderadores</span>
+        <div class="codepill"><span class="c" id="roomCode">-----</span><button class="btn small ghost" id="copyBtn">Copiar link</button></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <section class="clockcard" id="clockcard">
+        <div class="cardtop">
+          <div class="phasepick" role="group" aria-label="Fase">
+            <button data-ph="focus">Estudio</button><button data-ph="break">Pausa</button><button data-ph="long">Pausa larga</button>
+          </div>
+          <button class="iconbtn" id="zenBtn" aria-label="Modo zen, pantalla completa" title="Modo zen (Z)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+        <div class="house" id="roomSlot" title="Tocá la casita"></div>
+        <div class="dots" id="dots" aria-label="Pomodoros hacia la pausa larga"><i></i><i></i><i></i><i></i></div>
+        <div class="goal hidden" id="goalBox">
+          <div class="gt"><span id="goalTxt"></span><b id="goalNum"></b></div>
+          <div class="bar"><i id="goalBar"></i></div>
+        </div>
+        <div class="controls">
+          <button class="round" id="resetBtn" aria-label="Reiniciar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+          <button class="play" id="playBtn" aria-label="Arrancar"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+          <button class="round" id="skipBtn" aria-label="Saltar fase"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14l10-7zM17 5h2.5v14H17z"/></svg></button>
+        </div>
+        <div class="ctrlnote" id="ctrlNote"></div>
+        <div class="bubbles" id="bubbles"></div>
+        <div class="reactbar" id="reactbar" role="group" aria-label="Reacciones y avisos">
+          <button data-e="👏" aria-label="Aplausos">👏</button><button data-e="🔥" aria-label="Fuego">🔥</button>
+          <button data-e="💪" aria-label="Fuerza">💪</button><button data-e="☕" aria-label="Café">☕</button>
+          <button data-e="🧠" aria-label="Cerebro">🧠</button><button data-e="🎉" aria-label="Festejo">🎉</button>
+          <span class="sep"></span>
+          <button id="nudgeAll" aria-label="Avisar a toda la sala">🔔 <span>Avisar a todos</span></button>
+        </div>
+        <div class="keys"><kbd>Espacio</kbd> arrancar o pausar · <kbd>S</kbd> saltar · <kbd>R</kbd> reiniciar · <kbd>Z</kbd> modo zen</div>
+        <div class="floaters" id="floaters"></div>
+        <div class="err" id="roomErr"></div>
+      </section>
+
+      <aside class="side">
+        <section class="card">
+          <h3 style="font-size:17px">Tu estado</h3>
+          <div class="statuspick" id="statusPick" role="group" aria-label="Tu estado"></div>
+        </section>
+
+        <section class="card tabs">
+          <div class="tablist" role="tablist">
+            <button role="tab" data-tab="chat" aria-selected="true"><span class="ic">💬</span>Chat<span class="badge hidden" id="chatBadge"></span></button>
+            <button role="tab" data-tab="people"><span class="ic">👥</span><span id="peopleTabLbl">Gente</span></button>
+            <button role="tab" data-tab="hist"><span class="ic">📈</span>Historial</button>
+            <button role="tab" data-tab="sound"><span class="ic">🎧</span>Sonido</button>
+            <button role="tab" data-tab="room"><span class="ic">⚙️</span>Sala</button>
+          </div>
+
+          <div class="tabpanel" id="tab-chat" role="tabpanel">
+            <div class="chatlist" id="chatList" aria-live="polite"></div>
+            <div class="chatform">
+              <input class="t" id="chatInput" maxlength="400" placeholder="Escribí un mensaje o pegá un link" autocomplete="off">
+              <button class="btn small" id="chatSend">Enviar</button>
+            </div>
+          </div>
+
+          <div class="tabpanel hidden" id="tab-people" role="tabpanel">
+            <ul class="people" id="people"></ul>
+            <label class="f" for="myTask">¿En qué estás?</label>
+            <input class="t" id="myTask" maxlength="80" placeholder="Ej: guía 3, ejercicios 4 a 9">
+            <label class="f" for="myNick">Tu nombre en la sala</label>
+            <input class="t" id="myNick" maxlength="30" placeholder="Tu nombre">
+          </div>
+
+          <div class="tabpanel hidden" id="tab-hist" role="tabpanel">
+            <h4>Hoy</h4>
+            <div class="tiles">
+              <div class="tile"><b id="stGroupMin">0</b><span>min del grupo</span></div>
+              <div class="tile"><b id="stRoomPoms">0</b><span>pomodoros de la sala</span></div>
+              <div class="tile"><b id="stMyMin">0</b><span>tus minutos</span></div>
+              <div class="tile"><b id="stMyStreak">0</b><span id="stMyBest">tu racha</span></div>
+            </div>
+            <h4>Ranking de hoy</h4>
+            <ol class="rank" id="rank"></ol>
+            <h4>Línea de tiempo</h4>
+            <ul class="timeline" id="timeline"></ul>
+            <p class="muted" style="font-size:13px;margin:10px 0 0">Una racha suma cuando completás un bloque de estudio entero en estado “Concentrado”. Se corta si el bloque se salta o se reinicia.</p>
+          </div>
+
+          <div class="tabpanel hidden" id="tab-sound" role="tabpanel">
+            <h4>Sonido al terminar un bloque</h4>
+            <div class="chips" id="endSounds"></div>
+            <label class="f" for="vol">Volumen de avisos</label>
+            <input type="range" id="vol" min="0" max="1" step="0.05">
+            <h4>Ambiente de fondo</h4>
+            <div class="chips" id="ambChips"></div>
+            <label class="f" for="ambVol">Volumen del ambiente</label>
+            <input type="range" id="ambVol" min="0" max="1" step="0.05">
+            <p class="muted" style="font-size:13px;margin:6px 0 0">El ambiente suena solo en tu dispositivo.</p>
+            <h4>Música del grupo</h4>
+            <div id="musicBox"></div>
+            <div class="row">
+              <input class="t" id="musicInput" placeholder="Link de Spotify o YouTube" style="flex:1;min-width:160px">
+              <button class="btn small" id="musicSave">Guardar</button>
+            </div>
+            <h4>Avisos</h4>
+            <label class="toggle"><span>Avisos del sistema<small>Te avisa aunque la pestaña esté minimizada</small></span><input type="checkbox" class="sw" id="notifySw"></label>
+            <div class="muted" id="notifyNote" style="font-size:13px"></div>
+          </div>
+
+          <div class="tabpanel hidden" id="tab-room" role="tabpanel">
+            <h4>Meta de la sala</h4>
+            <div class="goalrow">
+              <input class="t" id="goalInput" maxlength="80" placeholder="Ej: Terminar la guía 3">
+              <div class="stepper"><div class="lab">Pomodoros</div><div class="ctl"><button type="button" id="gMinus" aria-label="Menos pomodoros">−</button><output id="gN">8</output><button type="button" id="gPlus" aria-label="Más pomodoros">+</button></div></div>
+            </div>
+            <div style="margin-top:10px"><button class="btn small" id="goalSave">Guardar meta</button></div>
+            <h4>Inicio automático</h4>
+            <label class="toggle"><span>Arrancar las pausas solas</span><input type="checkbox" class="sw" id="autoBreak"></label>
+            <label class="toggle"><span>Arrancar el estudio solo después de la pausa</span><input type="checkbox" class="sw" id="autoFocus"></label>
+            <h4>Tiempos</h4>
+            <div class="chips" id="roomPresets"></div>
+            <div class="steppers" id="roomSteps" style="margin-top:10px"></div>
+            <div style="margin-top:10px"><button class="btn small" id="saveDur">Guardar tiempos</button></div>
+            <h4>Permisos</h4>
+            <label class="toggle"><span>Solo el anfitrión y los moderadores manejan el reloj<small id="hostLine"></small></span><input type="checkbox" class="sw" id="lockSw"></label>
+            <p class="muted" style="font-size:13px;margin:4px 0 0">El anfitrión puede nombrar moderadores desde la pestaña Gente.</p>
+            <div style="margin-top:16px"><button class="btn small danger" id="delRoom">Borrar sala</button></div>
+          </div>
+        </section>
+        <button class="btn ghost" id="leaveBtn">Salir de la sala</button>
+      </aside>
+    </div>
+  </main>
+</div>
+<button class="btn ghost zenexit" id="zenExit">Salir del modo zen</button>
+<div class="toast" id="toast" role="status"></div>
+
+<template id="houseTpl">
+<svg viewBox="0 0 300 420" aria-hidden="true">
+  <line x1="112" y1="330" x2="112" y2="392" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 3"/>
+  <path d="M104 392h16l-3 22h-10z" fill="var(--phase)" opacity=".75"/>
+  <g id="weightR">
+    <line x1="188" y1="330" x2="188" y2="352" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 3"/>
+    <path d="M180 352h16l-3 22h-10z" fill="var(--phase)" opacity=".75"/>
+  </g>
+  <g id="pend">
+    <line x1="150" y1="330" x2="150" y2="392" stroke="var(--ink)" stroke-width="3"/>
+    <circle cx="150" cy="396" r="12" fill="var(--bird)"/>
+  </g>
+  <rect x="44" y="118" width="212" height="214" rx="22" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+  <path d="M18 128 150 22l132 106" fill="var(--phase)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="132" y="66" width="36" height="38" rx="6" fill="var(--ink)"/>
+  <g id="birdG">
+    <ellipse cx="150" cy="86" rx="15" ry="12" fill="var(--bird)"/>
+    <circle cx="155" cy="82" r="2.4" fill="#18202E"/>
+    <g id="beakG"><path d="M163 84l12 3-12 3z" fill="var(--beak)"/></g>
+    <path d="M138 88l-10 6 12-2z" fill="var(--bird)"/>
+  </g>
+  <rect id="door" x="132" y="66" width="36" height="38" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.5"/>
+  <g id="ticks"></g>
+  <circle cx="150" cy="226" r="78" fill="none" stroke="var(--line)" stroke-width="9"/>
+  <circle id="arc" cx="150" cy="226" r="78" fill="none" stroke="var(--phase)" stroke-width="9" stroke-linecap="round" transform="rotate(-90 150 226)" stroke-dasharray="490.09" stroke-dashoffset="0"/>
+  <text id="time" x="150" y="234" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="46" fill="var(--ink)" style="font-variant-numeric:tabular-nums">25:00</text>
+  <text id="phaseTxt" x="150" y="262" text-anchor="middle" font-family="Atkinson Hyperlegible, system-ui, sans-serif" font-weight="700" font-size="14" fill="var(--phase)">Estudio</text>
+</svg>
+</template>
+<script type="module">
+import "./firebase-backend.js";
+(() => {
+  // ================= helpers & state =================
+  const $ = id => document.getElementById(id);
+  const PH = { focus: "Estudio", break: "Pausa", long: "Pausa larga" };
+  const PRESETS = [["Clásico", 25, 5, 15], ["Profundo", 50, 10, 30], ["Sprint", 15, 3, 10]];
+  const EMOJIS = ["👏", "🔥", "💪", "☕", "🧠", "🎉"];
+  const STATUS = {
+    focus: ["Concentrado", "🎯", "var(--focus)"], rest: ["En descanso", "☕", "var(--break)"],
+    afk: ["Lejos del teclado", "💤", "var(--afk)"], done: ["Terminé por hoy", "✅", "var(--long)"]
+  };
+  const END_SOUNDS = [["cucu", "Cucú"], ["zen", "Campana zen"], ["gong", "Gong"], ["alarm", "Alarma clásica"]];
+  const AMBS = [["off", "Apagado"], ["rain", "🌧️ Lluvia"], ["cafe", "☕ Café"], ["nature", "🌿 Naturaleza"], ["brown", "〰️ Ruido marrón"], ["lofi", "🎹 Lo-fi"]];
+  const CIRC = 2 * Math.PI * 78;
+  const GREY = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='5' fill='%23999'/%3E%3C/svg%3E";
+
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const hm = ms => { const d = new Date(ms); return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
+  const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
+  const toast = msg => { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2600); };
+  const durOf = (d, ph) => (ph === "focus" ? d.focusMin : ph === "break" ? d.breakMin : d.longMin) * 60000;
+  const remainingMs = d => !d ? 0 : d.running ? Math.max(0, d.endsAt - Date.now()) : d.remaining;
+  const newCode = () => { const a = "abcdefghjkmnpqrstuvwxyz23456789"; let s = ""; for (let i = 0; i < 5; i++) s += a[Math.floor(Math.random() * a.length)]; return s; };
+  const doneToday = d => d.day === today() ? (d.doneToday || 0) : 0;
+
+  let db = null, room = null, user = null, myId = null, iAmOwner = false;
+  let current = null;                 // { code, data }
+  let subs = [], named = null, myPeer = null;
+  let localMode = false, writing = false, readOnly = false;
+  let listDocs = [], peers = [], chatDocs = [], statsDocs = [];
+  let myStatus = STATUS[store.get("cucu.status")] ? store.get("cucu.status") : "focus";
+  let focusAcc = 0, lastTick = Date.now(), lastFocusDur = 0, myStatsCache = null;
+  let activeTab = "chat", chatSeen = 0;
+  const prefs = Object.assign({ snd: "cucu", vol: 0.6, ambVol: 0.4, notify: false }, (() => { try { return JSON.parse(store.get("cucu.prefs") || "{}"); } catch (e) { return {}; } })());
+  const savePrefs = () => store.set("cucu.prefs", JSON.stringify(prefs));
+
+  function norm(d) {
+    d = Object.assign({}, d);
+    const def = { name: "Sala de estudio", focusMin: 25, breakMin: 5, longMin: 15, phase: "focus", round: 0, running: false, endsAt: 0,
+      hostId: null, mods: [], lock: false, autoBreak: true, autoFocus: false, goal: "", goalN: 8, music: "", day: today(),
+      doneToday: 0, log: [], why: "", phaseStart: 0, pausedAt: 0, updatedAt: 0 };
+    for (const k in def) if (d[k] === undefined || d[k] === null) d[k] = def[k];
+    if (!PH[d.phase]) d.phase = "focus";
+    if (!Array.isArray(d.mods)) d.mods = [];
+    if (!Array.isArray(d.log)) d.log = [];
+    if (!d.dur) d.dur = durOf(d, d.phase);
+    if (typeof d.remaining !== "number") d.remaining = d.dur;
+    return d;
+  }
+
+  // ================= roles =================
+  const isHost = () => !!(current && myId && current.data.hostId === myId);
+  const isMod = () => !!(current && myId && current.data.mods.includes(myId));
+  const canAdmin = () => !!current && !readOnly && (!current.data.hostId || isHost() || iAmOwner || localMode);
+  const canControl = () => !!current && !readOnly && (!current.data.lock || canAdmin() || isMod());
+  function showBanner(title, text) { $("bannerTitle").textContent = title; $("bannerText").textContent = text; $("accessBanner").classList.remove("hidden"); }
+  function setReadOnly() {
+    if (readOnly) return; readOnly = true;
+    showBanner("Estás entrando como espectador", "Podés ver el reloj, el chat y quién está, pero no tocar nada ni escribir. Pedile a quien te pasó el link que te invite por email como Editor.");
+    $("createBtn").disabled = true; $("chatInput").disabled = true; $("chatSend").disabled = true;
+    $("chatInput").placeholder = "Como espectador no podés escribir";
+    if (current) { bubKey = ""; render(); renderRoomPanel(); }
+  }
+  function denied() { toast("En esta sala solo el anfitrión y los moderadores manejan el reloj"); return false; }
+
+  // ================= theme =================
+  const savedTheme = store.get("cucu.theme"); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+  $("themeBtn").onclick = () => {
+    const ds = document.documentElement.dataset.theme;
+    const dark = ds ? ds === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    const t = dark ? "light" : "dark"; document.documentElement.dataset.theme = t; store.set("cucu.theme", t);
+  };
+
+  // ================= the cuckoo house =================
+  const house = document.createElement("div");
+  house.className = "house"; house.appendChild($("houseTpl").content.cloneNode(true));
+  const q = s => house.querySelector(s);
+  (() => { let s = ""; for (let i = 0; i < 60; i++) { const a = i * 6 * Math.PI / 180, big = i % 5 === 0, r1 = 98, r2 = big ? 90 : 94;
+    s += `<line x1="${150 + r1 * Math.sin(a)}" y1="${226 - r1 * Math.cos(a)}" x2="${150 + r2 * Math.sin(a)}" y2="${226 - r2 * Math.cos(a)}" stroke="var(--${big ? "muted" : "line"})" stroke-width="${big ? 2 : 1}" stroke-linecap="round"/>`; }
+    q("#ticks").innerHTML = s; })();
+  q("#arc").setAttribute("stroke-dasharray", CIRC);
+  const placeHouse = slot => { slot.innerHTML = ""; slot.appendChild(house); };
+  placeHouse($("heroSlot"));
+  house.addEventListener("click", () => birdOut(1100, true));
+  function birdOut(ms, withSound) {
+    if (withSound) playEnd(prefs.snd);
+    house.classList.add("out"); clearTimeout(birdOut.t);
+    birdOut.t = setTimeout(() => house.classList.remove("out"), ms);
+  }
+  let demoT = 0;
+  function heroTick() {
+    demoT = (demoT + 0.004) % 1;
+    q("#arc").setAttribute("stroke-dashoffset", CIRC * demoT);
+    q("#time").textContent = fmt((1 - demoT) * 25 * 60000);
+    q("#phaseTxt").textContent = "Estudio";
+    q("#weightR").setAttribute("transform", `translate(0 ${demoT * 30})`);
+    house.classList.add("running");
+  }
+
+  // ================= audio engine =================
+  const A = { ctx: null, out: null, amb: null, ambTimers: [], ambSrc: [], ambKind: "off" };
+  function ac() {
+    if (!A.ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; A.ctx = new C(); A.out = A.ctx.createGain(); A.out.connect(A.ctx.destination); }
+    if (A.ctx.state === "suspended") A.ctx.resume();
+    return A.ctx;
+  }
+  function tone(f, t0, dur, o = {}) {
+    const c = ac(); if (!c) return;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = o.type || "sine"; osc.frequency.setValueAtTime(f, c.currentTime + t0);
+    if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, c.currentTime + t0 + (o.glide || dur * 0.6));
+    const peak = (o.gain || 0.3) * (o.bus ? 1 : prefs.vol);
+    g.gain.setValueAtTime(0.0001, c.currentTime + t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), c.currentTime + t0 + (o.attack || 0.01));
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + t0 + dur);
+    osc.connect(g).connect(o.bus || A.out); osc.start(c.currentTime + t0); osc.stop(c.currentTime + t0 + dur + 0.05);
+  }
+  function playEnd(kind) {
+    if (!ac() || prefs.vol <= 0) return;
+    if (kind === "zen") { [[1, 0.3], [2.76, 0.12], [5.4, 0.05]].forEach(([m, g]) => tone(528 * m, 0, 4.2, { gain: g, attack: 0.005 })); tone(528, 1.6, 3.5, { gain: 0.14 }); }
+    else if (kind === "gong") { [[1, 0.35], [1.48, 0.16], [2.1, 0.12], [2.7, 0.08], [3.6, 0.05]].forEach(([m, g]) => tone(98 * m, 0, 5.5, { gain: g, attack: 0.03 })); }
+    else if (kind === "alarm") { for (let r = 0; r < 2; r++) for (let i = 0; i < 4; i++) tone(880, r * 0.9 + i * 0.16, 0.1, { type: "square", gain: 0.12, attack: 0.002 }); }
+    else { tone(784, 0, 0.28, { type: "triangle", gain: 0.32 }); tone(622, 0.32, 0.3, { type: "triangle", gain: 0.32 }); }
+  }
+  const playNudge = () => { tone(1320, 0, 0.18, { gain: 0.16 }); tone(1760, 0.14, 0.3, { gain: 0.14 }); };
+
+  const noiseCache = {};
+  function noiseBuf(kind) {
+    if (noiseCache[kind]) return noiseCache[kind];
+    const c = ac(), len = c.sampleRate * 3, b = c.createBuffer(1, len, c.sampleRate), d = b.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      if (kind === "brown") { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+      else if (kind === "crackle") d[i] = Math.random() < 0.0006 ? w : 0;
+      else d[i] = w;
+    }
+    return (noiseCache[kind] = b);
+  }
+  function noise(kind, chain) {
+    const c = ac(), s = c.createBufferSource(); s.buffer = noiseBuf(kind); s.loop = true;
+    let node = s; chain.forEach(n => { node.connect(n); node = n; }); node.connect(A.amb);
+    s.start(); A.ambSrc.push(s); return s;
+  }
+  const filt = (type, f, Q) => { const n = A.ctx.createBiquadFilter(); n.type = type; n.frequency.value = f; if (Q) n.Q.value = Q; return n; };
+  const gainN = v => { const g = A.ctx.createGain(); g.gain.value = v; return g; };
+  A.tok = 0;
+  const every = (fn, min, max) => { const tok = A.tok; const loop = () => { if (tok !== A.tok) return; fn(); setTimeout(loop, min + Math.random() * (max - min)); }; setTimeout(loop, min); };
+  function stopAmbient() {
+    A.tok++; A.ambTimers.forEach(clearInterval); A.ambTimers = [];
+    A.ambSrc.forEach(s => { try { s.stop(); } catch (e) {} }); A.ambSrc = [];
+    if (A.amb) { const old = A.amb; try { old.gain.setTargetAtTime(0, A.ctx.currentTime, 0.1); } catch (e) {} setTimeout(() => old.disconnect(), 500); A.amb = null; }
+    A.ambKind = "off";
+  }
+  function startAmbient(kind) {
+    stopAmbient(); if (kind === "off") return renderSoundPanel();
+    const c = ac(); if (!c) return;
+    A.amb = c.createGain(); A.amb.gain.value = prefs.ambVol; A.amb.connect(A.out); A.ambKind = kind;
+    const bus = A.amb;
+    if (kind === "rain") {
+      noise("white", [filt("highpass", 500), filt("lowpass", 7000), gainN(0.22)]);
+      noise("brown", [filt("lowpass", 350), gainN(0.55)]);
+      every(() => tone(1800 + Math.random() * 2600, 0, 0.04, { gain: 0.02 + Math.random() * 0.03, bus, attack: 0.002 }), 40, 160);
+    } else if (kind === "cafe") {
+      noise("brown", [filt("lowpass", 650), gainN(0.75)]);
+      const chat = gainN(0.04); noise("white", [filt("bandpass", 600, 1.2), chat]);
+      every(() => chat.gain.setTargetAtTime(0.02 + Math.random() * 0.07, c.currentTime, 0.25), 250, 600);
+      every(() => { const f = 2600 + Math.random() * 1400; tone(f, 0, 0.35, { gain: 0.05, bus, attack: 0.002 }); tone(f * 1.52, 0, 0.25, { gain: 0.025, bus, attack: 0.002 }); }, 1500, 5200);
+    } else if (kind === "nature") {
+      const wind = gainN(0.3), bp = filt("bandpass", 450, 0.6); noise("brown", [bp, wind]);
+      const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 0.07; lg.gain.value = 0.2; lfo.connect(lg).connect(wind.gain); lfo.start(); A.ambSrc.push(lfo);
+      noise("white", [filt("bandpass", 1400, 0.8), gainN(0.035)]);
+      every(() => { const n = 2 + Math.floor(Math.random() * 3), base = 2600 + Math.random() * 1200; for (let i = 0; i < n; i++) tone(base, i * 0.13, 0.09, { to: base * 1.45, glide: 0.07, gain: 0.05, bus, attack: 0.005 }); }, 2400, 7000);
+    } else if (kind === "brown") {
+      noise("brown", [filt("lowpass", 1000), gainN(0.65)]);
+    } else if (kind === "lofi") {
+      startLofi(bus);
+    }
+    renderSoundPanel();
+  }
+  function startLofi(bus) {
+    const c = A.ctx, warm = filt("lowpass", 2400); warm.connect(bus);
+    noise("crackle", [filt("highpass", 1200), gainN(0.35)]);
+    noise("white", [filt("lowpass", 900), gainN(0.008)]);
+    const CH = [[174.6, 220, 261.6, 329.6], [164.8, 196, 246.9, 293.7], [146.8, 174.6, 220, 261.6], [130.8, 164.8, 196, 246.9]];
+    const beat = 60 / 72; let step = 0, next = c.currentTime + 0.1;
+    const pad = (f, t, len) => {
+      [0, 4].forEach(det => { const o = c.createOscillator(), g = c.createGain(), lp = c.createBiquadFilter();
+        o.type = "triangle"; o.frequency.value = f; o.detune.value = det; lp.type = "lowpass"; lp.frequency.value = 900;
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.035, t + 0.35); g.gain.setValueAtTime(0.035, t + len - 0.4); g.gain.linearRampToValueAtTime(0.0001, t + len);
+        o.connect(lp).connect(g).connect(warm); o.start(t); o.stop(t + len + 0.05); });
+    };
+    const hit = (t, kind) => {
+      if (kind === "kick") { const o = c.createOscillator(), g = c.createGain(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+        g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3); o.connect(g).connect(warm); o.start(t); o.stop(t + 0.32); return; }
+      const s = c.createBufferSource(), g = c.createGain(), f = c.createBiquadFilter(); s.buffer = noiseBuf("white");
+      f.type = kind === "hat" ? "highpass" : "bandpass"; f.frequency.value = kind === "hat" ? 7000 : 1800;
+      const v = kind === "hat" ? 0.035 : 0.12, len = kind === "hat" ? 0.04 : 0.16;
+      g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + len); s.connect(f).connect(g).connect(warm); s.start(t, Math.random()); s.stop(t + len + 0.02);
+    };
+    const mel = (f, t) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.045, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + beat * 1.2); o.connect(g).connect(warm); o.start(t); o.stop(t + beat * 1.3); };
+    const sched = () => {
+      while (next < c.currentTime + 0.25) {
+        const eighth = step % 8, bar = Math.floor(step / 8) % 4, swing = eighth % 2 ? beat * 0.08 : 0, t = next + swing;
+        if (eighth === 0) { CH[bar].forEach(f => pad(f, t, beat * 4)); }
+        if (eighth === 0 || eighth === 5) hit(t, "kick");
+        if (eighth === 2 || eighth === 6) hit(t, "snare");
+        hit(t, "hat");
+        if (Math.random() < 0.22 && eighth % 2 === 0) mel(CH[bar][Math.floor(Math.random() * 4)] * 2, t);
+        next += beat / 2; step++;
+      }
+    };
+    A.ambTimers.push(setInterval(sched, 60));
+  }
+
+  // ================= steppers & presets =================
+  function makeSteppers(el, presetEl, vals) {
+    const defs = [["Estudio", "f", 1, 180], ["Pausa", "b", 1, 60], ["Larga", "l", 1, 90]], outs = {};
+    el.innerHTML = "";
+    defs.forEach(([lab, k, mn, mx]) => {
+      const box = document.createElement("div"); box.className = "stepper";
+      box.innerHTML = `<div class="lab">${lab}</div><div class="ctl"><button type="button" aria-label="Menos minutos de ${lab}">−</button><output>${vals[k]}</output><button type="button" aria-label="Más minutos de ${lab}">+</button></div><div class="u">min</div>`;
+      const [minus, plus] = box.querySelectorAll("button"), out = box.querySelector("output");
+      const set = v => { vals[k] = Math.min(mx, Math.max(mn, v)); out.textContent = vals[k]; sync(); };
+      minus.onclick = () => set(vals[k] - (vals[k] > 30 ? 5 : 1));
+      plus.onclick = () => set(vals[k] + (vals[k] >= 30 ? 5 : 1));
+      outs[k] = out; el.appendChild(box);
+    });
+    presetEl.innerHTML = "";
+    const chips = PRESETS.map(([n, f, b, l]) => {
+      const c = document.createElement("button"); c.type = "button"; c.className = "chip"; c.textContent = `${n} ${f}/${b}`;
+      c.onclick = () => { Object.assign(vals, { f, b, l }); Object.keys(outs).forEach(k => outs[k].textContent = vals[k]); sync(); };
+      presetEl.appendChild(c); return [c, f, b, l];
+    });
+    function sync() { chips.forEach(([c, f, b, l]) => c.setAttribute("aria-pressed", String(vals.f === f && vals.b === b && vals.l === l))); }
+    sync();
+    return { vals, el, refresh(v) { Object.assign(vals, v); Object.keys(outs).forEach(k => outs[k].textContent = vals[k]); sync(); } };
+  }
+  const newSteps = makeSteppers($("newSteps"), $("newPresets"), { f: 25, b: 5, l: 15 });
+  const roomSteps = makeSteppers($("roomSteps"), $("roomPresets"), { f: 25, b: 5, l: 15 });
+
+  // ================= room state: write + transitions =================
+  function setData(nd, source) {
+    if (!current) return;
+    const prev = current.data;
+    current.data = norm(nd);
+    transitions(prev, current.data, source);
+    render();
+  }
+  async function writeRoom(patch) {
+    if (!current) return;
+    const full = norm(Object.assign({}, current.data, patch, { updatedAt: Date.now() }));
+    setData(full, "local");
+    if (localMode) { store.set("cucu.local." + current.code, JSON.stringify(full)); return; }
+    if (readOnly) return;
+    if (writing) { writeRoom.pending = full; return; }
+    writing = true; const code = current.code;
+    try {
+      let body = full;
+      while (body) { writeRoom.pending = null; await db.doc("rooms/" + code).set(body); body = writeRoom.pending; }
+      $("roomErr").textContent = "";
+    } catch (e) {
+      if (e && (e.code === "permission_denied" || e.code === "invalid_argument")) {
+        toast("No tenés permiso para cambiar eso en esta sala");
+        try { const sn = await db.doc("rooms/" + code).get(); if (sn.exists && current && current.code === code) setData(sn.data(), "remote"); } catch (_) {}
+      } else $("roomErr").textContent = "No se pudo guardar el cambio. Probá de nuevo.";
+    } finally { writing = false; }
+  }
+  function focusCount() {
+    const seen = new Set();
+    peers.forEach(p => { const pr = p.presence || {}; if (pr.st === "focus") seen.add(p.by || pr.uid || p.peer); });
+    if (!peers.length && myStatus === "focus") return 1;
+    return Math.max(1, seen.size);
+  }
+  function advance(d, base, natural) {
+    const p = { why: natural ? "done" : "skip" };
+    let round = d.round || 0, phase;
+    if (d.phase === "focus") {
+      if (natural) {
+        round += 1; p.day = today(); p.doneToday = doneToday(d) + 1;
+        p.log = d.log.concat([{ s: d.phaseStart || base - d.dur, e: base, n: focusCount(), m: Math.round(d.dur / 60000) }]).slice(-30);
+      }
+      phase = natural && round % 4 === 0 ? "long" : "break";
+    } else phase = "focus";
+    const dur = durOf(d, phase);
+    const run = natural ? d.running && (phase === "focus" ? d.autoFocus : d.autoBreak) : d.running;
+    return Object.assign(p, { phase, round, dur, remaining: dur, running: !!run, endsAt: run ? base + dur : 0, phaseStart: run ? base : 0, pausedAt: run ? 0 : base });
+  }
+  function transitions(prev, nd, source) {
+    if (!prev) return;
+    const changed = prev.phase !== nd.phase;
+    const reset = nd.why === "reset" && nd.updatedAt !== prev.updatedAt;
+    if (prev.phase === "focus" && (changed || reset)) credit(nd.why === "done" ? "done" : "interrupted");
+    if (changed && nd.why === "done") {
+      birdOut(2200, true);
+      toast(prev.phase === "focus" ? "¡Pomodoro completado! Ahora: " + PH[nd.phase] : "¡Cucú! Volvemos a estudiar");
+      sysNotify(prev.phase === "focus" ? "Terminó el bloque de estudio" : "Terminó la pausa", `Ahora: ${PH[nd.phase]}${nd.running ? "" : " (esperando que alguien arranque)"}`);
+      if (prev.phase === "focus") {
+        burst(["🎉", "👏", "🔥"], 6);
+        if (nd.goalN && doneToday(nd) === nd.goalN) { setTimeout(() => { burst(["🏆", "🎉", "⭐"], 14); toast("¡La sala cumplió su meta de hoy! 🏆"); }, 900); }
+      }
+    } else if ((changed || reset) && source === "remote") {
+      toast(reset ? "Alguien reinició el reloj" : `Alguien cambió a ${PH[nd.phase]}`);
+    }
+  }
+
+  // ================= personal stats =================
+  const myStats = () => Object.assign({ day: today(), ms: 0, poms: 0, streak: 0, best: 0 }, myStatsCache && myStatsCache.day === today() ? myStatsCache : {});
+  function credit(kind) {
+    const ms = Math.round(focusAcc); focusAcc = 0;
+    const st = myStats(), before = JSON.stringify(st);
+    st.ms += ms;
+    if (kind === "done") {
+      if (ms >= 0.6 * (lastFocusDur || 25 * 60000)) {
+        st.poms++; st.streak++; st.best = Math.max(st.best, st.streak);
+        if (st.streak > 1 && st.streak % 2 === 0) setTimeout(() => toast(`Racha de ${st.streak} pomodoros seguidos 🔥`), 1600);
+      } else st.streak = 0;
+    } else if (kind === "interrupted" && ms > 0) st.streak = 0;
+    if (JSON.stringify(st) === before) return;
+    myStatsCache = st; saveStats(st);
+  }
+  let statsWriting = false, statsPending = null;
+  async function saveStats(st) {
+    if (!current) return;
+    const code = current.code, body = Object.assign({}, st, { uid: myId, nick: $("myNick").value.trim().slice(0, 30) });
+    renderHistory();
+    if (readOnly) return;
+    if (localMode || !myId) { store.set("cucu.stats." + code, JSON.stringify(body)); return; }
+    if (statsWriting) { statsPending = body; return; }
+    statsWriting = true;
+    try { let b = body; while (b) { statsPending = null; await db.doc(`rooms/${code}/stats/${myId}`).set(b); b = statsPending; } }
+    catch (e) {} finally { statsWriting = false; }
+  }
+
+  // ================= render: clock =================
+  const PLAY = '<path d="M7 4.5v15l13-7.5z"/>', PAUSE = '<path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"/>';
+  let flashing = null;
+  function render() {
+    if (!current) return;
+    const d = current.data, rem = remainingMs(d), total = d.dur || durOf(d, d.phase), prog = Math.min(1, Math.max(0, 1 - rem / total));
+    document.documentElement.style.setProperty("--phase", `var(--${d.phase})`);
+    q("#arc").setAttribute("stroke-dashoffset", CIRC * prog);
+    q("#time").textContent = fmt(rem);
+    q("#phaseTxt").textContent = PH[d.phase] + (d.running ? "" : " · en pausa");
+    q("#weightR").setAttribute("transform", `translate(0 ${prog * 30})`);
+    house.classList.toggle("running", !!d.running);
+    $("playIco").innerHTML = d.running ? PAUSE : PLAY;
+    $("playBtn").setAttribute("aria-label", d.running ? "Pausar" : "Arrancar");
+    document.querySelectorAll(".phasepick button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ph === d.phase)));
+    const inCycle = (d.round || 0) % 4;
+    $("dots").querySelectorAll("i").forEach((el, i) => el.classList.toggle("on", d.phase === "long" || i < inCycle));
+    const n = doneToday(d);
+    $("goalBox").classList.toggle("hidden", !d.goal && !d.goalN);
+    $("goalTxt").textContent = "🎯 " + (d.goal || "Meta de hoy");
+    $("goalNum").textContent = `${n}/${d.goalN}`;
+    $("goalBar").style.width = Math.min(100, n / Math.max(1, d.goalN) * 100) + "%";
+    $("roomMeta").textContent = `${d.focusMin} min de estudio, ${d.breakMin} de pausa, ${d.longMin} de pausa larga cada 4`;
+    $("lockBadge").classList.toggle("hidden", !d.lock);
+    const ctl = canControl();
+    ["playBtn", "skipBtn", "resetBtn"].forEach(id => $(id).disabled = !ctl);
+    document.querySelectorAll(".phasepick button,.bub").forEach(b => b.disabled = !ctl);
+    let note = "";
+    if (!ctl) note = "Solo el anfitrión y los moderadores manejan el reloj";
+    else if (!d.running && d.pausedAt && rem < total) note = `En pausa hace ${Math.max(1, Math.round((Date.now() - d.pausedAt) / 60000))} min`;
+    $("ctrlNote").textContent = note;
+    renderBubbles(d);
+    if (!flashing) document.title = `${fmt(rem)} ${PH[d.phase]} · Cucú`;
+  }
+  let bubKey = "";
+  function renderBubbles(d) {
+    const key = d.running ? "run" : d.phase + (canControl() ? "1" : "0");
+    if (key === bubKey) return; bubKey = key;
+    const box = $("bubbles"); box.innerHTML = "";
+    if (d.running) return;
+    const isFocus = d.phase === "focus", mins = isFocus ? [15, 25, 30, 45, 50] : [3, 5, 10, 15, 20];
+    mins.forEach(m => { const b = document.createElement("button"); b.className = "bub"; b.textContent = m; b.title = `Arrancar ${PH[d.phase].toLowerCase()} de ${m} min`;
+      b.setAttribute("aria-label", b.title); b.disabled = !canControl(); b.onclick = () => startFor(m); box.appendChild(b); });
+    const t = document.createElement("button"); t.className = "bub wide"; t.disabled = !canControl();
+    t.textContent = isFocus ? "☕ Tomar un descanso" : "📚 Volver a estudiar";
+    t.onclick = () => { if (!canControl()) return denied(); const ph = isFocus ? "break" : "focus", dur = durOf(current.data, ph), now = Date.now();
+      writeRoom({ phase: ph, dur, remaining: dur, running: true, endsAt: now + dur, phaseStart: now, pausedAt: 0, why: "pick" }); };
+    box.appendChild(t);
+  }
+
+  // ================= tick =================
+  setInterval(() => {
+    const now = Date.now(), dt = Math.min(70000, now - lastTick); lastTick = now;
+    if (!current) { heroTick(); renderListProgress(); return; }
+    const d = current.data;
+    if (d.phase === "focus") { lastFocusDur = d.dur; if (d.running && myStatus === "focus") focusAcc += dt; }
+    if (d.running && now >= d.endsAt) {
+      const before = d.endsAt;
+      let s = Object.assign({}, d);
+      do { s = Object.assign(s, advance(s, s.endsAt, true)); } while (s.running && s.endsAt <= now);
+      s.updatedAt = now;
+      const target = s.endsAt;
+      setData(s, "local");
+      if (localMode) store.set("cucu.local." + current.code, JSON.stringify(current.data));
+      else setTimeout(() => {
+        if (!current || current.data.endsAt !== target) return;
+        db.doc("rooms/" + current.code).get().then(sn => {
+          const live = sn.exists ? sn.data() : null;
+          if (!readOnly && canControl() && live && live.running && live.endsAt === before && current) writeRoom({});
+        }).catch(() => {});
+      }, Math.random() * 800);
+    } else render();
+    if (activeTab === "hist" && now % 3000 < 260) renderHistory();
+  }, 250);
+
+  // ================= controls =================
+  function togglePlay() {
+    if (!canControl()) return denied();
+    const d = current.data, rem = remainingMs(d), now = Date.now();
+    if (d.running) writeRoom({ running: false, remaining: rem, pausedAt: now, why: "pause" });
+    else { const r = rem > 0 ? rem : d.dur; writeRoom({ running: true, remaining: r, endsAt: now + r, phaseStart: d.phaseStart && r < d.dur ? d.phaseStart : now, pausedAt: 0, why: "start" }); }
+  }
+  function skip() { if (!canControl()) return denied(); writeRoom(advance(current.data, Date.now(), false)); }
+  function reset() { if (!canControl()) return denied(); const dur = durOf(current.data, "focus");
+    writeRoom({ phase: "focus", round: 0, dur, remaining: dur, running: false, endsAt: 0, phaseStart: 0, pausedAt: Date.now(), why: "reset" }); }
+  function startFor(m) { if (!canControl()) return denied(); const now = Date.now(), dur = m * 60000;
+    writeRoom({ dur, remaining: dur, running: true, endsAt: now + dur, phaseStart: now, pausedAt: 0, why: "start" }); }
+  $("playBtn").onclick = togglePlay; $("skipBtn").onclick = skip; $("resetBtn").onclick = reset;
+  document.querySelectorAll(".phasepick button").forEach(b => b.onclick = () => {
+    if (!canControl()) return denied(); const ph = b.dataset.ph, dur = durOf(current.data, ph);
+    writeRoom({ phase: ph, dur, remaining: dur, running: false, endsAt: 0, phaseStart: 0, pausedAt: Date.now(), why: "pick" });
+  });
+  document.addEventListener("keydown", e => {
+    if (!current) return;
+    if (e.key === "Escape" && document.body.classList.contains("zen")) return setZen(false);
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.closest && e.target.closest("input,textarea,select")) return;
+    const onBtn = e.target.closest && e.target.closest("button,summary,a");
+    if (e.code === "Space") { if (onBtn) return; e.preventDefault(); togglePlay(); }
+    else if (e.key === "s" || e.key === "S") skip();
+    else if (e.key === "r" || e.key === "R") reset();
+    else if (e.key === "z" || e.key === "Z") setZen(!document.body.classList.contains("zen"));
+  });
+  const roomLink = code => location.origin + location.pathname + "?sala=" + code;
+  $("copyBtn").onclick = async () => { const link = roomLink(current.code); try { await navigator.clipboard.writeText(link); toast("Link de la sala copiado"); } catch (e) { toast(link); } };
+
+  // ================= zen mode =================
+  let zenFs = false;
+  function setZen(on) {
+    document.body.classList.toggle("zen", on);
+    if (on) { try { const r = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (r && r.then) r.then(() => zenFs = true).catch(() => {}); } catch (e) {} }
+    else { zenFs = false; if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
+  }
+  $("zenBtn").onclick = () => setZen(true);
+  $("zenExit").onclick = () => setZen(false);
+  document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && zenFs) setZen(false); });
+
+  // ================= notifications =================
+  function sysNotify(title, body) {
+    if (document.hidden) startFlash(title);
+    if (!prefs.notify) return;
+    try { if ("Notification" in window && Notification.permission === "granted" && document.hidden) new Notification(title, { body, tag: "cucu" }); } catch (e) {}
+  }
+  function startFlash(msg) {
+    clearInterval(flashing); let on = false;
+    flashing = setInterval(() => { on = !on; document.title = on ? "🐦 " + msg : (current ? fmt(remainingMs(current.data)) + " · Cucú" : "Cucú"); }, 1000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && flashing) { clearInterval(flashing); flashing = null; } });
+  $("notifySw").onchange = async () => {
+    const want = $("notifySw").checked; $("notifyNote").textContent = "";
+    if (!want) { prefs.notify = false; savePrefs(); return; }
+    if (!("Notification" in window)) { $("notifySw").checked = false; $("notifyNote").textContent = "Este navegador no permite avisos desde esta página. Igual vas a ver parpadear el título de la pestaña."; return; }
+    let p = Notification.permission;
+    try { if (p === "default") p = await Notification.requestPermission(); } catch (e) { p = "denied"; }
+    if (p === "granted") { prefs.notify = true; savePrefs(); $("notifyNote").textContent = "Listo: te vamos a avisar cuando termine cada bloque."; }
+    else { $("notifySw").checked = false; prefs.notify = false; savePrefs(); $("notifyNote").textContent = "Los avisos están bloqueados para esta página. Igual vas a ver parpadear el título de la pestaña."; }
+  };
+
+  // ================= reactions & nudges =================
+  function floatEmoji(e, name) {
+    const f = document.createElement("div"); f.className = "floater"; f.style.left = (8 + Math.random() * 80) + "%";
+    const s = document.createElement("span"); s.textContent = e; f.appendChild(s);
+    if (name) { const sm = document.createElement("small"); sm.textContent = name; f.appendChild(sm); }
+    $("floaters").appendChild(f); setTimeout(() => f.remove(), 2700);
+  }
+  function burst(list, n) { for (let i = 0; i < n; i++) setTimeout(() => floatEmoji(list[i % list.length]), i * 140); }
+  function peerName(peerLabel, uid) {
+    const p = peers.find(x => x.peer === peerLabel);
+    const nick = p && p.presence && typeof p.presence.nick === "string" ? p.presence.nick : "";
+    return nick || (uid && profileCache[uid] && profileCache[uid].name) || "Alguien";
+  }
+  $("reactbar").querySelectorAll("button[data-e]").forEach(b => b.onclick = () => {
+    const e = b.dataset.e;
+    if (named && named.connected()) named.emit("react", { e }).catch(() => floatEmoji(e)); else floatEmoji(e);
+  });
+  let lastNudge = 0;
+  function sendNudge(to) {
+    if (Date.now() - lastNudge < 3000) return toast("Esperá un momento antes de volver a avisar");
+    if (readOnly) return toast("Como espectador no podés mandar avisos");
+    if (!named || !named.connected()) return toast("Los avisos necesitan conexión con la sala");
+    lastNudge = Date.now();
+    named.emit("nudge", { to }).then(() => toast(to === "all" ? "Aviso enviado a toda la sala 🔔" : "Aviso enviado 🔔")).catch(() => toast("No se pudo enviar el aviso"));
+  }
+  $("nudgeAll").onclick = () => sendNudge("all");
+  function onNudge(m) {
+    const to = m.data && m.data.to;
+    if (m.sameTab || (to !== "all" && to !== myPeer)) return;
+    const who = peerName(m.peer, m.by);
+    playNudge();
+    const cc = $("clockcard"); cc.classList.remove("ping"); void cc.offsetWidth; cc.classList.add("ping");
+    toast(`🔔 ${who} ${to === "all" ? "avisó a toda la sala" : "te mandó un aviso"}`);
+    if (document.hidden) { startFlash(`${who} te avisó`); try { if (prefs.notify && Notification.permission === "granted") new Notification("Cucú", { body: `${who} te mandó un aviso`, tag: "cucu-nudge" }); } catch (e) {} }
+  }
+
+  // ================= status & presence =================
+  function renderStatusPick() {
+    const box = $("statusPick"); box.innerHTML = "";
+    Object.entries(STATUS).forEach(([k, [lab, em, col]]) => {
+      const b = document.createElement("button"); b.style.setProperty("--sc", col);
+      b.setAttribute("aria-pressed", String(k === myStatus));
+      const e = document.createElement("span"); e.textContent = em; const l = document.createElement("span"); l.textContent = lab;
+      b.append(e, l);
+      b.onclick = () => { myStatus = k; store.set("cucu.status", k); renderStatusPick(); pushPresence(); schedulePeople(); };
+      box.appendChild(b);
+    });
+  }
+  renderStatusPick();
+  const myPresence = () => ({ uid: myId, nick: $("myNick").value.trim().slice(0, 30), task: $("myTask").value.trim().slice(0, 80), st: myStatus });
+  function pushPresence() { if (named) named.presence(myPresence()).catch(() => {}); }
+  let presT; const presSoon = () => { clearTimeout(presT); presT = setTimeout(pushPresence, 300); schedulePeople(); };
+  $("myTask").oninput = () => { store.set("cucu.task", $("myTask").value); presSoon(); };
+  $("myNick").oninput = () => { store.set("cucu.nick", $("myNick").value); presSoon(); };
+
+  // ================= people =================
+  const profileCache = {};
+  async function profilesFor(ids) {
+    ids = [...new Set(ids.filter(x => typeof x === "string" && x))];
+    if (!user || !ids.length) return profileCache;
+    try { Object.assign(profileCache, await user.profiles(ids)); } catch (e) {}
+    return profileCache;
+  }
+  let peopleRaf = 0;
+  const schedulePeople = () => { cancelAnimationFrame(peopleRaf); peopleRaf = requestAnimationFrame(renderPeople); };
+  async function renderPeople() {
+    if (!current) return;
+    const list = peers.length ? peers : [{ isMe: true, sameTab: true, by: myId, peer: null, presence: myPresence() }];
+    const rows = [], seen = new Map();
+    list.forEach(p => { const pr = p.presence || {}; const uid = p.by || (typeof pr.uid === "string" ? pr.uid : null) || p.peer;
+      if (seen.has(uid)) { if (p.sameTab) rows[seen.get(uid)] = [uid, p]; return; } seen.set(uid, rows.length); rows.push([uid, p]); });
+    rows.sort((a, b) => (b[1].isMe ? 1 : 0) - (a[1].isMe ? 1 : 0));
+    const ps = await profilesFor(rows.map(r => r[0]));
+    const meV = user ? await user.me() : null;
+    const statsBy = {}; statsDocs.forEach(s => statsBy[s.uid] = s); if (myId) statsBy[myId] = myStats();
+    const d = current.data, ul = $("people"); ul.innerHTML = "";
+    $("peopleTabLbl").textContent = `Gente (${rows.length})`;
+    rows.forEach(([uid, p]) => {
+      const pr = p.isMe && p.sameTab ? myPresence() : (p.presence || {});
+      const st = STATUS[pr.st] ? pr.st : "focus", prof = ps[uid];
+      const li = document.createElement("li"); if (p.isMe) li.className = "me";
+      const av = document.createElement("div"); av.className = "av"; av.style.setProperty("--sc", STATUS[st][2]);
+      const dispName = (typeof pr.nick === "string" && pr.nick) || "";
+      const img = document.createElement("img"); img.alt = ""; img.src = user && user.avatarFor ? user.avatarFor(dispName, uid) : (prof ? prof.avatarUrl : GREY);
+      const se = document.createElement("span"); se.className = "se"; se.textContent = STATUS[st][1]; av.append(img, se);
+      const pb = document.createElement("div"); pb.className = "pb";
+      const who = document.createElement("div"); who.className = "who";
+      const nm = document.createElement("span"); nm.textContent = (typeof pr.nick === "string" && pr.nick) || (prof && prof.name) || "Alguien"; who.appendChild(nm);
+      if (p.isMe) { const x = document.createElement("span"); x.className = "pill"; x.textContent = "vos"; who.appendChild(x); }
+      if (uid && uid === d.hostId) { const x = document.createElement("span"); x.className = "pill alt"; x.textContent = "Anfitrión"; who.appendChild(x); }
+      else if (uid && d.mods.includes(uid)) { const x = document.createElement("span"); x.className = "pill alt"; x.textContent = "Moderador"; who.appendChild(x); }
+      const task = document.createElement("div"); task.className = "task";
+      const s = statsBy[uid];
+      task.textContent = STATUS[st][0] + (typeof pr.task === "string" && pr.task ? " · " + pr.task : "") + (s && s.ms ? ` · ${Math.floor(s.ms / 60000)} min hoy` : "") + (s && s.streak ? ` · 🔥${s.streak}` : "");
+      pb.append(who, task);
+      const acts = document.createElement("div"); acts.className = "acts";
+      if (!p.isMe && p.peer) { const b = document.createElement("button"); b.textContent = "🔔"; b.title = "Mandarle un aviso"; b.setAttribute("aria-label", "Mandar un aviso a " + nm.textContent); b.onclick = () => sendNudge(p.peer); acts.appendChild(b); }
+      if (!p.isMe && canAdmin() && uid && uid !== d.hostId && p.by) {
+        const isM = d.mods.includes(uid), b = document.createElement("button");
+        b.textContent = isM ? "Quitar mod" : "Hacer mod"; b.title = isM ? "Quitar moderador" : "Nombrar moderador";
+        b.onclick = () => writeRoom({ mods: isM ? d.mods.filter(x => x !== uid) : d.mods.concat([uid]) });
+        acts.appendChild(b);
+      }
+      li.append(av, pb, acts); ul.appendChild(li);
+    });
+  }
+
+  // ================= chat =================
+  async function renderChat(scrollDown) {
+    const box = $("chatList"), atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+    box.innerHTML = "";
+    if (!chatDocs.length) { const e = document.createElement("div"); e.className = "empty"; e.textContent = localMode ? "El chat necesita una sala compartida." : "Todavía no hay mensajes. Saludá a la sala 👋"; box.appendChild(e); return; }
+    const ps = await profilesFor(chatDocs.map(m => m.uid));
+    chatDocs.forEach(m => {
+      const mine = myId && m.uid === myId, div = document.createElement("div"); div.className = "msg" + (mine ? " mine" : "");
+      const mh = document.createElement("div"); mh.className = "mh";
+      const b = document.createElement("b"); b.textContent = (typeof m.nick === "string" && m.nick) || (ps[m.uid] && ps[m.uid].name) || "Alguien";
+      if (ps[m.uid] && ps[m.uid].color && !mine) b.style.color = ps[m.uid].color;
+      mh.append(b, document.createTextNode(" " + hm(m.ts)));
+      const mb = document.createElement("div"); mb.className = "mb"; linkify(mb, String(m.text || ""));
+      div.append(mh, mb); box.appendChild(div);
+    });
+    if (atBottom || scrollDown) box.scrollTop = box.scrollHeight;
+  }
+  function linkify(el, text) {
+    const re = /https?:\/\/[^\s<>"]+/g; let last = 0, m;
+    while ((m = re.exec(text))) {
+      el.append(text.slice(last, m.index));
+      const a = document.createElement("a"); a.href = m[0]; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = m[0]; el.append(a);
+      last = m.index + m[0].length;
+    }
+    el.append(text.slice(last));
+  }
+  function updateBadge() {
+    const n = chatDocs.filter(m => m.ts > chatSeen && m.uid !== myId).length;
+    const b = $("chatBadge"); b.textContent = n > 9 ? "9+" : n; b.classList.toggle("hidden", !n || activeTab === "chat");
+  }
+  async function sendChat() {
+    const text = $("chatInput").value.trim().slice(0, 400); if (!text || !current) return;
+    if (localMode) return toast("El chat necesita una sala compartida");
+    $("chatInput").value = "";
+    try {
+      await db.collection(`rooms/${current.code}/chat`).add({ uid: myId, nick: $("myNick").value.trim().slice(0, 30), text, ts: Date.now() });
+      renderChat(true);
+      if (chatDocs.length > 60) { const old = chatDocs.slice(0, chatDocs.length - 60); for (const o of old) { try { await db.doc(`rooms/${current.code}/chat/${o.id}`).delete(); } catch (e) {} } }
+    } catch (e) { $("chatInput").value = text; toast(e && e.code === "permission_denied" ? "La base de datos rechazó el mensaje. Revisá las reglas de Firestore." : "No se pudo enviar el mensaje"); }
+  }
+  $("chatSend").onclick = sendChat;
+  $("chatInput").onkeydown = e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); sendChat(); } };
+
+  // ================= history & stats =================
+  async function renderHistory() {
+    if (!current) return;
+    const d = current.data, mine = myStats();
+    const all = statsDocs.filter(s => s.uid !== myId).concat(myId || localMode ? [Object.assign({}, mine, { uid: myId || "yo", nick: $("myNick").value })] : []);
+    const live = current.data.phase === "focus" && current.data.running && myStatus === "focus" ? focusAcc : 0;
+    const groupMs = all.reduce((a, s) => a + (s.ms || 0), 0) + live;
+    $("stGroupMin").textContent = Math.floor(groupMs / 60000);
+    $("stRoomPoms").textContent = doneToday(d);
+    $("stMyMin").textContent = Math.floor((mine.ms + live) / 60000);
+    $("stMyStreak").textContent = "🔥 " + mine.streak;
+    $("stMyBest").textContent = `tu racha (mejor: ${mine.best})`;
+    const ps = await profilesFor(all.map(s => s.uid));
+    const rk = $("rank"); rk.innerHTML = "";
+    const sorted = all.filter(s => s.ms > 0).sort((a, b) => b.ms - a.ms).slice(0, 10);
+    if (!sorted.length) rk.innerHTML = '<li class="empty">Nadie sumó minutos todavía hoy.</li>';
+    sorted.forEach((s, i) => {
+      const li = document.createElement("li"), a = document.createElement("span"), b = document.createElement("span");
+      a.textContent = `${["🥇", "🥈", "🥉"][i] || (i + 1) + "."} ${(s.nick || (ps[s.uid] && ps[s.uid].name) || (s.uid === (myId || "yo") ? "Vos" : "Alguien"))}${s.uid === (myId || "yo") ? " (vos)" : ""}`;
+      b.textContent = `${Math.floor(s.ms / 60000)} min · ${s.poms || 0} 🍅 · 🔥${s.best || 0}`;
+      li.append(a, b); rk.appendChild(li);
+    });
+    const tl = $("timeline"); tl.innerHTML = "";
+    const log = d.log.filter(x => new Date(x.e).toDateString() === new Date().toDateString()).slice().reverse();
+    if (!log.length) tl.innerHTML = '<li class="empty" style="padding-left:4px">Cuando la sala complete un bloque de estudio, aparece acá.</li>';
+    log.forEach(x => { const li = document.createElement("li"), b = document.createElement("b"); b.textContent = `${hm(x.s)}–${hm(x.e)}`;
+      li.append(b, document.createTextNode(` · Estudio de ${x.m} min completado por ${x.n} ${x.n === 1 ? "persona" : "personas"}`)); tl.appendChild(li); });
+  }
+
+  // ================= sound panel =================
+  function renderSoundPanel() {
+    const es = $("endSounds"); es.innerHTML = "";
+    END_SOUNDS.forEach(([k, l]) => { const b = document.createElement("button"); b.className = "chip"; b.textContent = l; b.setAttribute("aria-pressed", String(prefs.snd === k));
+      b.onclick = () => { prefs.snd = k; savePrefs(); renderSoundPanel(); playEnd(k); }; es.appendChild(b); });
+    const am = $("ambChips"); am.innerHTML = "";
+    AMBS.forEach(([k, l]) => { const b = document.createElement("button"); b.className = "chip"; b.textContent = l; b.setAttribute("aria-pressed", String(A.ambKind === k));
+      b.onclick = () => startAmbient(k); am.appendChild(b); });
+    $("vol").value = prefs.vol; $("ambVol").value = prefs.ambVol; $("notifySw").checked = !!prefs.notify;
+    renderMusic();
+  }
+  $("vol").oninput = () => { prefs.vol = +$("vol").value; savePrefs(); };
+  $("vol").onchange = () => playEnd(prefs.snd);
+  $("ambVol").oninput = () => { prefs.ambVol = +$("ambVol").value; savePrefs(); if (A.amb) A.amb.gain.setTargetAtTime(prefs.ambVol, A.ctx.currentTime, 0.05); };
+  function renderMusic() {
+    const box = $("musicBox"); box.innerHTML = "";
+    const url = current && current.data.music;
+    if (url && /^https:\/\//.test(url)) {
+      const a = document.createElement("a"); a.className = "musiclink"; a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.textContent = (/spotify/.test(url) ? "🟢 Abrir la lista del grupo en Spotify" : /youtu/.test(url) ? "▶️ Abrir la lista del grupo en YouTube" : "🎵 Abrir la música del grupo");
+      box.appendChild(a);
+    } else { const p = document.createElement("p"); p.className = "muted"; p.style.cssText = "font-size:13px;margin:0 0 8px"; p.textContent = "Pegá el link de una lista de Spotify o YouTube para que todos la tengan a mano."; box.appendChild(p); }
+  }
+  $("musicSave").onclick = () => {
+    const v = $("musicInput").value.trim();
+    if (v && !/^https:\/\/\S+$/.test(v)) return toast("Pegá un link que empiece con https://");
+    writeRoom({ music: v.slice(0, 300) }); $("musicInput").value = ""; toast(v ? "Música del grupo guardada" : "Música del grupo quitada");
+  };
+
+  // ================= room settings panel =================
+  let goalN = 8;
+  const setGN = v => { goalN = Math.min(40, Math.max(1, v)); $("gN").textContent = goalN; };
+  $("gMinus").onclick = () => setGN(goalN - 1); $("gPlus").onclick = () => setGN(goalN + 1);
+  function renderRoomPanel() {
+    if (!current) return; const d = current.data, ctl = canControl(), adm = canAdmin();
+    if (document.activeElement !== $("goalInput")) $("goalInput").value = d.goal || "";
+    setGN(d.goalN || 8);
+    $("autoBreak").checked = !!d.autoBreak; $("autoFocus").checked = !!d.autoFocus;
+    $("lockSw").checked = !!d.lock;
+    ["goalInput", "gMinus", "gPlus", "goalSave", "autoBreak", "autoFocus", "saveDur", "musicSave"].forEach(id => $(id).disabled = !ctl);
+    roomSteps.el.querySelectorAll("button").forEach(b => b.disabled = !ctl);
+    $("roomPresets").querySelectorAll("button").forEach(b => b.disabled = !ctl);
+    $("lockSw").disabled = !adm; $("delRoom").disabled = !adm;
+    const hp = d.hostId && profileCache[d.hostId];
+    $("hostLine").textContent = !d.hostId ? "Esta sala no tiene anfitrión: cualquiera puede manejarla." : isHost() ? "Vos sos el anfitrión de esta sala." : `Anfitrión: ${(hp && hp.name) || "quien creó la sala"}`;
+  }
+  $("goalSave").onclick = () => { writeRoom({ goal: $("goalInput").value.trim().slice(0, 80), goalN }); toast("Meta guardada"); };
+  $("autoBreak").onchange = () => writeRoom({ autoBreak: $("autoBreak").checked });
+  $("autoFocus").onchange = () => writeRoom({ autoFocus: $("autoFocus").checked });
+  $("lockSw").onchange = () => { if (!canAdmin()) { $("lockSw").checked = !!current.data.lock; return; } writeRoom({ lock: $("lockSw").checked }); toast($("lockSw").checked ? "Ahora solo el anfitrión y los moderadores manejan el reloj" : "Ahora cualquiera puede manejar el reloj"); };
+  $("saveDur").onclick = () => {
+    const v = roomSteps.vals, d = current.data, patch = { focusMin: v.f, breakMin: v.b, longMin: v.l };
+    if (!d.running) { const m = Object.assign({}, d, patch); patch.dur = durOf(m, d.phase); patch.remaining = patch.dur; }
+    writeRoom(patch); toast("Tiempos guardados");
+  };
+  let delArmed = 0;
+  $("delRoom").onclick = async () => {
+    if (!canAdmin()) return;
+    if (Date.now() - delArmed > 4000) { delArmed = Date.now(); $("delRoom").textContent = "Tocá de nuevo para borrar"; setTimeout(() => $("delRoom").textContent = "Borrar sala", 4000); return; }
+    const code = current.code;
+    if (localMode) { store.set("cucu.local." + code, ""); leaveRoom(); return; }
+    try { for (const m of chatDocs) await db.doc(`rooms/${code}/chat/${m.id}`).delete().catch(() => {}); await db.doc("rooms/" + code).delete(); leaveRoom(); toast("Sala borrada"); }
+    catch (e) { toast("No se pudo borrar la sala"); }
+  };
+
+  // ================= tabs =================
+  document.querySelectorAll(".tablist button").forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+  function selectTab(t) {
+    activeTab = t;
+    document.querySelectorAll(".tablist button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
+    ["chat", "people", "hist", "sound", "room"].forEach(k => $("tab-" + k).classList.toggle("hidden", k !== t));
+    if (t === "chat") { chatSeen = Math.max(chatSeen, ...chatDocs.map(m => m.ts || 0), 0); updateBadge(); const box = $("chatList"); box.scrollTop = box.scrollHeight; }
+    if (t === "hist") renderHistory();
+    if (t === "sound") renderSoundPanel();
+    if (t === "room") renderRoomPanel();
+    if (t === "people") schedulePeople();
+  }
+
+  // ================= enter / leave =================
+  async function enterRoom(code) {
+    code = String(code).toLowerCase().trim(); $("joinErr").textContent = "";
+    if (!/^[a-z0-9]{3,8}$/.test(code)) { $("joinErr").textContent = "El código tiene letras y números, por ejemplo “k7m2p”."; return; }
+    leaveRoom(true);
+    if (localMode) {
+      const raw = store.get("cucu.local." + code);
+      if (!raw) { $("joinErr").textContent = `No hay ninguna sala “${code}” en este dispositivo.`; return; }
+      current = { code, data: norm(JSON.parse(raw)) };
+      try { myStatsCache = JSON.parse(store.get("cucu.stats." + code) || "null"); } catch (e) { myStatsCache = null; }
+      showRoom(); return;
+    }
+    const ref = db.doc("rooms/" + code); let snap;
+    try { snap = await ref.get(); } catch (e) { $("joinErr").textContent = "No se pudo buscar la sala. Probá de nuevo."; return; }
+    if (!snap.exists) { $("joinErr").textContent = `No hay ninguna sala con el código “${code}”.`; return; }
+    current = { code, data: norm(snap.data()) };
+    myStatsCache = null; chatDocs = []; statsDocs = []; peers = []; chatSeen = Date.now();
+    showRoom();
+    subs.push(ref.onSnapshot(s => {
+      if (!current || current.code !== code) return;
+      if (!s.exists) { toast("La sala fue borrada"); leaveRoom(); return; }
+      if (s.metadata.hasPendingWrites) return;
+      setData(s.data(), "remote");
+      if (activeTab === "room") renderRoomPanel();
+      if (activeTab === "sound") renderMusic();
+      schedulePeople();
+    }, () => {}));
+    subs.push(db.collection(`rooms/${code}/chat`).orderBy("ts", "desc").limit(80).onSnapshot(s => {
+      chatDocs = s.docs.map(x => Object.assign({ id: x.id }, x.data())).filter(m => typeof m.ts === "number").reverse();
+      if (activeTab === "chat") chatSeen = Math.max(chatSeen, ...chatDocs.map(m => m.ts), 0);
+      renderChat(); updateBadge();
+    }, () => {}));
+    subs.push(db.collection(`rooms/${code}/stats`).onSnapshot(s => {
+      statsDocs = s.docs.map(x => x.data() || {}).filter(x => x.day === today() && typeof x.uid === "string");
+      const mine = statsDocs.find(x => x.uid === myId);
+      if (mine && !statsWriting && (!myStatsCache || myStatsCache.day !== today() || (mine.ms || 0) >= (myStatsCache.ms || 0))) myStatsCache = mine;
+      if (activeTab === "hist") renderHistory();
+      schedulePeople();
+    }, () => {}));
+    if (room) {
+      try {
+        named = await room.join("s-" + code);
+        if (!current || current.code !== code) { named.leave().catch(() => {}); named = null; return; }
+        subs.push(named.onPeers(ch => { peers = ch.peers.slice(); const me = peers.find(p => p.sameTab); if (me) myPeer = me.peer; schedulePeople(); }, () => {}));
+        subs.push(named.on("react", m => { const e = m.data && m.data.e; if (EMOJIS.includes(e)) floatEmoji(e, m.isMe ? "" : peerName(m.peer, m.by)); }, () => {}));
+        subs.push(named.on("nudge", onNudge, () => {}));
+        pushPresence();
+      } catch (e) {}
+    }
+  }
+  function showRoom() {
+    const d = current.data;
+    $("lobby").classList.add("hidden"); $("room").classList.remove("hidden");
+    placeHouse($("roomSlot"));
+    $("roomName").textContent = d.name || "Sala de estudio";
+    $("roomCode").textContent = current.code;
+    roomSteps.refresh({ f: d.focusMin, b: d.breakMin, l: d.longMin });
+    store.set("cucu.last", current.code);
+    bubKey = ""; focusAcc = 0; lastFocusDur = d.dur;
+    render(); selectTab(activeTab); renderChat(true); schedulePeople();
+    try { history.replaceState(null, "", "?sala=" + current.code); } catch (e) {}
+    if (!$("myNick").value.trim()) { selectTab("people"); setTimeout(() => { $("myNick").focus(); toast("Escribí tu nombre para que la sala sepa quién sos"); }, 400); }
+    window.scrollTo({ top: 0 });
+  }
+  function leaveRoom(silent) {
+    if (current && current.data.phase === "focus") credit("flush");
+    subs.forEach(u => { try { u(); } catch (e) {} }); subs = [];
+    if (named) { named.leave().catch(() => {}); named = null; }
+    current = null; peers = []; chatDocs = []; statsDocs = [];
+    setZen(false);
+    document.documentElement.style.setProperty("--phase", "var(--focus)");
+    document.title = "Cucú · salas para estudiar";
+    if (!silent) { $("room").classList.add("hidden"); $("lobby").classList.remove("hidden"); placeHouse($("heroSlot")); if (db) renderList(); try { history.replaceState(null, "", location.pathname); } catch (e) {} }
+  }
+  $("leaveBtn").onclick = () => leaveRoom();
+  $("home").onclick = () => { if (current) leaveRoom(); };
+
+  // ================= create / join =================
+  $("createBtn").onclick = async () => {
+    $("createErr").textContent = "";
+    const v = newSteps.vals, now = Date.now();
+    const d = norm({ name: $("newName").value.trim().slice(0, 40) || "Sala de estudio", goal: $("newGoal").value.trim().slice(0, 80), goalN: 8,
+      focusMin: v.f, breakMin: v.b, longMin: v.l, phase: "focus", dur: v.f * 60000, remaining: v.f * 60000,
+      hostId: myId || null, createdAt: now, updatedAt: now, day: today() });
+    const code = newCode(); $("createBtn").disabled = true;
+    try {
+      if (localMode) store.set("cucu.local." + code, JSON.stringify(d)); else await db.doc("rooms/" + code).set(d);
+      $("newName").value = ""; $("newGoal").value = "";
+      await enterRoom(code);
+      toast("Sala creada. Pasá el código: " + code);
+    } catch (e) {
+      $("createErr").textContent = e && e.code === "quota_exceeded" ? "Se llegó al límite de salas guardadas." : e && e.code === "permission_denied" ? "La base de datos rechazó la sala. Revisá que hayas publicado las reglas (paso 7 del LEEME)." : "No se pudo crear la sala. Probá de nuevo.";
+    } finally { $("createBtn").disabled = false; }
+  };
+  $("joinBtn").onclick = () => { const c = $("joinCode").value.trim(); if (c) enterRoom(c); };
+  $("joinCode").onkeydown = e => { if (e.key === "Enter") $("joinBtn").click(); };
+
+  // ================= lobby list =================
+  function renderList() {
+    const ul = $("roomList"); ul.innerHTML = "";
+    if (!listDocs.length) { ul.innerHTML = '<li class="empty">Todavía no hay salas. Creá la primera.</li>'; return; }
+    listDocs.forEach(({ id, d }) => {
+      const li = document.createElement("li"), b = document.createElement("button");
+      b.innerHTML = `<svg class="mini" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="none" stroke="var(--line)" stroke-width="4"/><circle class="mr" cx="20" cy="20" r="16" fill="none" stroke="var(--${d.phase})" stroke-width="4" stroke-linecap="round" transform="rotate(-90 20 20)" stroke-dasharray="100.5"/></svg>`;
+      const box = document.createElement("div"), n = document.createElement("span"), c = document.createElement("span");
+      n.className = "rn"; n.textContent = d.name; c.className = "rc"; box.append(n, c);
+      const go = document.createElement("span"); go.className = "go"; go.textContent = id;
+      b.append(box, go); b.onclick = () => enterRoom(id); li.appendChild(b); ul.appendChild(li);
+    });
+    renderListProgress();
+  }
+  function renderListProgress() {
+    $("roomList").querySelectorAll("li button").forEach((b, i) => {
+      const it = listDocs[i]; if (!it) return; const d = it.d, rem = remainingMs(d), tot = d.dur || durOf(d, d.phase) || 1;
+      b.querySelector(".mr").setAttribute("stroke-dashoffset", 100.5 * Math.min(1, Math.max(0, 1 - rem / tot)));
+      b.querySelector(".rc").textContent = d.running ? `${PH[d.phase]}, quedan ${fmt(rem)}` : "En pausa" + (d.goal ? " · 🎯 " + d.goal : "");
+    });
+  }
+
+  // ================= boot =================
+  $("myTask").value = store.get("cucu.task") || "";
+  $("myNick").value = store.get("cucu.nick") || "";
+  renderSoundPanel();
+  function goLocal() {
+    if (db) return; localMode = true; $("soloNote").classList.remove("hidden");
+    showBanner("No se pudo conectar con Firebase", "Revisá firebase-config.js y que estén activados el inicio de sesión anónimo, Firestore y Realtime Database (pasos 2 a 5 del LEEME). Mientras tanto, todo funciona solo en este dispositivo." + (window.cucuBackendError ? " Detalle: " + window.cucuBackendError : ""));
+    $("roomList").innerHTML = '<li class="empty">Las salas solo existen en este dispositivo.</li>';
+  }
+  (async () => {
+    const use = n => (window.claude && window.claude.use ? window.claude.use(n) : Promise.resolve(null)).catch(() => null);
+    const [d, r, u] = await Promise.all([use("db"), use("room"), use("user")]);
+    room = r; user = u;
+    if (user) {
+      try { myId = await user.id(); iAmOwner = await user.isOwner(); const meV = await user.me(); if (!$("myNick").value && meV.name) $("myNick").value = meV.name.split(" ")[0]; } catch (e) {}
+    }
+    if (!d) { goLocal(); return; }
+    db = d; localMode = false; $("soloNote").classList.add("hidden");
+    if (iAmOwner) $("ownerHint").classList.remove("hidden");
+    if (user) { try { if (await user.can("data.write") === false) setReadOnly(); } catch (e) {} }
+    db.collection("rooms").orderBy("updatedAt", "desc").limit(10).onSnapshot(s => {
+      listDocs = s.docs.map(x => ({ id: x.id, d: norm(x.data() || {}) })); if (!current) renderList();
+    }, () => { $("roomList").innerHTML = '<li class="empty">No se pudo cargar la lista de salas. Revisá las reglas de Firestore.</li>'; });
+    const fromLink = new URLSearchParams(location.search).get("sala");
+    if (fromLink) enterRoom(fromLink);
+  })();
+  setTimeout(() => { if (!db) goLocal(); }, 11000);
+})();
+</script>
+</body>
+</html>

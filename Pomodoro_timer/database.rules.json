@@ -1,0 +1,27 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "presence": {
+      "$room": {
+        ".read": "auth != null",
+        "$conn": {
+          ".write": "auth != null && (!data.exists() || data.child('by').val() === auth.uid)",
+          ".validate": "newData.child('by').val() === auth.uid && newData.child('t').exists()"
+        }
+      }
+    },
+    "events": {
+      "$room": {
+        "$topic": {
+          ".read": "auth != null",
+          ".indexOn": ["ts"],
+          "$ev": {
+            ".write": "auth != null && (!data.exists() || data.child('by').val() === auth.uid)",
+            ".validate": "newData.child('by').val() === auth.uid && newData.child('ts').isNumber()"
+          }
+        }
+      }
+    }
+  }
+}
