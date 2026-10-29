@@ -13,13 +13,48 @@
 <body>
   <header class="barra">
     <div class="sala">
-      <span class="marca">Tempo</span>
+      <a class="marca" href="./" aria-label="Tempo, volver al inicio">Tempo</a>
       <span id="sala-nombre" class="sala-nombre"></span>
     </div>
-    <button id="copiar" class="link">Copiar link</button>
+    <nav class="barra-acciones">
+      <button id="copiar" class="link" hidden>Copiar link</button>
+      <a id="ir-ideas" class="link" href="#ideas">Ideas y bugs</a>
+    </nav>
   </header>
 
-  <main>
+  <main id="v-inicio" class="pagina" hidden>
+    <section class="intro">
+      <h1>Ensayen con el mismo reloj.</h1>
+      <p>Creá una sala, pasá el link y todos ven el mismo cronómetro corriendo, en el celular, la compu o la tablet.</p>
+    </section>
+
+    <div class="tarjetas">
+      <form id="crear" class="tarjeta">
+        <h2>Crear una sala</h2>
+        <label for="crear-nombre">Nombre de la sala (opcional)</label>
+        <input id="crear-nombre" class="campo" maxlength="40" placeholder="Ej: Ensayo del jueves" autocomplete="off">
+        <button class="principal-btn">Crear sala</button>
+      </form>
+
+      <section class="tarjeta">
+        <form id="unirse">
+          <h2>Entrar a una sala</h2>
+          <label for="unirse-codigo">Nombre o link de la sala</label>
+          <div class="fila">
+            <input id="unirse-codigo" class="campo" placeholder="Ej: ensayo-k3x9pq" autocomplete="off" autocapitalize="none" spellcheck="false">
+            <button class="secundario-btn">Entrar</button>
+          </div>
+          <p id="unirse-error" class="error" role="alert"></p>
+        </form>
+        <h3>Salas recientes</h3>
+        <ul id="recientes" class="recientes"></ul>
+      </section>
+    </div>
+  </main>
+
+  <main id="v-ideas" class="pagina" hidden></main>
+
+  <main id="v-sala" hidden>
     <p id="modo-local" class="modo-local" hidden>
       Modo local: se sincroniza solo entre pestañas de este navegador. Configurá Firebase para usarlo entre dispositivos.
     </p>
@@ -36,7 +71,7 @@
     <p id="aviso" class="aviso" role="status"></p>
   </main>
 
-  <footer class="pie">
+  <footer id="pie-sala" class="pie" hidden>
     <ul id="gente" class="gente" aria-label="Personas en la sala"></ul>
     <div class="pie-acciones">
       <button id="control" class="interruptor" aria-pressed="false" hidden>

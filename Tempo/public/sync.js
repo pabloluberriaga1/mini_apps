@@ -9,6 +9,8 @@
 //
 // Para sumar funciones nuevas (tramos, marcas, etc.) alcanza con agregar
 // campos al estado: no hace falta tocar este archivo.
+//
+// Ideas y bugs (crearTickets) tiene su propia interfaz, más abajo.
 
 import { firebaseConfig } from "./firebase-config.js";
 
@@ -21,15 +23,23 @@ export async function crearSync(salaId, clienteId) {
   return crearSyncLocal(salaId, clienteId);
 }
 
+// Una sola conexión por página, la pidan la sala o los tickets.
+let conexion = null;
+function conectar() {
+  conexion ??= (async () => {
+    const { initializeApp } = await import(`${FB}/firebase-app.js`);
+    const fdb = await import(`${FB}/firebase-database.js`);
+    return { fdb, db: fdb.getDatabase(initializeApp(firebaseConfig)) };
+  })();
+  return conexion;
+}
+
 // ---------- Firebase Realtime Database ----------
 
 async function crearSyncFirebase(salaId, clienteId) {
-  const { initializeApp } = await import(`${FB}/firebase-app.js`);
-  const {
-    getDatabase, ref, onValue, set, runTransaction, onDisconnect, serverTimestamp,
-  } = await import(`${FB}/firebase-database.js`);
+  const { fdb, db } = await conectar();
+  const { ref, onValue, set, runTransaction, onDisconnect, serverTimestamp } = fdb;
 
-  const db = getDatabase(initializeApp(firebaseConfig));
   const base = `salas/${salaId}`;
   const estadoRef = ref(db, `${base}/estado`);
   const yoRef = ref(db, `${base}/gente/${clienteId}`);
@@ -110,5 +120,65 @@ function crearSyncLocal(salaId, clienteId) {
     },
     alCambiarGente: (cb) => { subsGente.push(cb); cb(genteViva()); },
     entrar: async (nombre) => { miNombre = nombre; latido(); },
+  };
+}
+
+// ---------- Ideas y bugs ----------
+//
+//   tickets.alCambiar(cb)              → cb({ id: ticket }) con todos los tickets
+//   tickets.crear(ticket)              → publica un ticket nuevo, con estado "nuevo"
+//   tickets.votar(id, votante, si)     → suma (si = true) o saca el voto de ese navegador
+//   tickets.modo                       → "firebase" | "local"
+//
+// El estado y la respuesta de cada ticket se cambian desde la consola de
+// Firebase: las reglas no dejan que la app los toque.
+
+export async function crearTickets() {
+  return firebaseConfig.databaseURL ? crearTicketsFirebase() : crearTicketsLocal();
+}
+
+async function crearTicketsFirebase() {
+  const { fdb, db } = await conectar();
+  const { ref, onValue, push, set, serverTimestamp } = fdb;
+
+  return {
+    modo: "firebase",
+    alCambiar: (cb) => onValue(ref(db, "tickets"), (s) => cb(s.val() || {})),
+    crear: (t) => set(push(ref(db, "tickets")), { ...t, estado: "nuevo", createdAt: serverTimestamp() }),
+    votar: (id, votante, si) => set(ref(db, `tickets/${id}/votos/${votante}`), si ? true : null),
+  };
+}
+
+function crearTicketsLocal() {
+  const k = "tempo:tickets";
+  const canal = new BroadcastChannel(k);
+  const subs = [];
+
+  const leer = () => {
+    try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; }
+  };
+  const guardar = (todos) => {
+    try { localStorage.setItem(k, JSON.stringify(todos)); } catch {}
+    canal.postMessage("tickets");
+    subs.forEach((cb) => cb(todos));
+  };
+  canal.onmessage = () => { const todos = leer(); subs.forEach((cb) => cb(todos)); };
+
+  return {
+    modo: "local",
+    alCambiar: (cb) => { subs.push(cb); cb(leer()); },
+    crear: async (t) => {
+      const todos = leer();
+      todos[Date.now().toString(36) + Math.random().toString(36).slice(2, 6)] = { ...t, estado: "nuevo", createdAt: Date.now() };
+      guardar(todos);
+    },
+    votar: async (id, votante, si) => {
+      const todos = leer();
+      if (!todos[id]) return;
+      const votos = { ...todos[id].votos };
+      if (si) votos[votante] = true; else delete votos[votante];
+      todos[id].votos = votos;
+      guardar(todos);
+    },
   };
 }
