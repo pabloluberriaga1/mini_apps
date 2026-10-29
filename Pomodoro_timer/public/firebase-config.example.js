@@ -1,4 +1,4 @@
-// Pegá acá la configuración de tu proyecto de Firebase.
+// Copiá este archivo como firebase-config.js y pegá ahí la configuración de tu proyecto de Firebase (ese archivo no se sube al repo).
 // La encontrás en: Consola de Firebase → ⚙️ Configuración del proyecto → Tus apps → (app web) → "Configuración del SDK" → Config.
 // Estos datos NO son secretos: la seguridad la ponen las reglas (firestore.rules y database.rules.json).
 export const firebaseConfig = {

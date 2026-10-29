@@ -24,7 +24,7 @@
 | :--- | :--- |
 | `public/index.html` | La aplicación completa (interfaz, reloj, chat, estadísticas y sonidos). |
 | `public/firebase-backend.js` | Lógica de conexión y comunicación con Firebase. *(No requiere modificaciones)*. |
-| `public/firebase-config.js` | **Único archivo editable:** Credenciales y configuración de tu proyecto. |
+| `public/firebase-config.example.js` | Plantilla de la configuración. Copiala como `public/firebase-config.js` (**único archivo editable**, no se sube al repo). |
 | `firestore.rules` | Reglas de seguridad para Firestore (salas, chat y estadísticas). |
 | `database.rules.json` | Reglas de seguridad para Realtime Database (estados, reacciones y presencia). |
 | `firebase.json` | Archivo de configuración global para el despliegue con CLI. |
@@ -55,7 +55,7 @@ Para que cada navegador tenga un identificador único sin pedir registros:
 ### 5. Configurar las credenciales en la app
 1. En la consola de Firebase, hacé clic en el ícono de engranaje ⚙️ (**Configuración del proyecto**).
 2. En la sección **Tus apps**, hacé clic en el ícono Web `</>` y registrá la app con un apodo (ej. `CucuWeb`). *(No hace falta tildar Firebase Hosting).*
-3. Copiá el objeto `firebaseConfig` y pegá sus valores dentro de `public/firebase-config.js`.
+3. Copiá `public/firebase-config.example.js` como `public/firebase-config.js` y pegá ahí los valores del objeto `firebaseConfig`. Ese archivo está en `.gitignore`, así tus credenciales no se suben al repo.
 
 > ⚠️ **Importante sobre `databaseURL`:** Asegurate de que el bloque copiado incluya la propiedad `databaseURL` (ej. `https://tu-proyecto-default-rtdb.firebaseio.com`). Si no aparece, copiala manualmente desde la parte superior de la pantalla de tu Realtime Database.
 
