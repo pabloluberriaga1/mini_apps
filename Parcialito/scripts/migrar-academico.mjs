@@ -32,14 +32,17 @@ if (!projectId) { console.error("No encontré el ID del proyecto. Pasalo con --p
 
 const apply = flag("apply");
 const db = getFirestore(initializeApp({ credential: applicationDefault(), projectId }));
-const uniId = uniIdOf(universidad, sigla), carreraId = carreraIdOf(uniId, carrera);
-
-console.log(`Proyecto: ${projectId}${apply ? "" : "  (simulación: no se escribe nada)"}`);
-console.log(`Universidad: ${universidad} [${uniId}]  ·  Carrera: ${carrera} [${carreraId}]\n`);
 
 const all = async name => (await db.collection(name).get()).docs;
 const [tests, users, unis, carreras, materias] = await Promise.all(["tests", "users", "universidades", "carreras", "materias"].map(all));
 const has = (docs, id) => docs.some(d => d.id === id);
+
+// Si alguien ya creó la universidad desde su perfil (quizás sin sigla), se reusa en vez de duplicarla.
+const uniExistente = unis.find(d => slug(d.data().nombre) === slug(universidad) || (sigla && slug(d.data().sigla || "") === slug(sigla)));
+const uniId = uniExistente ? uniExistente.id : uniIdOf(universidad, sigla), carreraId = carreraIdOf(uniId, carrera);
+
+console.log(`Proyecto: ${projectId}${apply ? "" : "  (simulación: no se escribe nada)"}`);
+console.log(`Universidad: ${universidad} [${uniId}]${uniExistente ? " (ya existía)" : ""}  ·  Carrera: ${carrera} [${carreraId}]\n`);
 
 const pendientes = tests.filter(d => !d.data().materiaId);
 const nuevasMaterias = new Map();
