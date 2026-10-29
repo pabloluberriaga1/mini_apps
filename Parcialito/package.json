@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "emuladores": "firebase emulators:start --only auth,firestore --project demo-parcialito",
+    "test": "node --test \"tests/*.test.mjs\"",
+    "test:reglas": "firebase emulators:exec --only firestore --project demo-parcialito \"node --test tests/reglas.emu.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.1.0"
+  }
+}

@@ -1,0 +1,22 @@
+# Config real de Firebase (cada uno tiene la suya; ver firebase-config.example.js)
+public/firebase-config.js
+
+# Caché local de firebase-tools
+.firebase/
+
+# Credenciales de cuenta de servicio y backups de la migración (tienen datos de usuarios)
+*service-account*.json
+serviceAccount*.json
+scripts/backups/
+
+# Dependencias y logs
+node_modules/
+npm-debug.log*
+firebase-debug.log*
+firestore-debug.log*
+
+# Archivos del sistema y del editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

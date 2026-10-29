@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Scripts de mantenimiento de Parcialito. Usan firebase-admin con una cuenta de servicio.",
+  "scripts": {
+    "migrar": "node migrar-academico.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

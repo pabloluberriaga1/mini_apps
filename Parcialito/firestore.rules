@@ -1,0 +1,168 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function adminPath() { return /databases/$(database)/documents/admins/$(me()); }
+    function isAdmin() { return signedIn() && exists(adminPath()); }
+    // Moderador de una universidad. Un admin sin el campo "universidades" es global (así son los que ya existían);
+    // con "universidades": ["unlp"] modera solo esa, y "*" en la lista lo vuelve global.
+    function modOf(uni) {
+      return isAdmin() && (!('universidades' in get(adminPath()).data)
+        || get(adminPath()).data.universidades.hasAny([uni, '*']));
+    }
+    function okStr(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
+    // Campo opcional: ausente, null o texto de hasta max caracteres.
+    function optStr(d, k, max) { return d.get(k, null) == null || (d.get(k, null) is string && d.get(k, null).size() <= max); }
+    function okTags(d) { return d.get('tags', []) is list && d.get('tags', []).size() <= 8; }
+    function testUni(id) { return get(/databases/$(database)/documents/tests/$(id)).data.get('universidadId', ''); }
+
+    // Nombre, foto, universidad y carrera de cada participante (para el ranking y los filtros)
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && me() == uid
+        && request.resource.data.keys().hasOnly(['name', 'photo', 'updatedAt', 'universidadId', 'carreraId'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.photo is string && request.resource.data.photo.size() <= 600
+        && optStr(request.resource.data, 'universidadId', 80)
+        && optStr(request.resource.data, 'carreraId', 160);
+    }
+
+    // Catálogo académico. Cualquiera con sesión puede sumar lo que falta; editar o borrar es de moderación.
+    match /universidades/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['nombre', 'sigla', 'creadoPor', 'createdAt'])
+        && okStr(request.resource.data.nombre, 120)
+        && optStr(request.resource.data, 'sigla', 20)
+        && request.resource.data.creadoPor == me();
+      allow update, delete: if modOf(id);
+    }
+    match /carreras/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['nombre', 'universidadId', 'creadoPor', 'createdAt'])
+        && okStr(request.resource.data.nombre, 120)
+        && request.resource.data.creadoPor == me()
+        && existsAfter(/databases/$(database)/documents/universidades/$(request.resource.data.universidadId));
+      allow update, delete: if modOf(resource.data.universidadId);
+    }
+    match /materias/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['nombre', 'carreraId', 'universidadId', 'creadoPor', 'createdAt'])
+        && okStr(request.resource.data.nombre, 120)
+        && request.resource.data.creadoPor == me()
+        && existsAfter(/databases/$(database)/documents/carreras/$(request.resource.data.carreraId));
+      allow update, delete: if modOf(resource.data.universidadId);
+    }
+
+    // Datos visibles de cada test (materia, parcial, título, etiquetas, cantidad de preguntas)
+    match /tests/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.autor == me()
+        && okStr(request.resource.data.materia, 120)
+        && okStr(request.resource.data.parcial, 80)
+        && okStr(request.resource.data.titulo, 160)
+        && request.resource.data.n is int
+        && request.resource.data.n > 0 && request.resource.data.n <= 300
+        && okTags(request.resource.data)
+        && optStr(request.resource.data, 'materiaId', 240)
+        && optStr(request.resource.data, 'carreraId', 160)
+        && optStr(request.resource.data, 'universidadId', 80);
+      allow update: if modOf(resource.data.get('universidadId', ''))
+        || (signedIn() && resource.data.autor == me() && request.resource.data.autor == me() && okTags(request.resource.data));
+      allow delete: if modOf(resource.data.get('universidadId', '')) || (signedIn() && resource.data.autor == me());
+    }
+
+    // Preguntas, opciones, respuestas y casos de cada test
+    match /bodies/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.autor == me()
+        && request.resource.data.questions is list
+        && request.resource.data.questions.size() > 0
+        && request.resource.data.questions.size() <= 300;
+      allow update: if (isAdmin() && modOf(testUni(id)))
+        || (signedIn() && resource.data.autor == me() && request.resource.data.autor == me());
+      allow delete: if (isAdmin() && modOf(testUni(id))) || (signedIn() && resource.data.autor == me());
+    }
+
+    // Puntajes: todos los leen, cada uno escribe solo el suyo
+    match /scores/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && me() == uid
+        && request.resource.data.keys().hasOnly(['tests', 'days', 'updatedAt'])
+        && request.resource.data.tests is map
+        && request.resource.data.days is list
+        && request.resource.data.days.size() <= 120;
+    }
+
+    // Historial de intentos: privado, solo se agregan (no se editan ni borran)
+    match /attempts/{id} {
+      allow read: if signedIn() && resource.data.uid == me();
+      allow create: if signedIn()
+        && request.resource.data.uid == me()
+        && request.resource.data.keys().hasOnly(['uid', 'testId', 'materia', 'materiaId', 'carreraId', 'universidadId', 'score', 'max', 'at'])
+        && okStr(request.resource.data.testId, 60)
+        && request.resource.data.materia is string && request.resource.data.materia.size() <= 120
+        && optStr(request.resource.data, 'materiaId', 240)
+        && optStr(request.resource.data, 'carreraId', 160)
+        && optStr(request.resource.data, 'universidadId', 80)
+        && request.resource.data.max is int && request.resource.data.max > 0 && request.resource.data.max <= 300
+        && request.resource.data.score is number && request.resource.data.score >= 0
+        && request.resource.data.score <= request.resource.data.max
+        && request.resource.data.at is int;
+      allow update, delete: if false;
+    }
+
+    // Materias y etiquetas que sigue cada persona: privado
+    match /subs/{uid} {
+      allow read: if signedIn() && me() == uid;
+      allow write: if signedIn() && me() == uid
+        && request.resource.data.keys().hasOnly(['materias', 'tags', 'seenAt'])
+        && request.resource.data.materias is list && request.resource.data.materias.size() <= 50
+        && request.resource.data.tags is list && request.resource.data.tags.size() <= 30
+        && request.resource.data.seenAt is number;
+    }
+
+    // Ticketera: ideas y bugs. Todos los leen; votar es agregar o quitar el propio uid de "votos".
+    function ticketOk(d) {
+      return d.keys().hasOnly(['tipo', 'titulo', 'descripcion', 'contexto', 'autor', 'estado', 'votos', 'respuesta', 'issueUrl', 'createdAt', 'updatedAt'])
+        && d.tipo in ['mejora', 'bug', 'otro']
+        && okStr(d.titulo, 120)
+        && d.descripcion is string && d.descripcion.size() <= 2000
+        && optStr(d, 'contexto', 400) && optStr(d, 'respuesta', 1000) && optStr(d, 'issueUrl', 300)
+        && d.estado in ['nuevo', 'revision', 'planificado', 'en_curso', 'hecho', 'descartado']
+        && d.votos is list && d.votos.size() <= 5000;
+    }
+    function votoValido() {
+      let antes = resource.data.votos;
+      let despues = request.resource.data.votos;
+      return (!(me() in antes) && (me() in despues) && despues.hasAll(antes) && despues.size() == antes.size() + 1)
+        || ((me() in antes) && !(me() in despues) && antes.hasAll(despues) && despues.size() == antes.size() - 1);
+    }
+    match /tickets/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && ticketOk(request.resource.data)
+        && request.resource.data.autor == me()
+        && request.resource.data.estado == 'nuevo'
+        && request.resource.data.votos == [me()]
+        && request.resource.data.get('respuesta', '') == ''
+        && request.resource.data.get('issueUrl', '') == '';
+      allow update: if signedIn() && ticketOk(request.resource.data) && (
+        (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'respuesta', 'issueUrl', 'updatedAt']))
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votos']) && votoValido())
+      );
+      allow delete: if isAdmin() || (signedIn() && resource.data.autor == me() && resource.data.estado == 'nuevo');
+    }
+
+    // Moderadores: se crean a mano desde la consola de Firebase
+    match /admins/{uid} {
+      allow read: if signedIn() && me() == uid;
+      allow write: if false;
+    }
+  }
+}
