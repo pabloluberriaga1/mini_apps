@@ -26,13 +26,16 @@ const S = {
   user: null, uid: null, admin: null, authReady: false, loginError: "",
   tests: {}, scores: {}, users: {}, tickets: {}, unis: {}, carreras: {}, mats: {}, attempts: [], subs: null,
   got: { tests: false, scores: false, users: false },
-  view: "tests", materia: null, tag: "", rankScope: "", rankMateria: "", progMat: "", run: null, unsub: [], desde: "",
+  view: "tests", f: null, rankScope: "", rankMateria: "", progMat: "", run: null, unsub: [], desde: "",
   up: { mode: "texto", parsed: null, error: null, busy: false },
   tk: { open: false, ntipo: "mejora", titulo: "", desc: "", tipo: "", estado: "abiertos", mios: false },
   perfil: null
 };
 const $ = s => document.querySelector(s);
 const app = $("#app");
+// Un index.html viejo en caché no trae las pestañas nuevas: se completan acá para que la app no se rompa.
+if (!$("#novDot")) $("#tabs").innerHTML = [["tests", "Tests"], ["ranking", "Ranking"], ["progreso", "Mi progreso"], ["subir", "Subir un test"], ["ideas", "Ideas y bugs"], ["novedades", "Novedades"]]
+  .map(([k, l]) => `<a href="#${k}" data-tab="${k}">${l}${k === "novedades" ? `<span class="tab-dot" id="novDot" hidden><span class="sr">(hay novedades)</span></span>` : ""}</a>`).join("");
 
 /* ================= Utilidades ================= */
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -71,9 +74,7 @@ const canMod = uni => !!S.admin && (S.admin.global || S.admin.unis.includes(uni)
 const testList = () => Object.entries(S.tests).map(([id, t]) => ({ id, ...t }));
 const data = () => ({ scores: S.scores, tests: S.tests });
 const matNombreDe = t => S.mats[t.materiaId]?.nombre || t.materia || "";
-// Con universidad elegida se ven sus tests y los anteriores a la migración, que todavía no tienen universidad.
-const enMiUni = t => { const u = me().universidadId; return !u || !t.universidadId || t.universidadId === u; };
-function materias(pred = enMiUni) {
+function materias(pred = () => true) {
   const m = new Map();
   testList().forEach(t => { if (!pred(t)) return; const k = matKey(t); const e = m.get(k) || { key: k, nombre: matNombreDe(t), n: 0 }; e.n++; m.set(k, e); });
   return [...m.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
@@ -84,10 +85,12 @@ const novedadPendiente = () => NOVEDADES.length > 0 && store.get("novedadesVista
 
 /* ================= Navegación ================= */
 const VIEWS = ["tests", "ranking", "subir", "progreso", "ideas", "perfil", "novedades"];
+// El hash puede llevar filtros: #tests?c=unlp__sistemas&q=parcial
 function parseHash() {
-  const h = decodeURIComponent((location.hash || "").slice(1));
-  if (h.startsWith("t/")) return { view: "test", id: h.slice(2) };
-  if (VIEWS.includes(h)) return { view: h };
+  const raw = (location.hash || "").slice(1);
+  if (raw.startsWith("t/")) return { view: "test", id: decodeURIComponent(raw.slice(2)) };
+  const i = raw.indexOf("?"), h = decodeURIComponent(i < 0 ? raw : raw.slice(0, i)), qs = i < 0 ? "" : raw.slice(i + 1);
+  if (VIEWS.includes(h)) return { view: h, qs };
   return { view: "tests" };
 }
 let lastHash = location.hash;
@@ -102,7 +105,7 @@ function go(hash) { if (location.hash === hash) route(); else location.hash = ha
 function route() {
   const r = parseHash();
   if (r.view === "test") { if (!S.run || S.run.id !== r.id) startTest(r.id); S.view = "test"; }
-  else { S.view = r.view; S.run = null; }
+  else { S.view = r.view; S.run = null; if (r.view === "tests" && r.qs) filtrosDesdeURL(r.qs); }
   render(); window.scrollTo(0, 0); app.focus({ preventScroll: true });
 }
 
@@ -203,58 +206,173 @@ function toggleSub(kind, val, label) {
   saveSubs({ ...sb, [kind]: on ? sb[kind].filter(x => x !== val) : [...sb[kind], val].slice(kind === "tags" ? -30 : -50) });
   toast(on ? `Dejaste de seguir ${label}` : `Ahora seguís ${label}`);
 }
+/* ---------- inicio: buscador, filtros y orden ---------- */
+const fold = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const ESTADOS_TEST = [["", "Todos"], ["pend", "Sin hacer"], ["hechos", "Hechos"], ["perf", "Perfectos"], ["mios", "Subidos por mí"]];
+const ORDENES = [["", "Por materia"], ["nuevos", "Más nuevos"], ["resueltos", "Más resueltos"], ["repasar", "Para repasar"], ["titulo", "Título A-Z"]];
+// Clave corta en la URL → campo del filtro.
+const FKEYS = { u: "uni", c: "car", m: "mat", p: "parcial", e: "estado", t: "tag", q: "q", o: "orden" };
+const filtrosVacios = () => ({ uni: "", car: "", mat: "", parcial: "", estado: "", tag: "", q: "", orden: "" });
+// Mientras la persona no toque universidad o carrera, siguen a su perfil (que puede llegar después del primer render).
+function filtros() {
+  if (!S.f) S.f = { ...filtrosVacios(), auto: true };
+  if (S.f.auto) Object.assign(S.f, { uni: me().universidadId || "", car: me().carreraId || "" });
+  return S.f;
+}
+function filtrosDesdeURL(qs) {
+  const p = new URLSearchParams(qs), f = { ...filtrosVacios(), auto: false };
+  for (const [k, key] of Object.entries(FKEYS)) if (p.has(k)) f[key] = p.get(k);
+  S.f = f;
+}
+function syncURL() {
+  const p = new URLSearchParams();
+  for (const [k, key] of Object.entries(FKEYS)) if (S.f[key]) p.set(k, S.f[key]);
+  const h = "#tests" + (p.toString() ? "?" + p : "");
+  if (location.hash !== h) { history.replaceState(null, "", h); lastHash = h; }
+}
+const hayFiltros = f => !!(f.q || f.mat || f.parcial || f.estado || f.tag || f.orden);
+const alcanceDe = f => f.car ? S.carreras[f.car]?.nombre || "la carrera" : f.uni ? S.unis[f.uni]?.sigla || S.unis[f.uni]?.nombre || "la universidad" : "todo Parcialito";
+const etiquetaUbicacion = t => [S.unis[t.universidadId]?.sigla || S.unis[t.universidadId]?.nombre, S.carreras[t.carreraId]?.nombre].filter(Boolean).join(" · ") || "Sin carrera asignada";
+const pctMio = t => { const r = S.scores[S.uid]?.tests?.[t.id]; return r ? r.best / r.max : null; };
+const resueltoPor = tid => Object.values(S.scores).filter(s => s.tests && s.tests[tid]).length;
+function testsEnAlcance(f) { return testList().filter(t => (!f.uni || t.universidadId === f.uni) && (!f.car || t.carreraId === f.car)); }
+function aplicarFiltros(f, base) {
+  const words = fold(f.q).split(/\s+/).filter(Boolean);
+  return base.filter(t => {
+    if (f.mat && matKey(t) !== f.mat) return false;
+    if (f.parcial && t.parcial !== f.parcial) return false;
+    if (f.tag && !(t.tags || []).includes(f.tag)) return false;
+    const p = pctMio(t);
+    if (f.estado === "pend" && p != null) return false;
+    if (f.estado === "hechos" && p == null) return false;
+    if (f.estado === "perf" && !(p >= 1)) return false;
+    if (f.estado === "mios" && t.autor !== S.uid) return false;
+    if (words.length) {
+      const texto = fold([t.titulo, matNombreDe(t), t.parcial, ...(t.tags || []).map(g => "#" + g), fullNameOf(t.autor)].join(" "));
+      if (!words.every(w => texto.includes(w.replace(/^#/, "")))) return false;
+    }
+    return true;
+  });
+}
+function ordenar(list, orden) {
+  const by = {
+    nuevos: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+    resueltos: (a, b) => resueltoPor(b.id) - resueltoPor(a.id),
+    // Primero los que peor te salieron; los que no hiciste van al final.
+    repasar: (a, b) => (pctMio(a) ?? 2) - (pctMio(b) ?? 2),
+    titulo: (a, b) => a.titulo.localeCompare(b.titulo, "es", { numeric: true })
+  }[orden];
+  return [...list].sort(by);
+}
+function trowHTML(t, conContexto) {
+  const r = S.scores[S.uid]?.tests?.[t.id], n = resueltoPor(t.id), pct = r ? Math.round(r.best / r.max * 100) : 0;
+  const canDel = t.autor === S.uid || canMod(t.universidadId || "");
+  return `<div class="trow"><div>
+    ${conContexto ? `<div class="ctx">${esc(matNombreDe(t))} · ${esc(t.parcial)}</div>` : ""}
+    <a class="t" href="#t/${encodeURIComponent(t.id)}">${esc(t.titulo)}</a>
+    <div class="s">${t.n} preguntas · subido por ${nm(t.autor)} · ${n === 0 ? "nadie lo hizo todavía" : n === 1 ? "lo hizo 1 persona" : `lo hicieron ${n} personas`}${canDel ? ` · <button class="link danger" data-del="${esc(t.id)}">Borrar</button>` : ""}</div>
+    ${(t.tags || []).length ? `<div class="tags">${t.tags.map(g => `<button class="tagbtn" data-ft="${esc(g)}" aria-label="Filtrar por la etiqueta ${esc(g)}">#${esc(g)}</button>`).join("")}</div>` : ""}</div>
+    <div class="meter ${r && r.best >= r.max ? "perfect" : ""}">${r ? `<span>Tu mejor: <b>${fmt(r.best)}/${r.max}</b></span>` : `<span>Sin hacer</span>`}<div class="track"><div class="fill" style="width:${pct}%"></div></div></div>
+    <a class="btn small ${r ? "ghost" : ""}" href="#t/${encodeURIComponent(t.id)}">${r ? "Repetir" : "Hacer"}</a></div>`;
+}
+function resultsHTML(list, f) {
+  if (!list.length) return `<div class="empty"><p><b>Ningún test coincide${f.q ? ` con “${esc(f.q)}”` : ""}.</b></p><p>Probá con otras palabras o sacá algún filtro.</p>
+    <div class="row-center">${hayFiltros(f) ? `<button class="btn small" data-clear="1">Limpiar filtros</button>` : ""}${f.car || f.uni ? `<button class="btn small ghost" data-widen="1">Buscar en ${f.car ? "toda la universidad" : "todo Parcialito"}</button>` : ""}</div></div>`;
+  if (f.orden) return `<div class="tlist">${ordenar(list, f.orden).map(t => trowHTML(t, true)).join("")}</div>`;
+  const grupos = new Map();
+  list.forEach(t => { const k = matKey(t); const g = grupos.get(k) || { key: k, nombre: matNombreDe(t), muestra: t, tests: [] }; g.tests.push(t); grupos.set(k, g); });
+  const sb = subs();
+  return [...grupos.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).map(g => {
+    const byP = {}; g.tests.forEach(t => (byP[t.parcial] ||= []).push(t));
+    const sigo = sb.materias.includes(g.key);
+    return `<section class="mgroup"><div class="mgroup-head"><div><h2>${esc(g.nombre)}</h2>${!f.car ? `<p class="muted">${esc(etiquetaUbicacion(g.muestra))}</p>` : ""}</div>
+      <button class="btn small ghost" data-follow="${esc(g.key)}" data-nombre="${esc(g.nombre)}" aria-pressed="${sigo}">${sigo ? "Siguiendo" : "Seguir"}</button></div>
+      ${Object.keys(byP).sort((a, b) => a.localeCompare(b, "es", { numeric: true })).map(p => {
+        const ts = byP[p].sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999) || (a.createdAt || 0) - (b.createdAt || 0));
+        return `<div class="parcial"><h3>${esc(p)} <small>${ts.length} ${ts.length === 1 ? "test" : "tests"}</small></h3>${ts.map(t => trowHTML(t, false)).join("")}</div>`;
+      }).join("")}</section>`;
+  }).join("");
+}
 function renderHome() {
-  const mats = materias();
-  if (!mats.length) {
+  if (!testList().length) {
     app.innerHTML = `<div class="wrap">${perfilBanner()}${studentCard()}<div class="empty"><p><b>Todavía no hay tests en Parcialito.</b></p><p>Subí el primero: un parcial viejo, un simulacro o preguntas que armaste vos.</p><a class="btn" href="#subir">Subir un test</a></div></div>`;
     return;
   }
-  if (!S.materia || !mats.find(m => m.key === S.materia)) S.materia = mats[0].key;
-  const mat = mats.find(m => m.key === S.materia);
-  const all = testList().filter(t => enMiUni(t) && matKey(t) === S.materia);
-  const tagsMat = [...new Set(all.flatMap(t => t.tags || []))].sort((a, b) => a.localeCompare(b, "es"));
-  if (S.tag && !tagsMat.includes(S.tag)) S.tag = "";
-  const tests = S.tag ? all.filter(t => (t.tags || []).includes(S.tag)) : all;
-  const byP = {}; tests.forEach(t => (byP[t.parcial] ||= []).push(t));
-  const parciales = Object.keys(byP).sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
-  const my = S.scores[S.uid]?.tests || {};
-  const doneBy = tid => Object.values(S.scores).filter(s => s.tests && s.tests[tid]).length;
-  const top = ranking(data(), t => matKey(t) === S.materia).slice(0, 5);
-  const sb = subs(), sigoMat = sb.materias.includes(S.materia), sigoTag = S.tag && sb.tags.includes(S.tag);
+  const f = filtros(), u = me();
+  const base = testsEnAlcance(f), ids = new Set(base.map(t => t.id));
+  const mats = materias(t => ids.has(t.id));
+  if (f.mat && !mats.some(m => m.key === f.mat)) f.mat = "";
+  const enMat = f.mat ? base.filter(t => matKey(t) === f.mat) : base;
+  const parciales = [...new Set(enMat.map(t => t.parcial))].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+  if (f.parcial && !parciales.includes(f.parcial)) f.parcial = "";
+  const cuenta = {}; enMat.forEach(t => (t.tags || []).forEach(g => cuenta[g] = (cuenta[g] || 0) + 1));
+  const tags = Object.entries(cuenta).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es")).slice(0, 14).map(e => e[0]);
+  if (f.tag && !cuenta[f.tag]) f.tag = "";
+  const unis = Object.values(S.unis).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  const carreras = Object.values(S.carreras).filter(c => c.universidadId === f.uni).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  const opt = (v, l, cur) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(l)}</option>`;
+  const chips = (attr, items, cur) => items.map(([v, l]) => `<button class="chip" data-${attr}="${esc(v)}" aria-pressed="${v === cur}">${esc(l)}</button>`).join("");
+  const rkPred = (t, id) => ids.has(id) && (!f.mat || matKey(t) === f.mat), rk = ranking(data(), rkPred), miPos = rk.findIndex(r => r.id === S.uid) + 1;
+  const activos = [f.parcial, f.estado, f.tag].filter(Boolean).length;
+  const rkTitulo = f.mat ? matNombre(f.mat) : alcanceDe(f), sigoTag = f.tag && subs().tags.includes(f.tag);
   app.innerHTML = `<div class="wrap">${perfilBanner()}${studentCard()}${paraVos()}
-  <div class="home">
-    <aside><h3 class="side-title">Materias</h3><ul class="mat-list">${mats.map(m => `<li><button data-mat="${esc(m.key)}" aria-current="${m.key === S.materia}"><span>${esc(m.nombre)}</span><span class="c">${m.n}</span></button></li>`).join("")}</ul></aside>
-    <section>
-      <div class="mat-head"><div class="mat-title"><h1>${esc(mat.nombre)}</h1><button class="btn small ghost" id="followMat" aria-pressed="${sigoMat}">${sigoMat ? "Siguiendo" : "Seguir materia"}</button></div>
-        <p>Elegí un test y marcá todas las opciones correctas. Si marcás solo algunas de las correctas y ninguna incorrecta, sumás la mitad.</p></div>
-      ${tagsMat.length ? `<div class="chips tag-filter" role="group" aria-label="Filtrar por etiqueta"><button class="chip" data-tag="" aria-pressed="${!S.tag}">Todas</button>${tagsMat.map(g => `<button class="chip" data-tag="${esc(g)}" aria-pressed="${g === S.tag}">#${esc(g)}</button>`).join("")}
-        ${S.tag ? `<button class="link" id="followTag">${sigoTag ? `Dejar de seguir #${esc(S.tag)}` : `Seguir #${esc(S.tag)}`}</button>` : ""}</div>` : ""}
-      ${parciales.map(p => {
-        const list = byP[p].sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999) || (a.createdAt || 0) - (b.createdAt || 0));
-        return `<div class="parcial"><h2>${esc(p)} <small>${list.length} ${list.length === 1 ? "test" : "tests"}</small></h2>
-        ${list.map(t => {
-          const r = my[t.id], n = doneBy(t.id), pct = r ? Math.round(r.best / r.max * 100) : 0;
-          const canDel = t.autor === S.uid || canMod(t.universidadId || "");
-          return `<div class="trow"><div><div class="t">${esc(t.titulo)}</div>
-            <div class="s">${t.n} preguntas · subido por ${nm(t.autor)} · ${n === 0 ? "nadie lo hizo todavía" : n === 1 ? "lo hizo 1 persona" : `lo hicieron ${n} personas`}${canDel ? ` · <button class="link danger" data-del="${esc(t.id)}">Borrar</button>` : ""}</div>
-            ${(t.tags || []).length ? `<div class="tags">${t.tags.map(g => `<span>#${esc(g)}</span>`).join("")}</div>` : ""}</div>
-            <div class="meter ${r && r.best >= r.max ? "perfect" : ""}">${r ? `<span>Tu mejor: <b>${fmt(r.best)}/${r.max}</b></span>` : `<span>Sin hacer</span>`}<div class="track"><div class="fill" style="width:${pct}%"></div></div></div>
-            <a class="btn small ${r ? "ghost" : ""}" href="#t/${encodeURIComponent(t.id)}">${r ? "Repetir" : "Hacer"}</a></div>`;
-        }).join("")}</div>`;
-      }).join("")}
+    <section class="finder ${S.fMas ? "mas" : ""}" aria-label="Buscar y filtrar tests">
+      <div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="fq" type="search" value="${esc(f.q)}" placeholder="Buscar por título, materia, #etiqueta o autor" aria-label="Buscar tests" autocomplete="off"></div>
+      <div class="selects">
+        <label class="sel"><span>Universidad</span><select id="fu">${opt("", "Todas", f.uni)}${unis.map(x => opt(x.id, x.sigla ? `${x.sigla} · ${x.nombre}` : x.nombre, f.uni)).join("")}</select></label>
+        <label class="sel"><span>Carrera</span><select id="fc" ${f.uni ? "" : "disabled"}>${opt("", f.uni ? "Todas" : "Elegí una universidad", f.car)}${carreras.map(c => opt(c.id, c.nombre, f.car)).join("")}</select></label>
+        <label class="sel"><span>Materia</span><select id="fm">${opt("", `Todas (${mats.length})`, f.mat)}${mats.map(m => opt(m.key, `${m.nombre} (${m.n})`, f.mat)).join("")}</select></label>
+        <label class="sel"><span>Ordenar</span><select id="fo">${ORDENES.map(([v, l]) => opt(v, l, f.orden)).join("")}</select></label>
+      </div>
+      <button class="link fmas-btn" id="fMas" aria-expanded="${!!S.fMas}">${S.fMas ? "Menos filtros" : "Más filtros"}${activos ? ` (${activos} ${activos === 1 ? "activo" : "activos"})` : ""}</button>
+      ${parciales.length > 1 ? `<div class="frow" role="group" aria-label="Parcial"><span class="flabel">Parcial</span><div class="chips">${chips("fp", [["", "Todos"], ...parciales.map(p => [p, p])], f.parcial)}</div></div>` : ""}
+      <div class="frow" role="group" aria-label="Estado"><span class="flabel">Estado</span><div class="chips">${chips("fe", ESTADOS_TEST, f.estado)}</div></div>
+      ${tags.length ? `<div class="frow" role="group" aria-label="Etiquetas"><span class="flabel">Etiquetas</span><div class="chips">${chips("ft", [["", "Todas"], ...tags.map(g => [g, "#" + g])], f.tag)}
+        ${f.tag ? `<button class="link" id="followTag">${sigoTag ? `Dejar de seguir #${esc(f.tag)}` : `Seguir #${esc(f.tag)}`}</button>` : ""}</div></div>` : ""}
     </section>
-    <aside class="panel"><h3>Ranking de ${esc(mat.nombre)}</h3>
-      ${top.length ? `<ol class="mini-rank">${top.map((r, i) => `<li class="${r.id === S.uid ? "is-me" : ""}"><span class="num">${i + 1}</span>${avatar(r.id)}${nm(r.id)}<span class="p">${r.pts}</span></li>`).join("")}</ol>` : `<p class="muted" style="font-size:.9rem;margin-top:0">Nadie sumó puntos en esta materia todavía. Hacé un test y arrancás primero.</p>`}
+    <div class="results-head"><p id="fcount" role="status"></p><div class="row"><button class="link" id="fclear" hidden>Limpiar filtros</button><button class="link" id="fshare">Copiar link de esta búsqueda</button></div></div>
+    <details class="rank-panel" id="rkPanel" ${store.get("rankOpen") === "1" ? "open" : ""}>
+      <summary>Ranking de ${esc(rkTitulo)}${miPos ? ` <span class="muted">· estás en el puesto ${miPos}</span>` : ""}</summary>
+      ${rk.length ? `<ol class="mini-rank">${rk.slice(0, 5).map((r, i) => `<li class="${r.id === S.uid ? "is-me" : ""}"><span class="num">${i + 1}</span>${avatar(r.id)}${nm(r.id)}<span class="p">${r.pts}</span></li>`).join("")}</ol>` : `<p class="muted">Nadie sumó puntos acá todavía. Hacé un test y arrancás primero.</p>`}
       <button class="link" id="seeRank">Ver ranking completo</button>
-    </aside>
-  </div></div>`;
-  app.querySelectorAll("[data-mat]").forEach(b => b.onclick = () => { S.materia = b.dataset.mat; S.tag = ""; render(); });
-  app.querySelectorAll("[data-tag]").forEach(b => b.onclick = () => { S.tag = b.dataset.tag; render(); });
-  app.querySelectorAll("[data-del]").forEach(b => b.onclick = () => deleteTest(b.dataset.del));
-  $("#followMat").onclick = () => toggleSub("materias", S.materia, mat.nombre);
-  $("#followTag")?.addEventListener("click", () => toggleSub("tags", S.tag, "#" + S.tag));
+    </details>
+    <div id="results"></div></div>`;
+  const rerender = (id, fn) => { fn(); S.refocus = id; render(); };
+  $("#fu").onchange = e => rerender("fu", () => Object.assign(f, { uni: e.target.value, car: "", mat: "", parcial: "", tag: "", auto: false }));
+  $("#fc").onchange = e => rerender("fc", () => Object.assign(f, { car: e.target.value, mat: "", parcial: "", tag: "", auto: false }));
+  $("#fm").onchange = e => rerender("fm", () => Object.assign(f, { mat: e.target.value, parcial: "", tag: "" }));
+  $("#fo").onchange = e => rerender("fo", () => f.orden = e.target.value);
+  app.querySelectorAll("[data-fp]").forEach(b => b.onclick = () => { f.parcial = b.dataset.fp; render(); });
+  app.querySelectorAll("[data-fe]").forEach(b => b.onclick = () => { f.estado = b.dataset.fe; render(); });
+  app.querySelectorAll(".finder [data-ft]").forEach(b => b.onclick = () => { f.tag = b.dataset.ft; render(); });
+  $("#fMas").onclick = () => { S.fMas = !S.fMas; S.refocus = "fMas"; render(); };
+  let tm; $("#fq").oninput = e => { clearTimeout(tm); tm = setTimeout(() => { f.q = e.target.value.trim(); renderResults(base); }, 150); };
+  $("#fclear").onclick = () => { Object.assign(f, { q: "", mat: "", parcial: "", estado: "", tag: "", orden: "" }); render(); };
+  $("#fshare").onclick = async () => { try { await navigator.clipboard.writeText(location.href); toast("Link copiado. Compartilo con tu curso."); } catch { toast("No se pudo copiar el link"); } };
+  $("#followTag")?.addEventListener("click", () => toggleSub("tags", f.tag, "#" + f.tag));
   $("#seenAll")?.addEventListener("click", () => saveSubs({ ...subs(), seenAt: Date.now() }));
-  $("#seeRank").onclick = () => { S.rankScope = ""; S.rankMateria = S.materia; go("#ranking"); };
+  $("#rkPanel").ontoggle = e => store.set("rankOpen", e.target.open ? "1" : "0");
+  $("#seeRank").onclick = () => {
+    S.rankMateria = f.mat; S.rankScope = f.car && f.car === u.carreraId ? "carrera" : f.uni && f.uni === u.universidadId ? "uni" : "";
+    go("#ranking");
+  };
+  renderResults(base);
+  if (S.refocus) { $("#" + S.refocus)?.focus(); S.refocus = null; }
+}
+// Solo se redibuja la lista, así el buscador no pierde el foco mientras se escribe.
+function renderResults(base) {
+  const f = S.f, list = aplicarFiltros(f, base), box = $("#results"); if (!box) return;
+  box.innerHTML = resultsHTML(list, f);
+  $("#fcount").textContent = `${list.length} ${list.length === 1 ? "test" : "tests"}${f.q ? ` para “${f.q}”` : ""} en ${alcanceDe(f)}`;
+  $("#fclear").hidden = !hayFiltros(f);
+  box.querySelectorAll("[data-del]").forEach(b => b.onclick = () => deleteTest(b.dataset.del));
+  box.querySelectorAll("[data-follow]").forEach(b => b.onclick = () => toggleSub("materias", b.dataset.follow, b.dataset.nombre));
+  box.querySelectorAll("[data-ft]").forEach(b => b.onclick = () => { f.tag = b.dataset.ft; render(); window.scrollTo({ top: $(".finder").offsetTop - 80, behavior: reduceMotion() ? "auto" : "smooth" }); });
+  box.querySelector("[data-clear]")?.addEventListener("click", () => { Object.assign(f, { q: "", mat: "", parcial: "", estado: "", tag: "", orden: "" }); render(); });
+  box.querySelector("[data-widen]")?.addEventListener("click", () => { if (f.car) f.car = ""; else f.uni = ""; f.auto = false; render(); });
+  paintNames(box);
+  syncURL();
 }
 async function deleteTest(id) {
   const t = S.tests[id]; if (!t) return;
@@ -346,11 +464,16 @@ function renderTest() {
   if (!m && !R.body && !R.error) { app.innerHTML = `<div class="wrap"><p class="muted">Cargando el test…</p></div>`; return; }
   if (R.error || !m) { app.innerHTML = `<div class="wrap"><div class="empty"><p><b>Este test no existe o fue borrado.</b></p><a class="btn" href="#tests">Volver a los tests</a></div></div>`; return; }
   R.meta = m;
-  const head = `<div class="test-head"><div class="crumbs"><a class="link" href="#tests">Tests</a><span>/</span><span>${esc(matNombreDe(m))}</span><span>/</span><span>${esc(m.parcial)}</span></div><h1>${esc(m.titulo)}</h1>${R.body?.intro ? `<p>${inline(R.body.intro)}</p>` : ""}</div>`;
+  const mejor = pctMio({ id: R.id }), tags = m.tags || [];
+  const head = `<div class="test-head"><div class="crumbs"><a class="link" href="#tests">Tests</a><span>/</span><a class="link" href="${hrefFiltro(m, { m: matKey(m) })}">${esc(matNombreDe(m))}</a><span>/</span><span>${esc(m.parcial)}</span></div>
+    <h1>${esc(m.titulo)}</h1>
+    <div class="test-meta"><span>${m.n} preguntas</span><span>subido por ${nm(m.autor)}</span>${m.carreraId ? `<span>${esc(etiquetaUbicacion(m))}</span>` : ""}${mejor != null ? `<span>tu mejor: <b>${Math.round(mejor * 100)}%</b></span>` : ""}</div>
+    ${tags.length ? `<div class="test-tags" aria-label="Etiquetas">${tags.map(g => `<a class="tagchip" href="${hrefFiltro(m, { t: g })}" title="Ver más tests con #${esc(g)}">#${esc(g)}</a>`).join("")}</div>` : ""}
+    ${R.body?.intro ? `<p>${inline(R.body.intro)}</p>` : ""}</div>`;
   if (!R.body) { app.innerHTML = `<div class="wrap">${head}<p class="muted">Cargando preguntas…</p></div>`; return; }
   const cases = R.body.cases || [];
   app.innerHTML = `<div class="wrap"><div class="test"><div>${head}
-    ${R.result ? resultHTML(R.result) : ""}
+    ${R.result ? resultHTML(R.result) + relatedHTML(R.id, m) : ""}
     ${cases.length ? `<div class="cases">${cases.map(c => `<details class="case"><summary><span class="cid">${esc(c.id)}</span>${esc(c.title || "")}</summary><div class="case-body">${sanitize(c.html)}</div></details>`).join("")}</div>` : ""}
     ${R.order.map((i, pos) => qHTML(i, pos)).join("")}
     </div><aside class="answer-sheet" id="sheet">${sheetHTML()}</aside></div></div>`;
@@ -386,6 +509,26 @@ function bindTest() {
   bindSheet();
 }
 function toggleCase(i, force) { const box = $("#ct-" + i), btn = document.querySelector(`#q-${i} .q-case`); const show = force ?? box.hidden; box.hidden = !show; btn?.setAttribute("aria-expanded", show); }
+// Link a la lista de tests filtrada en la carrera del test (por materia, etiqueta, etc.).
+function hrefFiltro(t, extra) {
+  const p = new URLSearchParams();
+  if (t.universidadId) p.set("u", t.universidadId);
+  if (t.carreraId) p.set("c", t.carreraId);
+  for (const [k, v] of Object.entries(extra)) p.set(k, v);
+  return "#tests?" + p;
+}
+// Tests parecidos para seguir practicando: comparten etiquetas o materia; primero los que no hiciste.
+function relatedHTML(id, m) {
+  const tags = new Set(m.tags || []), key = matKey(m);
+  const afinidad = t => (t.tags || []).filter(g => tags.has(g)).length * 2 + (matKey(t) === key ? 1 : 0);
+  const list = testList().filter(t => t.id !== id && afinidad(t) > 0 && (!m.universidadId || t.universidadId === m.universidadId))
+    .sort((a, b) => (pctMio(a) == null ? 0 : 1) - (pctMio(b) == null ? 0 : 1) || afinidad(b) - afinidad(a)).slice(0, 4);
+  if (!list.length) return "";
+  return `<section class="related" aria-label="Seguí practicando"><h2>Seguí practicando</h2><ul>${list.map(t => {
+    const p = pctMio(t);
+    return `<li><a href="#t/${encodeURIComponent(t.id)}"><b>${esc(t.titulo)}</b><span class="muted">${esc(matNombreDe(t))} · ${t.n} preguntas · ${p == null ? "sin hacer" : `tu mejor ${Math.round(p * 100)}%`}</span>${(t.tags || []).length ? `<span class="tags">${t.tags.slice(0, 3).map(g => `<span>#${esc(g)}</span>`).join("")}</span>` : ""}</a></li>`;
+  }).join("")}</ul></section>`;
+}
 function resultHTML(r) {
   return `<div class="result" id="result"><div class="big">${fmt(r.score)}<small> / ${r.max}</small></div><div>
     <p><b>${r.gained > 0 ? `<span class="gain">+${r.gained} puntos</span>` : r.first ? "Guardado." : `No superaste tu marca de ${fmt(r.prevBest)}, así que tus puntos no cambian.`}</b>${r.perfect ? ` Test perfecto: incluye ${PTS.perfect} de bonus.` : ""}</p>
@@ -429,7 +572,7 @@ function renderUpload() {
   const parcs = [...new Set(["1er parcial", "2do parcial", "Recuperatorio", "Final", ...testList().map(t => t.parcial)])];
   const sug = popularTags(t => t.carreraId === u.carreraId);
   const modes = [["texto", "Escribir o pegar"], ["archivo", "Desde un archivo"], ["ia", "Con ayuda de una IA"]];
-  U.materia ??= matNombre(S.materia);
+  U.materia ??= matNombre(S.f?.mat || "");
   app.innerHTML = `<div class="wrap"><div class="up"><section>
     <h1>Subir un test</h1>
     <p class="lead">Cada test que subís le sirve a todo el curso y te suma ${PTS.upload} puntos en el ranking.</p>
@@ -548,8 +691,8 @@ async function publish() {
       });
       await b.commit();
     }
-    S.materia = materiaId; S.tag = "";
-    S.up = { mode: U.mode, parsed: null, error: null, busy: false, materia: nombreMat, parcial };
+    S.f = { ...filtrosVacios(), uni: u.universidadId, car: u.carreraId, mat: materiaId, auto: false };
+    S.up ={ mode: U.mode, parsed: null, error: null, busy: false, materia: nombreMat, parcial };
     toast(ts.length === 1 ? `Test publicado: +${PTS.upload} puntos` : `${ts.length} tests publicados: +${PTS.upload * ts.length} puntos`);
     go("#tests");
   } catch (e) {
@@ -777,7 +920,7 @@ async function guardarPerfil() {
     if (!cSnap.exists()) b.set(doc(db, "carreras", carreraId), { nombre: car, universidadId: uniId, creadoPor: S.uid, createdAt: now });
     b.set(doc(db, "users", S.uid), { name: (S.user.displayName || "Sin nombre").slice(0, 80), photo: (S.user.photoURL || "").slice(0, 600), universidadId: uniId, carreraId, updatedAt: now }, { merge: true });
     await b.commit();
-    S.perfil = null; S.rankScope = "carrera";
+    S.perfil = null; S.rankScope = "carrera"; S.f = null;
     toast("Perfil guardado"); go("#tests");
   } catch { toast("No se pudo guardar el perfil. Probá de nuevo."); $("#pSave").disabled = false; }
 }
@@ -796,7 +939,7 @@ function renderNovedades() {
 /* ================= Sesión y datos ================= */
 function stopListening() {
   S.unsub.forEach(u => u()); S.unsub = [];
-  Object.assign(S, { tests: {}, scores: {}, users: {}, tickets: {}, unis: {}, carreras: {}, mats: {}, attempts: [], subs: null, perfil: null });
+  Object.assign(S, { tests: {}, scores: {}, users: {}, tickets: {}, unis: {}, carreras: {}, mats: {}, attempts: [], subs: null, perfil: null, f: null });
   S.got = { tests: false, scores: false, users: false };
 }
 function listen() {
@@ -830,6 +973,7 @@ onAuthStateChanged(auth, async user => {
     }).catch(() => {});
     listen();
     const r = parseHash(); S.view = r.view; if (r.view === "test") startTest(r.id);
+    if (r.view === "tests" && r.qs) filtrosDesdeURL(r.qs);
   }
   render();
 });
