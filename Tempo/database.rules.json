@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "salas": {
+      "$sala": {
+        ".read": true,
+        "estado": { ".write": true },
+        "gente": {
+          "$cliente": { ".write": true }
+        }
+      }
+    }
+  }
+}

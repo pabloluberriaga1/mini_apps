@@ -1,0 +1,9 @@
+# Config real de Firebase (cada uno tiene la suya; ver firebase-config.example.js)
+public/firebase-config.js
+
+# Caché local de firebase-tools
+.firebase/
+
+# Logs
+firebase-debug.log*
+database-debug.log*

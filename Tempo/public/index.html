@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tempo</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@300;500&family=Familjen+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="sala">
+      <span class="marca">Tempo</span>
+      <span id="sala-nombre" class="sala-nombre"></span>
+    </div>
+    <button id="copiar" class="link">Copiar link</button>
+  </header>
+
+  <main>
+    <p id="modo-local" class="modo-local" hidden>
+      Modo local: se sincroniza solo entre pestañas de este navegador. Configurá Firebase para usarlo entre dispositivos.
+    </p>
+
+    <div id="reloj" class="reloj" data-corriendo="no" aria-live="off">
+      <span class="principal">00:00</span><span class="decima">.0</span>
+    </div>
+    <p id="estado-txt" class="estado-txt">Listo para arrancar</p>
+
+    <div class="controles">
+      <button id="alternar" class="principal-btn">Arrancar</button>
+      <button id="reiniciar" class="secundario-btn">Reiniciar</button>
+    </div>
+    <p id="aviso" class="aviso" role="status"></p>
+  </main>
+
+  <footer class="pie">
+    <ul id="gente" class="gente" aria-label="Personas en la sala"></ul>
+    <div class="pie-acciones">
+      <button id="control" class="interruptor" aria-pressed="false" hidden>
+        <span class="punto" aria-hidden="true"></span>
+        <span id="control-txt">Controlan todos</span>
+      </button>
+      <button id="tomar" class="link" hidden>El host se fue: tomar el control</button>
+    </div>
+    <p class="atajos">Atajos: espacio arranca o pausa, R reinicia</p>
+  </footer>
+
+  <dialog id="dialogo">
+    <form id="entrada">
+      <label for="nombre">¿Cómo te llamamos en la sala?</label>
+      <input id="nombre" maxlength="24" autocomplete="nickname" placeholder="Ej: Lu, batería">
+      <button class="principal-btn">Entrar</button>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+/* Tempo — reloj de sala de ensayo: se tiene que leer desde la batería. */
+
+:root {
+  --fondo: #E9ECF3;
+  --superficie: #DCE1EC;
+  --tinta: #1C2240;
+  --tenue: #5B6385;
+  --led: #A85A00;        /* reloj corriendo */
+  --led-apagado: #9AA1BC; /* reloj en pausa */
+  --linea: #C3C9DA;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #161A30;
+    --superficie: #20253F;
+    --tinta: #E6E8F2;
+    --tenue: #8E95B5;
+    --led: #FFB547;
+    --led-apagado: #4C5372;
+    --linea: #2E3453;
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+[hidden] { display: none !important; }
+
+html { height: 100%; }
+body { min-height: 100%; margin: 0; }
+
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+button:disabled { cursor: not-allowed; opacity: 0.4; }
+:focus-visible { outline: 3px solid var(--led); outline-offset: 3px; }
+
+/* ---------- Barra superior ---------- */
+
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 4vw, 2.5rem);
+}
+.sala { display: flex; align-items: baseline; gap: 0.75rem; min-width: 0; }
+.marca { font-weight: 600; }
+.sala-nombre {
+  color: var(--tenue);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link {
+  background: none;
+  border: 0;
+  padding: 0.25rem 0;
+  color: var(--tenue);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.link:hover { color: var(--tinta); }
+
+/* ---------- Reloj ---------- */
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+}
+
+.reloj {
+  font-family: "Chivo Mono", "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--led-apagado);
+  transition: color 0.25s ease;
+  white-space: nowrap;
+}
+.reloj .principal { font-size: clamp(4rem, min(22vw, 30vh), 17rem); }
+.reloj .decima { font-size: clamp(1.75rem, min(8vw, 11vh), 6rem); margin-left: 0.05em; }
+.reloj[data-corriendo="si"] { color: var(--led); }
+
+.estado-txt {
+  margin: 0.75rem 0 2rem;
+  color: var(--tenue);
+  font-size: 1.125rem;
+}
+
+.controles { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+
+.principal-btn {
+  min-width: 10rem;
+  padding: 1rem 2rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--led);
+  color: var(--fondo);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+.secundario-btn {
+  padding: 1rem 1.75rem;
+  border: 2px solid var(--linea);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 1.25rem;
+}
+.secundario-btn:hover:not(:disabled) { border-color: var(--tenue); }
+
+.aviso { min-height: 1.5em; margin: 1rem 0 0; color: var(--tenue); }
+
+.modo-local {
+  max-width: 34rem;
+  margin: 0 0 2rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--led);
+  background: var(--superficie);
+  color: var(--tenue);
+  text-align: left;
+  font-size: 0.9375rem;
+}
+
+/* ---------- Pie: gente y control ---------- */
+
+.pie {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem clamp(1rem, 4vw, 2.5rem) 1.5rem;
+  border-top: 1px solid var(--linea);
+}
+
+.gente {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gente li {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--superficie);
+}
+.gente li.host { box-shadow: inset 0 0 0 2px var(--led); }
+.gente li.host::after { content: " · host"; color: var(--tenue); }
+
+.pie-acciones { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; }
+
+.interruptor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.9rem 0.4rem 0.6rem;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  background: transparent;
+}
+.interruptor .punto {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--led-apagado);
+}
+.interruptor[aria-pressed="true"] .punto { background: var(--led); }
+
+.atajos { margin: 0; color: var(--tenue); font-size: 0.875rem; }
+
+@media (hover: none) { .atajos { display: none; } }
+
+/* ---------- Diálogo de entrada ---------- */
+
+dialog {
+  width: min(24rem, calc(100% - 2rem));
+  padding: 1.75rem;
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--fondo);
+  color: var(--tinta);
+}
+dialog::backdrop { background: rgb(10 12 25 / 0.6); }
+
+#entrada { display: grid; gap: 1rem; }
+#entrada label { font-size: 1.25rem; font-weight: 600; line-height: 1.3; }
+#entrada input {
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--linea);
+  border-radius: 0.75rem;
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1.125rem;
+}
+#entrada input:focus { border-color: var(--led); outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reloj { transition: none; }
+}
