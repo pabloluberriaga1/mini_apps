@@ -2,6 +2,7 @@
 // Cucú · capa de conexión con Firebase
 //
 // La app (index.html) habla con tres "servicios": db, room y user.
+// db.now() da la hora del servidor: todo lo que se compara entre dispositivos (reloj, chat) la usa.
 // Este archivo los implementa con Firebase:
 //   db   → Cloud Firestore (salas, chat, estadísticas)
 //   room → Realtime Database (quién está conectado, reacciones y avisos)
@@ -10,14 +11,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
-  getFirestore, doc as fsDoc, collection as fsCol, getDoc, getDocs, setDoc, deleteDoc, addDoc,
-  onSnapshot, query as fsQuery, orderBy as fsOrderBy, limit as fsLimit
+  getFirestore, doc as fsDoc, collection as fsCol, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc,
+  connectFirestoreEmulator, onSnapshot, query as fsQuery, where as fsWhere, orderBy as fsOrderBy, limit as fsLimit, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import {
-  getDatabase, ref, set as rtSet, remove as rtRemove, push as rtPush, onValue, onChildAdded,
-  onDisconnect, serverTimestamp, query as rtQuery, orderByChild, startAt
+  getDatabase, ref, get as rtGet, set as rtSet, remove as rtRemove, push as rtPush, onValue, onChildAdded,
+  connectDatabaseEmulator, onDisconnect, serverTimestamp, query as rtQuery, orderByChild, startAt
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
 // ---------- errores con los códigos que entiende la app ----------
@@ -33,6 +34,13 @@ function wrapErr(e) {
 const W = p => p.catch(e => { throw wrapErr(e); });
 const clean = o => JSON.parse(JSON.stringify(o === undefined ? null : o)); // Firebase no acepta undefined
 
+// ---------- emuladores ----------
+// En localhost, abrir con ?emu usa los emuladores (npm run emuladores) en vez del proyecto real.
+const EMU = (() => {
+  if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return false;
+  try { if (new URLSearchParams(location.search).has("emu")) sessionStorage.setItem("cucu.emu", "1"); return sessionStorage.getItem("cucu.emu") === "1"; } catch (e) { return false; }
+})();
+
 // ---------- arranque: config + sesión anónima ----------
 let ready = null;
 function init() {
@@ -43,6 +51,7 @@ function init() {
     if (!cfg.databaseURL) throw Object.assign(new Error("Falta databaseURL en firebase-config.js (creá la Realtime Database y volvé a copiar la configuración)"), { code: "config" });
     const app = initializeApp(cfg);
     const auth = getAuth(app);
+    if (EMU) connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
     const user = await new Promise((resolve, reject) => {
       let off = null;
       off = onAuthStateChanged(auth, u => { if (u) { if (off) off(); resolve(u); } }, reject);
@@ -50,10 +59,12 @@ function init() {
     });
     const fs = getFirestore(app);
     const rt = getDatabase(app);
+    if (EMU) { connectFirestoreEmulator(fs, "127.0.0.1", 8097); connectDatabaseEmulator(rt, "127.0.0.1", 9010); }
+    // El desfase con la hora del servidor se sigue escuchando: si el reloj del dispositivo cambia, se corrige solo.
     let offset = 0;
     await new Promise(res => {
       const t = setTimeout(res, 3000);
-      const off = onValue(ref(rt, ".info/serverTimeOffset"), s => { offset = s.val() || 0; clearTimeout(t); off(); res(); });
+      onValue(ref(rt, ".info/serverTimeOffset"), s => { offset = s.val() || 0; clearTimeout(t); res(); });
     });
     return { app, auth, uid: user.uid, fs, rt, now: () => Date.now() + offset };
   })();
@@ -70,12 +81,14 @@ function makeDb(c) {
   class DocRef {
     constructor(path) { this.path = path; this.r = fsDoc(c.fs, path); this.id = this.r.id; }
     get() { return W(getDoc(this.r).then(docSnap)); }
-    set(data) { return W(setDoc(this.r, clean(data))); }
+    set(data, opts) { return W(setDoc(this.r, clean(data), opts || {})); }
+    update(data) { return W(updateDoc(this.r, data)); } // sin clean: acepta arrayUnion/arrayRemove
     delete() { return W(deleteDoc(this.r)); }
     onSnapshot(next, error) { return onSnapshot(this.r, s => next(docSnap(s)), e => error && error(wrapErr(e))); }
   }
   class Query {
     constructor(path, cons = []) { this.path = path; this.cons = cons; }
+    where(field, op, val) { return new Query(this.path, this.cons.concat([fsWhere(field, op, val)])); }
     orderBy(field, dir = "asc") { return new Query(this.path, this.cons.concat([fsOrderBy(field, dir)])); }
     limit(n) { return new Query(this.path, this.cons.concat([fsLimit(n)])); }
     doc(id) { return new DocRef(this.path + "/" + id); }
@@ -84,7 +97,7 @@ function makeDb(c) {
     add(data) { return W(addDoc(fsCol(c.fs, this.path), clean(data)).then(r => new DocRef(r.path))); }
     onSnapshot(next, error) { return onSnapshot(this.q(), s => next(qSnap(s)), e => error && error(wrapErr(e))); }
   }
-  return { doc: p => new DocRef(p), collection: p => new Query(p) };
+  return { doc: p => new DocRef(p), collection: p => new Query(p), arrayUnion, arrayRemove, now: c.now };
 }
 
 // ---------- room (Realtime Database) ----------
@@ -148,7 +161,12 @@ function makeRoom(c) {
       }
     };
   }
-  return { join };
+  // Cuántas conexiones hay ahora en una sala, sin entrar (para limpiar salas vacías).
+  async function peek(name) {
+    const s = await W(rtGet(ref(c.rt, `presence/${key(name)}`)));
+    return s.exists() ? Object.keys(s.val() || {}).length : 0;
+  }
+  return { join, peek };
 }
 
 // ---------- user (sesión anónima) ----------

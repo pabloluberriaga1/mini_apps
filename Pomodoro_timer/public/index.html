@@ -219,6 +219,86 @@ input[type=range]{width:100%;accent-color:var(--phase)}
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--surface);padding:11px 18px;border-radius:14px;font-size:15px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:20;max-width:90vw;text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
+/* lobby: secciones */
+.lnav{display:flex;gap:4px;flex-wrap:wrap;margin:-6px 0 22px;padding:4px;border-radius:14px;background:var(--soft);border:1px solid var(--line);width:fit-content;max-width:100%}
+.lnav a{text-decoration:none;color:var(--muted);font-weight:700;font-size:14px;padding:7px 13px;border-radius:10px;position:relative}
+.lnav a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.lnav .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bird);margin-left:6px;vertical-align:2px;box-shadow:0 0 0 1.5px var(--ink)}
+.vhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.vhead h2{font-size:clamp(26px,4vw,34px);font-weight:800}
+.vlead{max-width:62ch;margin:8px 0 0}
+.lockrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:15px}
+.lockrow small{display:block;color:var(--muted);font-size:13px}
+.foot{color:var(--muted);font-size:12px;margin-top:28px;text-align:center}
+.foot code{font-size:12px;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 5px}
+.linkbtn{border:0;background:none;padding:0;color:var(--phase);text-decoration:underline;font-size:inherit}
+textarea.t{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);font:inherit;color:inherit;resize:vertical}
+textarea.t:focus,select.t:focus{border-color:var(--phase);outline:none;background:var(--surface)}
+select.t{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft)}
+
+/* ideas y bugs */
+.tk-form{margin-top:16px;max-width:760px}
+.tickets{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px;max-width:860px}
+.ticket{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.vote{display:flex;flex-direction:column;align-items:center;gap:0;min-width:48px;padding:6px 4px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);font-size:12px;color:var(--muted);align-self:start}
+.vote b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:18px;color:var(--ink)}
+.vote[aria-pressed="true"]{border-color:var(--phase);background:color-mix(in srgb,var(--phase) 14%,var(--surface));color:var(--phase)}
+.tk-head{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.tk-tipo,.tk-estado{font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tk-estado.e-revision,.tk-estado.e-planificado,.tk-estado.e-en_curso{border-color:var(--focus);color:var(--focus)}
+.tk-estado.e-hecho{border-color:var(--break);color:var(--break)}
+.tk-estado.e-descartado{border-color:var(--danger);color:var(--danger)}
+.ticket h4{font-size:17px;margin-bottom:2px}
+.tk-desc{margin:0 0 6px;font-size:15px;overflow-wrap:anywhere}
+.tk-resp{margin:0 0 6px;padding:8px 11px;border-left:3px solid var(--phase);background:var(--soft);border-radius:0 10px 10px 0;font-size:14px}
+.tk-meta{margin:0;font-size:13px;color:var(--muted)}
+.tk-mod{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+.tk-mod summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--phase)}
+.tk-ctx{font-size:12px;overflow-wrap:anywhere}
+
+/* novedades */
+.news{max-width:760px;margin-top:16px}
+.news+.news{margin-top:12px}
+.news .nd{font-size:13px;color:var(--muted);margin:0 0 2px}
+.news ul{margin:10px 0 0;padding-left:20px}
+.news li{margin-bottom:6px}
+
+/* panel del creador */
+.adm-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:16px 0;max-width:860px}
+.adm-rooms{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-width:860px}
+.adm-rooms li{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 14px}
+.adm-rooms .ai{flex:1;min-width:180px}
+.adm-rooms .ai b{display:block}
+.adm-rooms .ai span{font-size:13px;color:var(--muted)}
+
+/* chat: días, respuestas, silencio */
+.daysep{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;font-weight:700;margin:4px 0;align-self:stretch}
+.daysep::before,.daysep::after{content:"";flex:1;height:1px;background:var(--line)}
+.msg{position:relative}
+.msg .mq{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--phase);background:color-mix(in srgb,var(--phase) 8%,var(--soft));border-radius:8px;padding:3px 8px;margin:2px 0 3px;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
+.msg.mine .mq{margin-left:auto}
+.msg .mq b{color:var(--ink)}
+.msg .macts{display:inline-flex;gap:2px;opacity:0;transition:opacity .15s;vertical-align:middle}
+.msg:hover .macts,.msg:focus-within .macts{opacity:1}
+@media (hover:none){.msg .macts{opacity:.7}}
+.msg .macts button{border:0;background:transparent;border-radius:8px;padding:0 5px;font-size:13px;color:var(--muted);line-height:1.6}
+.msg .macts button:hover{background:var(--soft);color:var(--ink)}
+.msg.flash .mb{animation:flashmsg 1.4s ease-out}
+@keyframes flashmsg{0%{box-shadow:0 0 0 3px var(--bird)}100%{box-shadow:0 0 0 0 transparent}}
+.replybar{display:flex;align-items:center;gap:8px;margin-top:10px;padding:6px 6px 6px 10px;border-left:3px solid var(--phase);background:var(--soft);border-radius:0 10px 10px 0;font-size:13px;color:var(--muted)}
+.replybar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.replybar button{border:0;background:transparent;font-size:15px;width:28px;height:28px;border-radius:50%}
+.chatclosed{margin-top:10px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--focus) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--focus) 30%,var(--line));font-size:14px}
+.chatclosed b{font-variant-numeric:tabular-nums}
+.secret{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}
+.secret code{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:17px;letter-spacing:.15em}
+
+/* oferta de anfitrión */
+dialog.dlg{border:1px solid var(--line);border-radius:22px;padding:22px;max-width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--ink);box-shadow:0 20px 60px -20px rgba(0,0,0,.4)}
+dialog.dlg::backdrop{background:rgba(10,14,20,.45)}
+dialog.dlg h3{font-size:21px;margin-bottom:6px}
+dialog.dlg p{margin:0 0 16px;color:var(--muted)}
+
 /* zen */
 .zenexit{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:10;display:none}
 body.zen .zenexit{display:block}
@@ -267,6 +347,21 @@ body.zen .house{width:min(500px,62vh,90vw)}
 
   <!-- LOBBY -->
   <main id="lobby">
+    <nav class="lnav" aria-label="Secciones">
+      <a href="#" data-v="salas">Salas</a>
+      <a href="#ideas" data-v="ideas">Ideas y bugs</a>
+      <a href="#novedades" data-v="novedades">Novedades<span class="dot hidden" id="novDot"><span class="hidden">(hay novedades)</span></span></a>
+      <a href="#creador" data-v="creador" class="hidden" id="navCreador">Panel del creador</a>
+    </nav>
+    <section id="v-ideas" class="hidden"></section>
+    <section id="v-novedades" class="hidden"></section>
+    <section id="v-creador" class="hidden">
+      <div class="vhead"><h2>Panel del creador</h2><div class="row"><button class="btn small ghost" id="admRefresh">Actualizar</button><button class="btn small danger" id="admClean">Borrar salas inactivas</button></div></div>
+      <p class="muted vlead">Todas las salas, también las privadas. Podés entrar a cualquiera sin clave, ver su clave y borrarlas. Los tickets se moderan desde Ideas y bugs.</p>
+      <div class="adm-sum" id="admSum"></div>
+      <ul class="adm-rooms" id="admRooms"></ul>
+    </section>
+    <div id="v-salas">
     <section class="hero">
       <div>
         <h2>Estudiá al mismo ritmo que tu grupo.</h2>
@@ -284,6 +379,12 @@ body.zen .house{width:min(500px,62vh,90vw)}
         <label class="f">Ritmo</label>
         <div class="chips" id="newPresets"></div>
         <div class="steppers" id="newSteps" style="margin-top:10px"></div>
+        <label class="f">Quién puede entrar</label>
+        <div class="chips" id="newVis" role="group" aria-label="Visibilidad de la sala">
+          <button type="button" class="chip" data-vis="pub" aria-pressed="true">🌐 Pública</button>
+          <button type="button" class="chip" data-vis="priv" aria-pressed="false">🔒 Privada</button>
+        </div>
+        <p class="muted" id="newVisNote" style="font-size:13px;margin:6px 0 0">Aparece en la lista de salas públicas y entra cualquiera con el código.</p>
         <div style="margin-top:18px"><button class="btn" id="createBtn">Crear sala</button></div>
         <div class="err" id="createErr" style="text-align:left"></div>
       </section>
@@ -293,13 +394,25 @@ body.zen .house{width:min(500px,62vh,90vw)}
           <input class="t" id="joinCode" maxlength="8" placeholder="•••••" autocomplete="off" aria-label="Código de sala">
           <button class="btn" id="joinBtn">Entrar</button>
         </div>
+        <div class="hidden" id="claveBox">
+          <label class="f" for="joinClave">🔒 Esta sala es privada. Pedile la clave a quien la creó.</label>
+          <div class="joinrow" style="margin-top:0">
+            <input class="t" id="joinClave" maxlength="20" placeholder="Clave" autocomplete="off" aria-label="Clave de la sala">
+            <button class="btn" id="claveBtn">Entrar</button>
+          </div>
+        </div>
         <div class="err" id="joinErr" style="text-align:left"></div>
-        <p class="muted hidden" id="ownerHint" data-unused="1" style="font-size:14px;margin:0 0 10px">Si alguien entra y no puede tocar nada, invitalo por email como Editor desde Compartir. Con el acceso por link activado, la gente de afuera entra solo a mirar.</p>
-        <h3 style="font-size:17px;margin-top:6px">Salas recientes</h3>
+        <div class="hidden" id="mineBox">
+          <h3 style="font-size:17px;margin-top:6px">Tus salas</h3>
+          <ul class="rooms" id="mineList"></ul>
+        </div>
+        <h3 style="font-size:17px;margin-top:16px">Salas públicas</h3>
         <ul class="rooms" id="roomList"><li class="empty">Cargando…</li></ul>
         <p class="muted hidden" id="soloNote" style="font-size:14px;margin-top:14px">Esta vista no puede guardar datos compartidos: las salas, el chat y las estadísticas funcionan solo en este dispositivo.</p>
       </section>
     </div>
+    </div>
+    <p class="foot hidden" id="foot">ID de este navegador: <code id="myIdTxt"></code> <button class="linkbtn" id="copyId">copiar</button></p>
   </main>
 
   <!-- ROOM -->
@@ -367,6 +480,8 @@ body.zen .house{width:min(500px,62vh,90vw)}
 
           <div class="tabpanel" id="tab-chat" role="tabpanel">
             <div class="chatlist" id="chatList" aria-live="polite"></div>
+            <div class="chatclosed hidden" id="chatClosed" role="status">🤫 Mientras estudian, el chat está en silencio. Se abre en la pausa, en <b id="chatOpenIn">--:--</b>.</div>
+            <div class="replybar hidden" id="replyBar"><span id="replyTxt"></span><button type="button" id="replyX" aria-label="Cancelar la respuesta">✕</button></div>
             <div class="chatform">
               <input class="t" id="chatInput" maxlength="400" placeholder="Escribí un mensaje o pegá un link" autocomplete="off">
               <button class="btn small" id="chatSend">Enviar</button>
@@ -418,6 +533,13 @@ body.zen .house{width:min(500px,62vh,90vw)}
           </div>
 
           <div class="tabpanel hidden" id="tab-room" role="tabpanel">
+            <h4>Quién puede entrar</h4>
+            <div class="chips" id="roomVis" role="group" aria-label="Visibilidad de la sala">
+              <button type="button" class="chip" data-vis="pub">🌐 Pública</button>
+              <button type="button" class="chip" data-vis="priv">🔒 Privada</button>
+            </div>
+            <p class="muted" id="roomVisNote" style="font-size:13px;margin:6px 0 0"></p>
+            <div class="secret hidden" id="privBox" style="margin-top:8px">🔒 Clave: <code id="claveTxt">······</code><button class="btn small ghost" id="copyClave" style="margin-left:auto">Copiar link con clave</button></div>
             <h4>Meta de la sala</h4>
             <div class="goalrow">
               <input class="t" id="goalInput" maxlength="80" placeholder="Ej: Terminar la guía 3">
@@ -433,7 +555,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
             <div style="margin-top:10px"><button class="btn small" id="saveDur">Guardar tiempos</button></div>
             <h4>Permisos</h4>
             <label class="toggle"><span>Solo el anfitrión y los moderadores manejan el reloj<small id="hostLine"></small></span><input type="checkbox" class="sw" id="lockSw"></label>
-            <p class="muted" style="font-size:13px;margin:4px 0 0">El anfitrión puede nombrar moderadores desde la pestaña Gente.</p>
+            <p class="muted" style="font-size:13px;margin:4px 0 0">El anfitrión puede nombrar moderadores y pasarle su lugar a otra persona desde la pestaña Gente. Si el anfitrión se va, la sala le ofrece el lugar a quien esté hace más tiempo.</p>
             <div style="margin-top:16px"><button class="btn small danger" id="delRoom">Borrar sala</button></div>
           </div>
         </section>
@@ -444,6 +566,11 @@ body.zen .house{width:min(500px,62vh,90vw)}
 </div>
 <button class="btn ghost zenexit" id="zenExit">Salir del modo zen</button>
 <div class="toast" id="toast" role="status"></div>
+<dialog class="dlg" id="hostDlg" aria-labelledby="hostDlgT">
+  <h3 id="hostDlgT">🐦 La sala se quedó sin anfitrión</h3>
+  <p id="hostDlgP">¿Querés ser el anfitrión? Decide quién maneja el reloj y puede nombrar moderadores.</p>
+  <div class="row"><button class="btn" id="hostYes">Sí, quiero</button><button class="btn ghost" id="hostNo">No, gracias <span id="hostLeft"></span></button></div>
+</dialog>
 
 <template id="houseTpl">
 <svg viewBox="0 0 300 420" aria-hidden="true">
@@ -476,6 +603,8 @@ body.zen .house{width:min(500px,62vh,90vw)}
 </template>
 <script type="module">
 import "./firebase-backend.js";
+import { NOVEDADES } from "./novedades.js";
+import { crearIdeas } from "./ideas.js";
 (() => {
   // ================= helpers & state =================
   const $ = id => document.getElementById(id);
@@ -497,18 +626,23 @@ import "./firebase-backend.js";
   const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
   const toast = msg => { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2600); };
   const durOf = (d, ph) => (ph === "focus" ? d.focusMin : ph === "break" ? d.breakMin : d.longMin) * 60000;
-  const remainingMs = d => !d ? 0 : d.running ? Math.max(0, d.endsAt - Date.now()) : d.remaining;
+  // Hora del servidor: así el reloj y el chat coinciden aunque algún dispositivo tenga la hora corrida.
+  const now = () => db && db.now ? db.now() : Date.now();
+  const remainingMs = d => !d ? 0 : d.running ? Math.max(0, d.endsAt - now()) : d.remaining;
+  const newClave = () => { const a = "abcdefghjkmnpqrstuvwxyz23456789"; let s = ""; for (let i = 0; i < 6; i++) s += a[Math.floor(Math.random() * a.length)]; return s; };
+  const HOST_BEAT = 40000, HOST_STALE = 120000, HOST_GRACE = 20000, OFFER_MS = 30000, INACTIVA = 7 * 864e5;
   const newCode = () => { const a = "abcdefghjkmnpqrstuvwxyz23456789"; let s = ""; for (let i = 0; i < 5; i++) s += a[Math.floor(Math.random() * a.length)]; return s; };
   const doneToday = d => d.day === today() ? (d.doneToday || 0) : 0;
 
-  let db = null, room = null, user = null, myId = null, iAmOwner = false;
-  let current = null;                 // { code, data }
+  let db = null, room = null, user = null, myId = null, iAmAdmin = false;
+  let current = null;                 // { code, data, clave }
   let subs = [], named = null, myPeer = null;
   let localMode = false, writing = false, readOnly = false;
   let listDocs = [], peers = [], chatDocs = [], statsDocs = [];
   let myStatus = STATUS[store.get("cucu.status")] ? store.get("cucu.status") : "focus";
   let focusAcc = 0, lastTick = Date.now(), lastFocusDur = 0, myStatsCache = null;
   let activeTab = "chat", chatSeen = 0;
+  let nameBook = {}, replyTo = null;  // nameBook: último nombre conocido de cada uid en la sala
   const prefs = Object.assign({ snd: "cucu", vol: 0.6, ambVol: 0.4, notify: false }, (() => { try { return JSON.parse(store.get("cucu.prefs") || "{}"); } catch (e) { return {}; } })());
   const savePrefs = () => store.set("cucu.prefs", JSON.stringify(prefs));
 
@@ -516,7 +650,7 @@ import "./firebase-backend.js";
     d = Object.assign({}, d);
     const def = { name: "Sala de estudio", focusMin: 25, breakMin: 5, longMin: 15, phase: "focus", round: 0, running: false, endsAt: 0,
       hostId: null, mods: [], lock: false, autoBreak: true, autoFocus: false, goal: "", goalN: 8, music: "", day: today(),
-      doneToday: 0, log: [], why: "", phaseStart: 0, pausedAt: 0, updatedAt: 0 };
+      doneToday: 0, log: [], why: "", phaseStart: 0, pausedAt: 0, updatedAt: 0, privada: false, hostSeen: 0 };
     for (const k in def) if (d[k] === undefined || d[k] === null) d[k] = def[k];
     if (!PH[d.phase]) d.phase = "focus";
     if (!Array.isArray(d.mods)) d.mods = [];
@@ -529,7 +663,7 @@ import "./firebase-backend.js";
   // ================= roles =================
   const isHost = () => !!(current && myId && current.data.hostId === myId);
   const isMod = () => !!(current && myId && current.data.mods.includes(myId));
-  const canAdmin = () => !!current && !readOnly && (!current.data.hostId || isHost() || iAmOwner || localMode);
+  const canAdmin = () => !!current && !readOnly && (!current.data.hostId || isHost() || iAmAdmin || localMode);
   const canControl = () => !!current && !readOnly && (!current.data.lock || canAdmin() || isMod());
   function showBanner(title, text) { $("bannerTitle").textContent = title; $("bannerText").textContent = text; $("accessBanner").classList.remove("hidden"); }
   function setReadOnly() {
@@ -728,7 +862,7 @@ import "./firebase-backend.js";
   }
   async function writeRoom(patch) {
     if (!current) return;
-    const full = norm(Object.assign({}, current.data, patch, { updatedAt: Date.now() }));
+    const full = norm(Object.assign({}, current.data, patch, { updatedAt: now() }));
     setData(full, "local");
     if (localMode) { store.set("cucu.local." + current.code, JSON.stringify(full)); return; }
     if (readOnly) return;
@@ -736,7 +870,8 @@ import "./firebase-backend.js";
     writing = true; const code = current.code;
     try {
       let body = full;
-      while (body) { writeRoom.pending = null; await db.doc("rooms/" + code).set(body); body = writeRoom.pending; }
+      // hostId y hostSeen no viajan: se cambian aparte (hostUpdate), así un cambio del reloj no pisa al anfitrión
+      while (body) { writeRoom.pending = null; const { hostId, hostSeen, ...rest } = body; await db.doc("rooms/" + code).set(rest, { merge: true }); body = writeRoom.pending; }
       $("roomErr").textContent = "";
     } catch (e) {
       if (e && (e.code === "permission_denied" || e.code === "invalid_argument")) {
@@ -833,16 +968,17 @@ import "./firebase-backend.js";
     $("goalTxt").textContent = "🎯 " + (d.goal || "Meta de hoy");
     $("goalNum").textContent = `${n}/${d.goalN}`;
     $("goalBar").style.width = Math.min(100, n / Math.max(1, d.goalN) * 100) + "%";
-    $("roomMeta").textContent = `${d.focusMin} min de estudio, ${d.breakMin} de pausa, ${d.longMin} de pausa larga cada 4`;
+    $("roomMeta").textContent = (d.privada ? "🔒 Privada · " : "") + `${d.focusMin} min de estudio, ${d.breakMin} de pausa, ${d.longMin} de pausa larga cada 4`;
     $("lockBadge").classList.toggle("hidden", !d.lock);
     const ctl = canControl();
     ["playBtn", "skipBtn", "resetBtn"].forEach(id => $(id).disabled = !ctl);
     document.querySelectorAll(".phasepick button,.bub").forEach(b => b.disabled = !ctl);
     let note = "";
     if (!ctl) note = "Solo el anfitrión y los moderadores manejan el reloj";
-    else if (!d.running && d.pausedAt && rem < total) note = `En pausa hace ${Math.max(1, Math.round((Date.now() - d.pausedAt) / 60000))} min`;
+    else if (!d.running && d.pausedAt && rem < total) note = `En pausa hace ${Math.max(1, Math.round((now() - d.pausedAt) / 60000))} min`;
     $("ctrlNote").textContent = note;
     renderBubbles(d);
+    updateChatLock();
     if (!flashing) document.title = `${fmt(rem)} ${PH[d.phase]} · Cucú`;
   }
   let bubKey = "";
@@ -856,22 +992,22 @@ import "./firebase-backend.js";
       b.setAttribute("aria-label", b.title); b.disabled = !canControl(); b.onclick = () => startFor(m); box.appendChild(b); });
     const t = document.createElement("button"); t.className = "bub wide"; t.disabled = !canControl();
     t.textContent = isFocus ? "☕ Tomar un descanso" : "📚 Volver a estudiar";
-    t.onclick = () => { if (!canControl()) return denied(); const ph = isFocus ? "break" : "focus", dur = durOf(current.data, ph), now = Date.now();
-      writeRoom({ phase: ph, dur, remaining: dur, running: true, endsAt: now + dur, phaseStart: now, pausedAt: 0, why: "pick" }); };
+    t.onclick = () => { if (!canControl()) return denied(); const ph = isFocus ? "break" : "focus", dur = durOf(current.data, ph), t0 = now();
+      writeRoom({ phase: ph, dur, remaining: dur, running: true, endsAt: t0 + dur, phaseStart: t0, pausedAt: 0, why: "pick" }); };
     box.appendChild(t);
   }
 
   // ================= tick =================
   setInterval(() => {
-    const now = Date.now(), dt = Math.min(70000, now - lastTick); lastTick = now;
+    const dt = Math.min(70000, Date.now() - lastTick); lastTick = Date.now();
     if (!current) { heroTick(); renderListProgress(); return; }
-    const d = current.data;
+    const d = current.data, t = now();
     if (d.phase === "focus") { lastFocusDur = d.dur; if (d.running && myStatus === "focus") focusAcc += dt; }
-    if (d.running && now >= d.endsAt) {
+    if (d.running && t >= d.endsAt) {
       const before = d.endsAt;
       let s = Object.assign({}, d);
-      do { s = Object.assign(s, advance(s, s.endsAt, true)); } while (s.running && s.endsAt <= now);
-      s.updatedAt = now;
+      do { s = Object.assign(s, advance(s, s.endsAt, true)); } while (s.running && s.endsAt <= t);
+      s.updatedAt = t;
       const target = s.endsAt;
       setData(s, "local");
       if (localMode) store.set("cucu.local." + current.code, JSON.stringify(current.data));
@@ -883,25 +1019,25 @@ import "./firebase-backend.js";
         }).catch(() => {});
       }, Math.random() * 800);
     } else render();
-    if (activeTab === "hist" && now % 3000 < 260) renderHistory();
+    if (activeTab === "hist" && lastTick % 3000 < 260) renderHistory();
   }, 250);
 
   // ================= controls =================
   function togglePlay() {
     if (!canControl()) return denied();
-    const d = current.data, rem = remainingMs(d), now = Date.now();
-    if (d.running) writeRoom({ running: false, remaining: rem, pausedAt: now, why: "pause" });
-    else { const r = rem > 0 ? rem : d.dur; writeRoom({ running: true, remaining: r, endsAt: now + r, phaseStart: d.phaseStart && r < d.dur ? d.phaseStart : now, pausedAt: 0, why: "start" }); }
+    const d = current.data, rem = remainingMs(d), t = now();
+    if (d.running) writeRoom({ running: false, remaining: rem, pausedAt: t, why: "pause" });
+    else { const r = rem > 0 ? rem : d.dur; writeRoom({ running: true, remaining: r, endsAt: t + r, phaseStart: d.phaseStart && r < d.dur ? d.phaseStart : t, pausedAt: 0, why: "start" }); }
   }
-  function skip() { if (!canControl()) return denied(); writeRoom(advance(current.data, Date.now(), false)); }
+  function skip() { if (!canControl()) return denied(); writeRoom(advance(current.data, now(), false)); }
   function reset() { if (!canControl()) return denied(); const dur = durOf(current.data, "focus");
-    writeRoom({ phase: "focus", round: 0, dur, remaining: dur, running: false, endsAt: 0, phaseStart: 0, pausedAt: Date.now(), why: "reset" }); }
-  function startFor(m) { if (!canControl()) return denied(); const now = Date.now(), dur = m * 60000;
-    writeRoom({ dur, remaining: dur, running: true, endsAt: now + dur, phaseStart: now, pausedAt: 0, why: "start" }); }
+    writeRoom({ phase: "focus", round: 0, dur, remaining: dur, running: false, endsAt: 0, phaseStart: 0, pausedAt: now(), why: "reset" }); }
+  function startFor(m) { if (!canControl()) return denied(); const t = now(), dur = m * 60000;
+    writeRoom({ dur, remaining: dur, running: true, endsAt: t + dur, phaseStart: t, pausedAt: 0, why: "start" }); }
   $("playBtn").onclick = togglePlay; $("skipBtn").onclick = skip; $("resetBtn").onclick = reset;
   document.querySelectorAll(".phasepick button").forEach(b => b.onclick = () => {
     if (!canControl()) return denied(); const ph = b.dataset.ph, dur = durOf(current.data, ph);
-    writeRoom({ phase: ph, dur, remaining: dur, running: false, endsAt: 0, phaseStart: 0, pausedAt: Date.now(), why: "pick" });
+    writeRoom({ phase: ph, dur, remaining: dur, running: false, endsAt: 0, phaseStart: 0, pausedAt: now(), why: "pick" });
   });
   document.addEventListener("keydown", e => {
     if (!current) return;
@@ -914,8 +1050,10 @@ import "./firebase-backend.js";
     else if (e.key === "r" || e.key === "R") reset();
     else if (e.key === "z" || e.key === "Z") setZen(!document.body.classList.contains("zen"));
   });
-  const roomLink = code => location.origin + location.pathname + "?sala=" + code;
-  $("copyBtn").onclick = async () => { const link = roomLink(current.code); try { await navigator.clipboard.writeText(link); toast("Link de la sala copiado"); } catch (e) { toast(link); } };
+  // El link de una sala privada lleva la clave, así quien lo recibe entra directo.
+  const roomLink = () => location.origin + location.pathname + "?sala=" + current.code + (current.data.privada && current.clave ? "&clave=" + encodeURIComponent(current.clave) : "");
+  async function copyLink() { const link = roomLink(); try { await navigator.clipboard.writeText(link); toast(current.data.privada ? "Link con clave copiado: pasalo solo a tu grupo" : "Link de la sala copiado"); } catch (e) { toast(link); } }
+  $("copyBtn").onclick = copyLink; $("copyClave").onclick = copyLink;
 
   // ================= zen mode =================
   let zenFs = false;
@@ -1002,7 +1140,12 @@ import "./firebase-backend.js";
   function pushPresence() { if (named) named.presence(myPresence()).catch(() => {}); }
   let presT; const presSoon = () => { clearTimeout(presT); presT = setTimeout(pushPresence, 300); schedulePeople(); };
   $("myTask").oninput = () => { store.set("cucu.task", $("myTask").value); presSoon(); };
-  $("myNick").oninput = () => { store.set("cucu.nick", $("myNick").value); presSoon(); };
+  let nickT;
+  $("myNick").oninput = () => {
+    store.set("cucu.nick", $("myNick").value); presSoon();
+    // El nombre queda guardado en las estadísticas de la sala: así los demás lo ven actualizado en el chat aunque te vayas
+    clearTimeout(nickT); nickT = setTimeout(() => { renderChat(); if (current && !localMode) saveStats(myStats()); }, 1200);
+  };
 
   // ================= people =================
   const profileCache = {};
@@ -1052,26 +1195,95 @@ import "./firebase-backend.js";
         b.onclick = () => writeRoom({ mods: isM ? d.mods.filter(x => x !== uid) : d.mods.concat([uid]) });
         acts.appendChild(b);
       }
+      if (!p.isMe && p.by && uid !== d.hostId && (isHost() || iAmAdmin) && !localMode) {
+        const b = document.createElement("button"); b.textContent = "👑"; b.title = "Pasarle el lugar de anfitrión";
+        b.setAttribute("aria-label", "Hacer anfitrión a " + nm.textContent);
+        b.onclick = () => { if (confirm(`¿Pasarle el lugar de anfitrión a ${nm.textContent}?`)) hostUpdate({ hostId: uid }, `${nm.textContent} es el nuevo anfitrión`); };
+        acts.appendChild(b);
+      }
       li.append(av, pb, acts); ul.appendChild(li);
     });
   }
 
   // ================= chat =================
+  // El nombre se busca en vivo (presencia, después estadísticas de la sala): si alguien se cambia
+  // el nombre, se actualiza también en los mensajes que ya mandó.
+  function nameOf(uid, fallback) {
+    if (uid && uid === myId) return $("myNick").value.trim() || fallback || "Vos";
+    const p = peers.find(x => x.by === uid && x.presence && typeof x.presence.nick === "string" && x.presence.nick);
+    return (p && p.presence.nick) || nameBook[uid] || (typeof fallback === "string" && fallback) || "Alguien";
+  }
+  let namesSig = "";
+  function namesChanged() {
+    const sig = peers.map(p => p.by + ":" + ((p.presence && p.presence.nick) || "")).sort().join("|") + "#" + JSON.stringify(nameBook);
+    if (sig === namesSig) return; namesSig = sig; renderChat();
+  }
+  function dayLabel(ts) {
+    const d = new Date(ts), t = new Date(now()), y = new Date(t); y.setDate(t.getDate() - 1);
+    if (d.toDateString() === t.toDateString()) return "Hoy";
+    if (d.toDateString() === y.toDateString()) return "Ayer";
+    return d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long", year: d.getFullYear() !== t.getFullYear() ? "numeric" : undefined });
+  }
+  const canDeleteMsg = m => !localMode && !readOnly && (m.uid === myId || isHost() || iAmAdmin);
   async function renderChat(scrollDown) {
     const box = $("chatList"), atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
-    box.innerHTML = "";
-    if (!chatDocs.length) { const e = document.createElement("div"); e.className = "empty"; e.textContent = localMode ? "El chat necesita una sala compartida." : "Todavía no hay mensajes. Saludá a la sala 👋"; box.appendChild(e); return; }
+    if (!chatDocs.length) { box.innerHTML = ""; const e = document.createElement("div"); e.className = "empty"; e.textContent = localMode ? "El chat necesita una sala compartida." : "Todavía no hay mensajes. Saludá a la sala 👋"; box.appendChild(e); return; }
     const ps = await profilesFor(chatDocs.map(m => m.uid));
+    box.innerHTML = "";
+    let lastDay = "";
     chatDocs.forEach(m => {
-      const mine = myId && m.uid === myId, div = document.createElement("div"); div.className = "msg" + (mine ? " mine" : "");
+      const day = new Date(m.ts).toDateString();
+      if (day !== lastDay) { lastDay = day; const sep = document.createElement("div"); sep.className = "daysep"; sep.textContent = dayLabel(m.ts); box.appendChild(sep); }
+      const mine = myId && m.uid === myId, div = document.createElement("div"); div.className = "msg" + (mine ? " mine" : ""); div.dataset.id = m.id;
       const mh = document.createElement("div"); mh.className = "mh";
-      const b = document.createElement("b"); b.textContent = (typeof m.nick === "string" && m.nick) || (ps[m.uid] && ps[m.uid].name) || "Alguien";
+      const b = document.createElement("b"); b.textContent = nameOf(m.uid, m.nick);
       if (ps[m.uid] && ps[m.uid].color && !mine) b.style.color = ps[m.uid].color;
-      mh.append(b, document.createTextNode(" " + hm(m.ts)));
+      const acts = document.createElement("span"); acts.className = "macts";
+      const rb = document.createElement("button"); rb.type = "button"; rb.textContent = "↩"; rb.title = "Responder"; rb.setAttribute("aria-label", "Responder a " + b.textContent);
+      rb.onclick = () => startReply(m); acts.appendChild(rb);
+      if (canDeleteMsg(m)) { const db_ = document.createElement("button"); db_.type = "button"; db_.textContent = "🗑"; db_.title = "Borrar mensaje"; db_.setAttribute("aria-label", "Borrar mensaje"); db_.onclick = () => deleteMsg(m); acts.appendChild(db_); }
+      if (mine) mh.append(acts, document.createTextNode(hm(m.ts) + " "), b);
+      else mh.append(b, document.createTextNode(" " + hm(m.ts)), acts);
+      div.appendChild(mh);
+      if (m.re && typeof m.re === "object") {
+        const qb = document.createElement("button"); qb.type = "button"; qb.className = "mq";
+        const qn = document.createElement("b"); qn.textContent = nameOf(m.re.uid, m.re.nick);
+        qb.append(qn, document.createTextNode(": " + String(m.re.text || "")));
+        qb.title = "Ir al mensaje original"; qb.onclick = () => jumpTo(m.re.id);
+        div.appendChild(qb);
+      }
       const mb = document.createElement("div"); mb.className = "mb"; linkify(mb, String(m.text || ""));
-      div.append(mh, mb); box.appendChild(div);
+      div.appendChild(mb); box.appendChild(div);
     });
     if (atBottom || scrollDown) box.scrollTop = box.scrollHeight;
+  }
+  function jumpTo(id) {
+    const el = $("chatList").querySelector(`[data-id="${CSS.escape(String(id))}"]`);
+    if (!el) return toast("Ese mensaje ya no está en el chat");
+    el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  }
+  function startReply(m) {
+    replyTo = { id: m.id, uid: m.uid, nick: nameOf(m.uid, m.nick).slice(0, 30), text: String(m.text || "").slice(0, 120) };
+    $("replyTxt").textContent = `Respondiendo a ${replyTo.nick}: ${replyTo.text}`;
+    $("replyBar").classList.remove("hidden");
+    if (!$("chatInput").disabled) $("chatInput").focus();
+  }
+  function cancelReply() { replyTo = null; $("replyBar").classList.add("hidden"); }
+  $("replyX").onclick = cancelReply;
+  async function deleteMsg(m) {
+    if (!confirm("¿Borrar este mensaje?")) return;
+    try { await db.doc(`rooms/${current.code}/chat/${m.id}`).delete(); } catch (e) { toast("No se pudo borrar el mensaje"); }
+  }
+  // Mientras corre un bloque de estudio no se chatea (las reglas también lo frenan)
+  const chatOpen = () => { const d = current && current.data; return !d || !(d.phase === "focus" && d.running && remainingMs(d) > 0); };
+  function updateChatLock() {
+    if (!current) return;
+    const closed = !chatOpen(), dis = closed || readOnly;
+    $("chatClosed").classList.toggle("hidden", !closed);
+    if (closed) $("chatOpenIn").textContent = fmt(remainingMs(current.data));
+    if ($("chatInput").disabled === dis) return;
+    $("chatInput").disabled = dis; $("chatSend").disabled = dis;
+    $("chatInput").placeholder = readOnly ? "Como espectador no podés escribir" : closed ? "El chat se abre en la pausa ☕" : "Escribí un mensaje o pegá un link";
   }
   function linkify(el, text) {
     const re = /https?:\/\/[^\s<>"]+/g; let last = 0, m;
@@ -1089,12 +1301,19 @@ import "./firebase-backend.js";
   async function sendChat() {
     const text = $("chatInput").value.trim().slice(0, 400); if (!text || !current) return;
     if (localMode) return toast("El chat necesita una sala compartida");
-    $("chatInput").value = "";
+    if (!chatOpen()) return toast("Mientras estudian, el chat está en silencio. Se abre en la pausa ☕");
+    const msg = { uid: myId, nick: $("myNick").value.trim().slice(0, 30), text, ts: now() };
+    if (replyTo) msg.re = replyTo;
+    $("chatInput").value = ""; cancelReply();
     try {
-      await db.collection(`rooms/${current.code}/chat`).add({ uid: myId, nick: $("myNick").value.trim().slice(0, 30), text, ts: Date.now() });
+      await db.collection(`rooms/${current.code}/chat`).add(msg);
       renderChat(true);
-      if (chatDocs.length > 60) { const old = chatDocs.slice(0, chatDocs.length - 60); for (const o of old) { try { await db.doc(`rooms/${current.code}/chat/${o.id}`).delete(); } catch (e) {} } }
-    } catch (e) { $("chatInput").value = text; toast(e && e.code === "permission_denied" ? "La base de datos rechazó el mensaje. Revisá las reglas de Firestore." : "No se pudo enviar el mensaje"); }
+      // Solo el anfitrión (o el creador) recorta el chat viejo: los demás no pueden borrar mensajes ajenos
+      if ((isHost() || iAmAdmin) && chatDocs.length > 70) { const old = chatDocs.slice(0, chatDocs.length - 70); for (const o of old) { try { await db.doc(`rooms/${current.code}/chat/${o.id}`).delete(); } catch (e) {} } }
+    } catch (e) {
+      $("chatInput").value = text; if (msg.re) startReply(msg.re);
+      toast(e && e.code === "permission_denied" ? (chatOpen() ? "La base de datos rechazó el mensaje. Revisá las reglas de Firestore." : "Mientras estudian, el chat está en silencio") : "No se pudo enviar el mensaje");
+    }
   }
   $("chatSend").onclick = sendChat;
   $("chatInput").onkeydown = e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); sendChat(); } };
@@ -1117,7 +1336,7 @@ import "./firebase-backend.js";
     if (!sorted.length) rk.innerHTML = '<li class="empty">Nadie sumó minutos todavía hoy.</li>';
     sorted.forEach((s, i) => {
       const li = document.createElement("li"), a = document.createElement("span"), b = document.createElement("span");
-      a.textContent = `${["🥇", "🥈", "🥉"][i] || (i + 1) + "."} ${(s.nick || (ps[s.uid] && ps[s.uid].name) || (s.uid === (myId || "yo") ? "Vos" : "Alguien"))}${s.uid === (myId || "yo") ? " (vos)" : ""}`;
+      a.textContent = `${["🥇", "🥈", "🥉"][i] || (i + 1) + "."} ${nameOf(s.uid, s.nick || (ps[s.uid] && ps[s.uid].name))}${s.uid === (myId || "yo") ? " (vos)" : ""}`;
       b.textContent = `${Math.floor(s.ms / 60000)} min · ${s.poms || 0} 🍅 · 🔥${s.best || 0}`;
       li.append(a, b); rk.appendChild(li);
     });
@@ -1170,10 +1389,43 @@ import "./firebase-backend.js";
     ["goalInput", "gMinus", "gPlus", "goalSave", "autoBreak", "autoFocus", "saveDur", "musicSave"].forEach(id => $(id).disabled = !ctl);
     roomSteps.el.querySelectorAll("button").forEach(b => b.disabled = !ctl);
     $("roomPresets").querySelectorAll("button").forEach(b => b.disabled = !ctl);
-    $("lockSw").disabled = !adm; $("delRoom").disabled = !adm;
-    const hp = d.hostId && profileCache[d.hostId];
-    $("hostLine").textContent = !d.hostId ? "Esta sala no tiene anfitrión: cualquiera puede manejarla." : isHost() ? "Vos sos el anfitrión de esta sala." : `Anfitrión: ${(hp && hp.name) || "quien creó la sala"}`;
+    $("lockSw").disabled = !adm; $("delRoom").disabled = !(isHost() || iAmAdmin || localMode);
+    $("hostLine").textContent = !d.hostId ? "Esta sala no tiene anfitrión: cualquiera puede manejarla." : isHost() ? "Vos sos el anfitrión de esta sala." : `Anfitrión: ${nameOf(d.hostId, "quien creó la sala")}`;
+    const canVis = !localMode && (isHost() || iAmAdmin);
+    $("roomVis").querySelectorAll("button").forEach(b => { b.setAttribute("aria-pressed", String((b.dataset.vis === "priv") === !!d.privada)); b.disabled = !canVis; });
+    $("roomVisNote").textContent = localMode ? "Sin conexión, la sala existe solo en este dispositivo."
+      : d.privada ? "No aparece en la lista. Para entrar hace falta el código y la clave." : "Aparece en la lista de salas públicas y entra cualquiera con el código.";
+    $("privBox").classList.toggle("hidden", !d.privada);
+    $("claveTxt").textContent = current.clave || "······";
+    if (d.privada && !current.clave) loadClave();
   }
+  async function loadClave() {
+    const code = current.code;
+    try { const s = await db.doc(`rooms/${code}/secreto/clave`).get(); if (current && current.code === code && s.exists) { current.clave = s.data().clave; $("claveTxt").textContent = current.clave; } } catch (e) {}
+  }
+  // Pasar la sala de pública a privada: se crea una clave nueva y se la manda a los que están,
+  // así nadie queda afuera. Después se marca como privada (las reglas exigen que la clave ya exista).
+  async function setPrivada(on) {
+    if (!current || localMode || !(isHost() || iAmAdmin) || !!current.data.privada === on) return;
+    const code = current.code;
+    try {
+      if (on) {
+        const clave = newClave(), sec = db.doc(`rooms/${code}/secreto/clave`);
+        await sec.delete().catch(() => {});
+        await sec.set({ clave });
+        await db.doc(`rooms/${code}/miembros/${myId}`).set({ clave, at: now() }).catch(() => {});
+        current.clave = clave;
+        if (named) await named.emit("clave", { c: clave }).catch(() => {});
+        await new Promise(r => setTimeout(r, 1500));
+      }
+      const patch = { privada: on, updatedAt: now() };
+      await db.doc("rooms/" + code).update(patch);
+      if (current && current.code === code) applyLocal(patch);
+      toast(on ? "La sala ahora es privada. Copiá el link con clave para invitar" : "La sala ahora es pública");
+      rememberRoom();
+    } catch (e) { toast("No se pudo cambiar quién puede entrar"); }
+  }
+  $("roomVis").querySelectorAll("button").forEach(b => b.onclick = () => setPrivada(b.dataset.vis === "priv"));
   $("goalSave").onclick = () => { writeRoom({ goal: $("goalInput").value.trim().slice(0, 80), goalN }); toast("Meta guardada"); };
   $("autoBreak").onchange = () => writeRoom({ autoBreak: $("autoBreak").checked });
   $("autoFocus").onchange = () => writeRoom({ autoFocus: $("autoFocus").checked });
@@ -1185,13 +1437,21 @@ import "./firebase-backend.js";
   };
   let delArmed = 0;
   $("delRoom").onclick = async () => {
-    if (!canAdmin()) return;
+    if (!(isHost() || iAmAdmin || localMode)) return;
     if (Date.now() - delArmed > 4000) { delArmed = Date.now(); $("delRoom").textContent = "Tocá de nuevo para borrar"; setTimeout(() => $("delRoom").textContent = "Borrar sala", 4000); return; }
     const code = current.code;
-    if (localMode) { store.set("cucu.local." + code, ""); leaveRoom(); return; }
-    try { for (const m of chatDocs) await db.doc(`rooms/${code}/chat/${m.id}`).delete().catch(() => {}); await db.doc("rooms/" + code).delete(); leaveRoom(); toast("Sala borrada"); }
+    if (localMode) { store.set("cucu.local." + code, ""); forgetRoom(code); leaveRoom(); return; }
+    try { await borrarSala(code); forgetRoom(code); leaveRoom(); toast("Sala borrada"); }
     catch (e) { toast("No se pudo borrar la sala"); }
   };
+  // Borra lo de adentro (lo que se pueda leer) y después la sala. Lo usan el anfitrión,
+  // el panel del creador y la limpieza de salas inactivas.
+  async function borrarSala(code) {
+    for (const sub of ["chat", "stats", "miembros", "secreto"]) {
+      try { const s = await db.collection(`rooms/${code}/${sub}`).get(); for (const x of s.docs) await db.doc(`rooms/${code}/${sub}/${x.id}`).delete().catch(() => {}); } catch (e) {}
+    }
+    await db.doc("rooms/" + code).delete();
+  }
 
   // ================= tabs =================
   document.querySelectorAll(".tablist button").forEach(b => b.onclick = () => selectTab(b.dataset.tab));
@@ -1207,7 +1467,7 @@ import "./firebase-backend.js";
   }
 
   // ================= enter / leave =================
-  async function enterRoom(code) {
+  async function enterRoom(code, clave) {
     code = String(code).toLowerCase().trim(); $("joinErr").textContent = "";
     if (!/^[a-z0-9]{3,8}$/.test(code)) { $("joinErr").textContent = "El código tiene letras y números, por ejemplo “k7m2p”."; return; }
     leaveRoom(true);
@@ -1219,27 +1479,44 @@ import "./firebase-backend.js";
       showRoom(); return;
     }
     const ref = db.doc("rooms/" + code); let snap;
-    try { snap = await ref.get(); } catch (e) { $("joinErr").textContent = "No se pudo buscar la sala. Probá de nuevo."; return; }
-    if (!snap.exists) { $("joinErr").textContent = `No hay ninguna sala con el código “${code}”.`; return; }
-    current = { code, data: norm(snap.data()) };
-    myStatsCache = null; chatDocs = []; statsDocs = []; peers = []; chatSeen = Date.now();
+    try { snap = await ref.get(); }
+    catch (e) {
+      if (!e || e.code !== "permission_denied") { $("joinErr").textContent = "No se pudo buscar la sala. Probá de nuevo."; return; }
+      // Sala privada: para entrar hay que anotarse con la clave (las reglas la comparan con la guardada)
+      if (!clave) { askClave(code); return; }
+      try { await db.doc(`rooms/${code}/miembros/${myId}`).set({ clave: String(clave).trim().slice(0, 20), at: now() }); snap = await ref.get(); }
+      catch (e2) { askClave(code); $("joinErr").textContent = "La clave no es correcta."; return; }
+    }
+    if (!snap.exists) { forgetRoom(code); $("joinErr").textContent = `No hay ninguna sala con el código “${code}”.`; return; }
+    hideClave();
+    current = { code, data: norm(snap.data()), clave: clave ? String(clave).trim() : null };
+    myStatsCache = null; chatDocs = []; statsDocs = []; peers = []; nameBook = {}; chatSeen = now();
     showRoom();
     subs.push(ref.onSnapshot(s => {
       if (!current || current.code !== code) return;
-      if (!s.exists) { toast("La sala fue borrada"); leaveRoom(); return; }
+      if (!s.exists) { toast("La sala fue borrada"); forgetRoom(code); leaveRoom(); return; }
       if (s.metadata.hasPendingWrites) return;
+      const wasPriv = !!current.data.privada;
       setData(s.data(), "remote");
+      if (!!current.data.privada !== wasPriv) { rememberRoom(); if (current.data.privada) loadClave(); toast(current.data.privada ? "🔒 La sala ahora es privada" : "🌐 La sala ahora es pública"); }
       if (activeTab === "room") renderRoomPanel();
       if (activeTab === "sound") renderMusic();
-      schedulePeople();
-    }, () => {}));
+      schedulePeople(); checkHost();
+    }, e => {
+      // La hicieron privada y no llegamos a anotarnos con la clave
+      if (!current || current.code !== code || !e || e.code !== "permission_denied") return;
+      leaveRoom(); askClave(code); toast("La sala ahora es privada: pedí la clave para volver a entrar");
+    }));
     subs.push(db.collection(`rooms/${code}/chat`).orderBy("ts", "desc").limit(80).onSnapshot(s => {
       chatDocs = s.docs.map(x => Object.assign({ id: x.id }, x.data())).filter(m => typeof m.ts === "number").reverse();
       if (activeTab === "chat") chatSeen = Math.max(chatSeen, ...chatDocs.map(m => m.ts), 0);
       renderChat(); updateBadge();
     }, () => {}));
     subs.push(db.collection(`rooms/${code}/stats`).onSnapshot(s => {
-      statsDocs = s.docs.map(x => x.data() || {}).filter(x => x.day === today() && typeof x.uid === "string");
+      const all = s.docs.map(x => x.data() || {}).filter(x => typeof x.uid === "string");
+      statsDocs = all.filter(x => x.day === today());
+      const nb = {}; all.forEach(x => { if (typeof x.nick === "string" && x.nick) nb[x.uid] = x.nick; });
+      if (JSON.stringify(nb) !== JSON.stringify(nameBook)) { nameBook = nb; namesChanged(); }
       const mine = statsDocs.find(x => x.uid === myId);
       if (mine && !statsWriting && (!myStatsCache || myStatsCache.day !== today() || (mine.ms || 0) >= (myStatsCache.ms || 0))) myStatsCache = mine;
       if (activeTab === "hist") renderHistory();
@@ -1249,9 +1526,21 @@ import "./firebase-backend.js";
       try {
         named = await room.join("s-" + code);
         if (!current || current.code !== code) { named.leave().catch(() => {}); named = null; return; }
-        subs.push(named.onPeers(ch => { peers = ch.peers.slice(); const me = peers.find(p => p.sameTab); if (me) myPeer = me.peer; schedulePeople(); }, () => {}));
+        subs.push(named.onPeers(ch => {
+          peers = ch.peers.slice(); peersReady = true;
+          const me = peers.find(p => p.sameTab); if (me) myPeer = me.peer;
+          schedulePeople(); namesChanged(); checkHost();
+        }, () => {}));
         subs.push(named.on("react", m => { const e = m.data && m.data.e; if (EMOJIS.includes(e)) floatEmoji(e, m.isMe ? "" : peerName(m.peer, m.by)); }, () => {}));
         subs.push(named.on("nudge", onNudge, () => {}));
+        subs.push(named.on("host", m => { if (m.data && m.data.no && m.by) { declined.add(m.by); checkHost(); } }, () => {}));
+        // El anfitrión hizo privada la sala: los que ya estaban se anotan con la clave nueva
+        subs.push(named.on("clave", m => {
+          const c = m.data && m.data.c;
+          if (m.sameTab || typeof c !== "string" || !current || current.code !== code) return;
+          current.clave = c;
+          db.doc(`rooms/${code}/miembros/${myId}`).set({ clave: c, at: now() }).catch(() => {});
+        }, () => {}));
         pushPresence();
       } catch (e) {}
     }
@@ -1264,6 +1553,8 @@ import "./firebase-backend.js";
     $("roomCode").textContent = current.code;
     roomSteps.refresh({ f: d.focusMin, b: d.breakMin, l: d.longMin });
     store.set("cucu.last", current.code);
+    rememberRoom();
+    if (d.privada && !current.clave && !localMode) loadClave();
     bubKey = ""; focusAcc = 0; lastFocusDur = d.dur;
     render(); selectTab(activeTab); renderChat(true); schedulePeople();
     try { history.replaceState(null, "", "?sala=" + current.code); } catch (e) {}
@@ -1272,41 +1563,167 @@ import "./firebase-backend.js";
   }
   function leaveRoom(silent) {
     if (current && current.data.phase === "focus") credit("flush");
+    // El anfitrión que se va deja el lugar libre: la sala se lo ofrece a otra persona
+    if (current && !localMode && db && isHost()) db.doc("rooms/" + current.code).update({ hostId: null }).catch(() => {});
     subs.forEach(u => { try { u(); } catch (e) {} }); subs = [];
     if (named) { named.leave().catch(() => {}); named = null; }
-    current = null; peers = []; chatDocs = []; statsDocs = [];
+    current = null; peers = []; chatDocs = []; statsDocs = []; nameBook = {};
+    resetHostState(); cancelReply();
     setZen(false);
     document.documentElement.style.setProperty("--phase", "var(--focus)");
     document.title = "Cucú · salas para estudiar";
-    if (!silent) { $("room").classList.add("hidden"); $("lobby").classList.remove("hidden"); placeHouse($("heroSlot")); if (db) renderList(); try { history.replaceState(null, "", location.pathname); } catch (e) {} }
+    if (!silent) { $("room").classList.add("hidden"); $("lobby").classList.remove("hidden"); placeHouse($("heroSlot")); if (db) renderList(); renderMine(); try { history.replaceState(null, "", location.pathname); } catch (e) {} showView(); }
   }
   $("leaveBtn").onclick = () => leaveRoom();
-  $("home").onclick = () => { if (current) leaveRoom(); };
+  $("home").onclick = () => { if (current) leaveRoom(); else if (location.hash) location.hash = ""; };
+
+  // ================= anfitrión =================
+  // Si el anfitrión no está, la sala le ofrece el lugar a quien está hace más tiempo. Si dice que no
+  // (o no contesta en 30 s), al siguiente. Si nadie acepta, queda el primero igual: siempre hay anfitrión.
+  // Las reglas solo dejan tomar el lugar si el anterior lleva 2 min sin dar señal (hostSeen).
+  // hostWasHere: el anfitrión estuvo mientras yo estaba. Si se va, se pregunta siempre (aunque quede uno solo);
+  // si entro a una sala vacía y sin anfitrión, el lugar se toma sin preguntar.
+  let peersReady = false, hostGone = 0, lastHostId, declined = new Set(), accepted = false, claiming = false, lastBeat = 0, offerTimer = 0, offerUntil = 0;
+  let hostWasHere = false, askAlone = false;
+  function resetHostState() { peersReady = false; hostGone = 0; lastHostId = undefined; declined = new Set(); accepted = false; lastBeat = 0; hostWasHere = false; askAlone = false; closeOffer(); }
+  function hostUpdate(patch, msg) {
+    if (!current || localMode) return Promise.resolve(false);
+    return db.doc("rooms/" + current.code).update(patch).then(() => { applyLocal(patch); if (msg) toast(msg); return true; }).catch(() => false);
+  }
+  // Firestore no avisa de nuevo un cambio propio ya confirmado: se aplica a mano
+  function applyLocal(patch) {
+    if (!current) return;
+    setData(Object.assign({}, current.data, patch), "local");
+    renderRoomPanel(); schedulePeople();
+  }
+  function presentUids() {
+    const first = new Map();   // uid → la conexión más vieja (las claves de presencia son cronológicas)
+    peers.forEach(p => { if (p.by && (!first.has(p.by) || p.peer < first.get(p.by))) first.set(p.by, p.peer); });
+    return [...first.entries()].sort((a, b) => a[1] < b[1] ? -1 : 1).map(e => e[0]);
+  }
+  function checkHost() {
+    if (!current || localMode || readOnly || !named || !peersReady || !myId) return closeOffer();
+    const d = current.data;
+    if (d.hostId !== lastHostId) {
+      const left = !!lastHostId && hostWasHere && !d.hostId;   // el anfitrión dejó el lugar libre al irse
+      lastHostId = d.hostId; hostGone = 0; declined = new Set(); accepted = false; hostWasHere = false; askAlone = left; closeOffer();
+    }
+    if (d.hostId === myId) { if (now() - lastBeat > HOST_BEAT) { lastBeat = now(); hostUpdate({ hostSeen: now() }); } return; }
+    const here = presentUids();
+    if (d.hostId && here.includes(d.hostId)) { hostGone = 0; hostWasHere = true; return closeOffer(); }
+    if (hostWasHere) askAlone = true;
+    if (!hostGone) hostGone = now();
+    if (d.hostId && now() - hostGone < HOST_GRACE) return;   // margen por si solo recargó la página
+    const cands = here.filter(u => !declined.has(u)), pick = cands[0] || here[0];
+    if (pick !== myId) return closeOffer();
+    if (accepted) return claimHost("Ahora sos el anfitrión de la sala 👑");
+    if (here.length === 1 && !askAlone) return claimHost("Quedaste como anfitrión de la sala 👑");
+    if (!cands.length) return claimHost(here.length === 1 ? "No hay nadie más en la sala, así que quedaste como anfitrión. Cuando llegue alguien, le podés pasar el lugar desde Gente."
+      : "Nadie aceptó ser anfitrión, así que quedaste vos. Podés pasarle el lugar a otra persona desde Gente.");
+    openOffer();
+  }
+  async function claimHost(msg) {
+    const d = current.data;
+    if (claiming || (d.hostId && (d.hostSeen || 0) + HOST_STALE + 2000 > now())) return;
+    claiming = true; closeOffer();
+    if (await hostUpdate({ hostId: myId, hostSeen: now() }, msg)) lastBeat = now();
+    claiming = false;
+  }
+  function openOffer() {
+    const dlg = $("hostDlg"); if (dlg.open) return;
+    const d = current.data;
+    $("hostDlgT").textContent = d.hostId ? `🐦 ${nameOf(d.hostId, "El anfitrión")} se fue de la sala` : "🐦 La sala se quedó sin anfitrión";
+    offerUntil = now() + OFFER_MS;
+    try { dlg.showModal(); } catch (e) { dlg.setAttribute("open", ""); }
+    playNudge();
+    if (document.hidden) startFlash("¿Querés ser anfitrión?");
+    clearInterval(offerTimer);
+    offerTimer = setInterval(() => { const left = Math.ceil((offerUntil - now()) / 1000); $("hostLeft").textContent = left > 0 ? `(${left})` : ""; if (left <= 0) declineHost(); }, 500);
+  }
+  function closeOffer() { clearInterval(offerTimer); offerTimer = 0; const dlg = $("hostDlg"); if (dlg.open) dlg.close(); }
+  function declineHost() { declined.add(myId); closeOffer(); if (named) named.emit("host", { no: true }).catch(() => {}); checkHost(); }
+  $("hostYes").onclick = () => {
+    accepted = true; closeOffer();
+    const d = current && current.data;
+    if (d && d.hostId && (d.hostSeen || 0) + HOST_STALE > now()) toast("Listo. En unos segundos quedás como anfitrión");
+    checkHost();
+  };
+  $("hostNo").onclick = declineHost;
+  $("hostDlg").addEventListener("cancel", e => { e.preventDefault(); declineHost(); });
+  setInterval(checkHost, 2000);
 
   // ================= create / join =================
+  let newPriv = false;
+  $("newVis").querySelectorAll("button").forEach(b => b.onclick = () => {
+    newPriv = b.dataset.vis === "priv";
+    $("newVis").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    $("newVisNote").textContent = newPriv ? "No aparece en la lista. Para entrar hace falta el código y una clave; el link que copiás ya la lleva." : "Aparece en la lista de salas públicas y entra cualquiera con el código.";
+  });
   $("createBtn").onclick = async () => {
     $("createErr").textContent = "";
-    const v = newSteps.vals, now = Date.now();
+    if (newPriv && localMode) { $("createErr").textContent = "Las salas privadas necesitan conexión con Firebase."; return; }
+    const v = newSteps.vals, t = now(), priv = newPriv;
     const d = norm({ name: $("newName").value.trim().slice(0, 40) || "Sala de estudio", goal: $("newGoal").value.trim().slice(0, 80), goalN: 8,
       focusMin: v.f, breakMin: v.b, longMin: v.l, phase: "focus", dur: v.f * 60000, remaining: v.f * 60000,
-      hostId: myId || null, createdAt: now, updatedAt: now, day: today() });
-    const code = newCode(); $("createBtn").disabled = true;
+      hostId: myId || null, hostSeen: t, privada: priv, createdAt: t, updatedAt: t, day: today() });
+    let code = newCode(), clave = null; $("createBtn").disabled = true;
     try {
-      if (localMode) store.set("cucu.local." + code, JSON.stringify(d)); else await db.doc("rooms/" + code).set(d);
+      if (localMode) store.set("cucu.local." + code, JSON.stringify(d));
+      else {
+        // Que no pise una sala que ya existe (una privada ajena da "sin permiso": también cuenta como ocupada)
+        for (let i = 0; i < 4; i++) { if (await db.doc("rooms/" + code).get().then(s => !s.exists).catch(() => false)) break; code = newCode(); }
+        await db.doc("rooms/" + code).set(d);
+        if (priv) {
+          clave = newClave();
+          await db.doc(`rooms/${code}/secreto/clave`).set({ clave });
+          await db.doc(`rooms/${code}/miembros/${myId}`).set({ clave, at: now() });
+        }
+      }
       $("newName").value = ""; $("newGoal").value = "";
-      await enterRoom(code);
-      toast("Sala creada. Pasá el código: " + code);
+      await enterRoom(code, clave);
+      if (priv) { selectTab("room"); toast("Sala privada creada. Copiá el link: ya lleva la clave"); }
+      else toast("Sala creada. Pasá el código: " + code);
     } catch (e) {
       $("createErr").textContent = e && e.code === "quota_exceeded" ? "Se llegó al límite de salas guardadas." : e && e.code === "permission_denied" ? "La base de datos rechazó la sala. Revisá que hayas publicado las reglas (paso 7 del LEEME)." : "No se pudo crear la sala. Probá de nuevo.";
     } finally { $("createBtn").disabled = false; }
   };
-  $("joinBtn").onclick = () => { const c = $("joinCode").value.trim(); if (c) enterRoom(c); };
+  $("joinBtn").onclick = () => { const c = $("joinCode").value.trim(); if (!c) return; if (c.toLowerCase() !== claveFor) hideClave(); enterRoom(c, claveFor ? $("joinClave").value.trim() : null); };
   $("joinCode").onkeydown = e => { if (e.key === "Enter") $("joinBtn").click(); };
+  let claveFor = null;
+  function askClave(code) {
+    claveFor = code; $("joinCode").value = code; $("claveBox").classList.remove("hidden");
+    if (location.hash) location.hash = "";
+    setTimeout(() => $("joinClave").focus(), 50);
+  }
+  function hideClave() { claveFor = null; $("claveBox").classList.add("hidden"); $("joinClave").value = ""; }
+  $("claveBtn").onclick = () => { const c = $("joinClave").value.trim(); if (!c) return $("joinClave").focus(); enterRoom(claveFor || $("joinCode").value, c); };
+  $("joinClave").onkeydown = e => { if (e.key === "Enter") $("claveBtn").click(); };
 
   // ================= lobby list =================
+  // "Tus salas": las que abriste en este navegador, también las privadas (que no salen en la lista pública)
+  const mine = () => { try { const l = JSON.parse(store.get("cucu.mias") || "[]"); return Array.isArray(l) ? l : []; } catch (e) { return []; } };
+  function rememberRoom() {
+    if (!current || localMode) return;
+    const l = mine().filter(x => x.code !== current.code);
+    l.unshift({ code: current.code, name: current.data.name, privada: !!current.data.privada });
+    store.set("cucu.mias", JSON.stringify(l.slice(0, 8)));
+  }
+  function forgetRoom(code) { store.set("cucu.mias", JSON.stringify(mine().filter(x => x.code !== code))); renderMine(); }
+  function renderMine() {
+    const l = localMode ? [] : mine(), ul = $("mineList"); ul.innerHTML = "";
+    $("mineBox").classList.toggle("hidden", !l.length);
+    l.forEach(x => {
+      const li = document.createElement("li"), b = document.createElement("button"), box = document.createElement("div");
+      const n = document.createElement("span"), c = document.createElement("span"), go = document.createElement("span");
+      n.className = "rn"; n.textContent = (x.privada ? "🔒 " : "") + (x.name || "Sala de estudio");
+      c.className = "rc"; c.textContent = x.privada ? "Privada" : "Pública"; box.append(n, c);
+      go.className = "go"; go.textContent = x.code;
+      b.append(box, go); b.onclick = () => enterRoom(x.code); li.appendChild(b); ul.appendChild(li);
+    });
+  }
   function renderList() {
     const ul = $("roomList"); ul.innerHTML = "";
-    if (!listDocs.length) { ul.innerHTML = '<li class="empty">Todavía no hay salas. Creá la primera.</li>'; return; }
+    if (!listDocs.length) { ul.innerHTML = '<li class="empty">Todavía no hay salas públicas. Creá la primera.</li>'; return; }
     listDocs.forEach(({ id, d }) => {
       const li = document.createElement("li"), b = document.createElement("button");
       b.innerHTML = `<svg class="mini" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="none" stroke="var(--line)" stroke-width="4"/><circle class="mr" cx="20" cy="20" r="16" fill="none" stroke="var(--${d.phase})" stroke-width="4" stroke-linecap="round" transform="rotate(-90 20 20)" stroke-dasharray="100.5"/></svg>`;
@@ -1325,31 +1742,128 @@ import "./firebase-backend.js";
     });
   }
 
+  // ================= limpieza de salas inactivas =================
+  // No hay servidor que limpie (plan Spark), así que lo hacen los navegadores: una vez cada 6 h,
+  // se borran las salas sin cambios ni anfitrión hace 7 días y sin nadie conectado.
+  async function limpiarInactivas(todas) {
+    const corte = now() - INACTIVA; let n = 0;
+    let q = db.collection("rooms"); if (!todas) q = q.where("privada", "==", false);
+    const s = await q.where("updatedAt", "<", corte).orderBy("updatedAt", "desc").limit(todas ? 50 : 10).get();
+    for (const x of s.docs) {
+      const d = x.data() || {};
+      if ((d.hostSeen || 0) >= corte) continue;
+      if (room && (await room.peek("s-" + x.id).catch(() => 1)) > 0) continue;
+      try { await borrarSala(x.id); forgetRoom(x.id); n++; } catch (e) {}
+    }
+    return n;
+  }
+
+  // ================= secciones del inicio =================
+  const ideas = crearIdeas({ el: $("v-ideas"), db: null, uid: () => myId, nick: () => $("myNick").value.trim(), admin: () => iAmAdmin, toast, store });
+  const VIEWS = ["salas", "ideas", "novedades", "creador"];
+  function showView() {
+    let v = location.hash.slice(1);
+    if (!VIEWS.includes(v) || (v === "creador" && !iAmAdmin)) v = "salas";
+    VIEWS.forEach(k => $("v-" + k).classList.toggle("hidden", k !== v));
+    document.querySelectorAll(".lnav a").forEach(a => { if (a.dataset.v === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    if (v === "ideas") ideas.mostrar(db);
+    if (v === "novedades") renderNovedades();
+    if (v === "creador") renderCreador();
+  }
+  window.addEventListener("hashchange", () => { if (!current) showView(); });
+  const novPendiente = () => NOVEDADES.length > 0 && store.get("cucu.novedades") !== NOVEDADES[0].v;
+  $("novDot").classList.toggle("hidden", !novPendiente());
+  function renderNovedades() {
+    if (NOVEDADES.length) store.set("cucu.novedades", NOVEDADES[0].v);
+    $("novDot").classList.add("hidden");
+    const box = $("v-novedades");
+    box.innerHTML = '<div class="vhead"><h2>Novedades</h2></div><p class="muted vlead">Lo que fue cambiando en Cucú. ¿Se te ocurre algo más? <a href="#ideas">Proponelo en Ideas y bugs</a>.</p>';
+    NOVEDADES.forEach(n => {
+      const art = document.createElement("article"); art.className = "card news";
+      const dt = document.createElement("p"); dt.className = "nd"; dt.textContent = new Date(n.v + "T12:00").toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" });
+      const h = document.createElement("h3"); h.textContent = n.titulo;
+      const ul = document.createElement("ul");
+      n.items.forEach(it => { const li = document.createElement("li"); String(it).split("**").forEach((part, i) => { if (i % 2) { const b = document.createElement("b"); b.textContent = part; li.appendChild(b); } else li.append(part); }); ul.appendChild(li); });
+      art.append(dt, h, ul); box.appendChild(art);
+    });
+  }
+
+  // ================= panel del creador =================
+  const ago = ms => { const m = Math.round((now() - ms) / 60000); return !ms ? "nunca" : m < 1 ? "recién" : m < 60 ? `hace ${m} min` : m < 2880 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} días`; };
+  async function renderCreador() {
+    if (!iAmAdmin || !db) return;
+    ideas.mostrar(db);
+    const ul = $("admRooms"); ul.innerHTML = '<li class="empty">Cargando…</li>';
+    let docs;
+    try { docs = (await db.collection("rooms").orderBy("updatedAt", "desc").limit(100).get()).docs.map(x => ({ id: x.id, d: norm(x.data() || {}) })); }
+    catch (e) { ul.innerHTML = '<li class="empty">No se pudieron cargar las salas. ¿Publicaste las reglas nuevas?</li>'; return; }
+    const counts = await Promise.all(docs.map(x => room ? room.peek("s-" + x.id).catch(() => 0) : 0));
+    const last = x => Math.max(x.d.updatedAt || 0, x.d.hostSeen || 0);
+    const tile = (n, l) => `<div class="tile"><b>${n}</b><span>${l}</span></div>`;
+    $("admSum").innerHTML = tile(docs.length, "salas") + tile(docs.filter(x => x.d.privada).length, "privadas")
+      + tile(counts.reduce((a, b) => a + b, 0), "conexiones ahora") + tile(docs.filter(x => last(x) < now() - INACTIVA).length, "sin uso hace +7 días")
+      + tile(ideas.abiertos(), "tickets nuevos");
+    ul.innerHTML = "";
+    if (!docs.length) ul.innerHTML = '<li class="empty">No hay salas.</li>';
+    docs.forEach((x, i) => {
+      const li = document.createElement("li"), ai = document.createElement("div"); ai.className = "ai";
+      const b = document.createElement("b"); b.textContent = (x.d.privada ? "🔒 " : "") + x.d.name;
+      const sp = document.createElement("span");
+      sp.textContent = `${x.id} · ${counts[i]} ${counts[i] === 1 ? "conectado" : "conectados"} · ${PH[x.d.phase]}${x.d.running ? " corriendo" : " en pausa"} · ${x.d.doneToday || 0} 🍅 · actividad ${ago(last(x))}`;
+      ai.append(b, sp);
+      const go = document.createElement("button"); go.className = "btn small"; go.textContent = "Entrar"; go.onclick = () => enterRoom(x.id);
+      li.append(ai, go);
+      if (x.d.privada) {
+        const k = document.createElement("button"); k.className = "btn small ghost"; k.textContent = "Ver clave";
+        k.onclick = async () => { try { const s = await db.doc(`rooms/${x.id}/secreto/clave`).get(); k.textContent = s.exists ? "🔑 " + s.data().clave : "Sin clave"; } catch (e) { toast("No se pudo leer la clave"); } };
+        li.appendChild(k);
+      }
+      const del = document.createElement("button"); del.className = "btn small danger"; del.textContent = "Borrar";
+      del.onclick = async () => { if (!confirm(`¿Borrar la sala “${x.d.name}” (${x.id})? ${counts[i] ? "Hay gente conectada." : ""}`)) return; try { await borrarSala(x.id); forgetRoom(x.id); toast("Sala borrada"); renderCreador(); } catch (e) { toast("No se pudo borrar la sala"); } };
+      li.appendChild(del); ul.appendChild(li);
+    });
+  }
+  $("admRefresh").onclick = renderCreador;
+  $("admClean").onclick = async () => {
+    if (!confirm("¿Borrar las salas sin uso hace más de 7 días y sin nadie conectado?")) return;
+    const n = await limpiarInactivas(true).catch(() => 0);
+    toast(n ? `Se borraron ${n} ${n === 1 ? "sala" : "salas"}` : "No había salas para borrar"); renderCreador();
+  };
+  $("copyId").onclick = async () => { try { await navigator.clipboard.writeText(myId); toast("ID copiado"); } catch (e) { toast(myId); } };
+
   // ================= boot =================
   $("myTask").value = store.get("cucu.task") || "";
   $("myNick").value = store.get("cucu.nick") || "";
-  renderSoundPanel();
+  renderSoundPanel(); renderMine(); showView();
   function goLocal() {
     if (db) return; localMode = true; $("soloNote").classList.remove("hidden");
     showBanner("No se pudo conectar con Firebase", "Revisá firebase-config.js y que estén activados el inicio de sesión anónimo, Firestore y Realtime Database (pasos 2 a 5 del LEEME). Mientras tanto, todo funciona solo en este dispositivo." + (window.cucuBackendError ? " Detalle: " + window.cucuBackendError : ""));
     $("roomList").innerHTML = '<li class="empty">Las salas solo existen en este dispositivo.</li>';
+    renderMine();
   }
   (async () => {
     const use = n => (window.claude && window.claude.use ? window.claude.use(n) : Promise.resolve(null)).catch(() => null);
     const [d, r, u] = await Promise.all([use("db"), use("room"), use("user")]);
     room = r; user = u;
     if (user) {
-      try { myId = await user.id(); iAmOwner = await user.isOwner(); const meV = await user.me(); if (!$("myNick").value && meV.name) $("myNick").value = meV.name.split(" ")[0]; } catch (e) {}
+      try { myId = await user.id(); const meV = await user.me(); if (!$("myNick").value && meV.name) $("myNick").value = meV.name.split(" ")[0]; } catch (e) {}
     }
     if (!d) { goLocal(); return; }
     db = d; localMode = false; $("soloNote").classList.add("hidden");
-    if (iAmOwner) $("ownerHint").classList.remove("hidden");
+    if (myId) { $("myIdTxt").textContent = myId; $("foot").classList.remove("hidden"); }
     if (user) { try { if (await user.can("data.write") === false) setReadOnly(); } catch (e) {} }
-    db.collection("rooms").orderBy("updatedAt", "desc").limit(10).onSnapshot(s => {
+    // ¿Es el creador? (admins/{uid}, se agrega a mano desde la consola de Firebase)
+    if (myId) db.doc("admins/" + myId).get().then(s => {
+      iAmAdmin = !!s.exists; $("navCreador").classList.toggle("hidden", !iAmAdmin);
+      ideas.refrescar(); if (!current) showView(); if (current) { renderRoomPanel(); renderChat(); schedulePeople(); }
+    }).catch(() => {});
+    db.collection("rooms").where("privada", "==", false).orderBy("updatedAt", "desc").limit(10).onSnapshot(s => {
       listDocs = s.docs.map(x => ({ id: x.id, d: norm(x.data() || {}) })); if (!current) renderList();
-    }, () => { $("roomList").innerHTML = '<li class="empty">No se pudo cargar la lista de salas. Revisá las reglas de Firestore.</li>'; });
-    const fromLink = new URLSearchParams(location.search).get("sala");
-    if (fromLink) enterRoom(fromLink);
+    }, () => { $("roomList").innerHTML = '<li class="empty">No se pudo cargar la lista de salas. Revisá las reglas y los índices de Firestore.</li>'; });
+    if (Date.now() - +(store.get("cucu.limpieza") || 0) > 6 * 3600e3) { store.set("cucu.limpieza", String(Date.now())); setTimeout(() => limpiarInactivas(false).catch(() => {}), 8000); }
+    if (!current) showView();
+    const params = new URLSearchParams(location.search), fromLink = params.get("sala");
+    if (fromLink) enterRoom(fromLink, params.get("clave"));
   })();
   setTimeout(() => { if (!db) goLocal(); }, 11000);
 })();

@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "emuladores": "firebase emulators:start --only auth,firestore,database,hosting --project demo-cucu",
+    "test:reglas": "firebase emulators:exec --only firestore --project demo-cucu \"node --test tests/reglas.emu.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.1.0"
+  }
+}

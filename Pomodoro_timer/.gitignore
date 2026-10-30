@@ -8,3 +8,6 @@ public/firebase-config.js
 firebase-debug.log*
 firestore-debug.log*
 database-debug.log*
+
+# Dependencias de las pruebas
+node_modules/

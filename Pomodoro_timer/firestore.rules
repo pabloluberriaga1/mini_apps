@@ -2,15 +2,24 @@ rules_version = '2';
 
 // Reglas de Cloud Firestore para Cucú.
 // Todos entran con sesión anónima (sin cuentas). Las reglas cuidan que:
+//  - las salas privadas solo las vea quien entró con la clave (o el anfitrión y el creador);
+//    el anfitrión puede pasar la sala de pública a privada y al revés,
 //  - solo el anfitrión cambie el bloqueo del reloj y los moderadores,
+//  - el anfitrión pase a otra persona solo si lo pasa él o si dejó de estar (2 min sin señal),
 //  - con el reloj bloqueado, solo anfitrión y moderadores lo manejen,
-//  - cada persona escriba solo sus propias estadísticas y mensajes.
+//  - mientras se estudia no se pueda escribir en el chat,
+//  - cada persona escriba solo sus propias estadísticas y mensajes,
+//  - una sala inactiva hace 7 días la pueda borrar cualquiera (no hay servidor que limpie).
+// El creador de la app es quien tiene un documento en admins/{uid} (se crea a mano desde la consola).
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn() {
-      return request.auth != null;
-    }
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function ahora() { return request.time.toMillis(); }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(me())); }
+    function okStr(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
+    function optStr(d, k, max) { return !(k in d) || (d[k] is string && d[k].size() <= max); }
 
     function roomOk(d) {
       return d.name is string && d.name.size() <= 40
@@ -18,54 +27,145 @@ service cloud.firestore {
         && d.music is string && d.music.size() <= 300
         && d.mods is list && d.mods.size() <= 20
         && d.log is list && d.log.size() <= 30
-        && d.focusMin is number && d.breakMin is number && d.longMin is number;
+        && d.focusMin is number && d.breakMin is number && d.longMin is number
+        && d.get('privada', false) is bool;
     }
+
+    // 7 días sin cambios en el reloj ni señal del anfitrión
+    function inactiva(r) {
+      return r.get('updatedAt', 0) < ahora() - 604800000 && r.get('hostSeen', 0) < ahora() - 604800000;
+    }
+    // Se puede chatear salvo durante un bloque de estudio corriendo (5 s de margen por los relojes)
+    function chatAbierto(r) {
+      return r.phase != 'focus' || r.running != true || r.get('endsAt', 0) <= ahora() + 5000;
+    }
+    function sala(code) { return get(/databases/$(database)/documents/rooms/$(code)).data; }
+    function esMiembro(code) { return exists(/databases/$(database)/documents/rooms/$(code)/miembros/$(me())); }
+    function puedeVer(code, r) {
+      return signedIn() && (r.get('privada', false) != true || r.get('hostId', null) == me() || esMiembro(code) || isAdmin());
+    }
+    function esHostDe(r) { return signedIn() && r.get('hostId', null) == me(); }
 
     match /rooms/{code} {
       function isHost() {
-        return resource.data.get('hostId', null) == null
-          || resource.data.get('hostId', null) == request.auth.uid;
+        return resource.data.get('hostId', null) == null || resource.data.get('hostId', null) == me();
       }
-      function isMod() {
-        return request.auth.uid in resource.data.get('mods', []);
-      }
-      function adminFieldsUnchanged() {
-        return request.resource.data.get('lock', false) == resource.data.get('lock', false)
-          && request.resource.data.get('mods', []) == resource.data.get('mods', []);
+      function isMod() { return me() in resource.data.get('mods', []); }
+      function igual(k, def) { return request.resource.data.get(k, def) == resource.data.get(k, def); }
+      function soloCambia(ks) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(ks); }
+      function hostAusente() {
+        return resource.data.get('hostId', null) == null || resource.data.get('hostSeen', 0) < ahora() - 120000;
       }
 
-      allow read: if signedIn();
+      // Si la sala no existe se deja ver (para avisar "no hay ninguna sala con ese código").
+      allow get: if signedIn() && (resource == null || puedeVer(code, resource.data));
+      // La lista del inicio solo trae salas públicas (la consulta tiene que filtrar privada == false).
+      allow list: if signedIn() && (isAdmin() || resource.data.privada == false);
 
       allow create: if signedIn()
         && code.matches('^[a-z0-9]{3,8}$')
         && roomOk(request.resource.data)
-        && (request.resource.data.get('hostId', null) == null
-            || request.resource.data.get('hostId', null) == request.auth.uid);
+        && request.resource.data.get('hostId', null) in [null, me()]
+        && (request.resource.data.get('privada', false) == false || request.resource.data.get('hostId', null) == me());
 
       allow update: if signedIn()
+        && puedeVer(code, resource.data)
         && roomOk(request.resource.data)
-        && request.resource.data.get('hostId', null) == resource.data.get('hostId', null)
-        && (isHost()
-            || (adminFieldsUnchanged()
-                && (resource.data.get('lock', false) != true || isMod())));
+        // Pública ↔ privada: solo el anfitrión o el creador, y para hacerla privada tiene que existir la clave
+        && (igual('privada', false)
+            || ((isAdmin() || esHostDe(resource.data))
+                && (request.resource.data.privada == false
+                    || exists(/databases/$(database)/documents/rooms/$(code)/secreto/clave))))
+        && (isAdmin()
+            || isHost()
+            // cualquiera maneja el reloj, sin tocar anfitrión, bloqueo ni moderadores
+            || (igual('hostId', null) && igual('lock', false) && igual('mods', [])
+                && (resource.data.get('lock', false) != true || isMod()))
+            // tomar el lugar de anfitrión cuando el anterior se fue
+            || (request.resource.data.get('hostId', null) == me() && hostAusente() && soloCambia(['hostId', 'hostSeen'])));
 
-      allow delete: if signedIn() && isHost();
+      allow delete: if signedIn() && (isAdmin() || esHostDe(resource.data) || inactiva(resource.data));
+
+      // La clave de una sala privada. Nadie la puede cambiar; la ven quienes ya entraron.
+      match /secreto/{d} {
+        allow read: if puedeVer(code, sala(code));
+        allow create: if d == 'clave' && (esHostDe(sala(code)) || isAdmin())
+          && request.resource.data.keys().hasOnly(['clave'])
+          && request.resource.data.clave is string
+          && request.resource.data.clave.size() >= 4 && request.resource.data.clave.size() <= 20;
+        allow delete: if isAdmin() || esHostDe(sala(code)) || inactiva(sala(code));
+      }
+
+      // Quién entró a una sala privada: para anotarse hay que mandar la clave correcta.
+      match /miembros/{uid} {
+        allow read: if signedIn() && (me() == uid || isAdmin() || esHostDe(sala(code)));
+        allow create: if signedIn() && me() == uid
+          && request.resource.data.keys().hasOnly(['clave', 'at'])
+          && request.resource.data.clave == get(/databases/$(database)/documents/rooms/$(code)/secreto/clave).data.clave;
+        allow delete: if signedIn() && (me() == uid || isAdmin() || esHostDe(sala(code)) || inactiva(sala(code)));
+      }
 
       match /chat/{msgId} {
-        allow read: if signedIn();
-        allow create: if signedIn()
-          && request.resource.data.uid == request.auth.uid
-          && request.resource.data.text is string
-          && request.resource.data.text.size() > 0
-          && request.resource.data.text.size() <= 400
-          && request.resource.data.ts is number;
-        allow delete: if signedIn();
+        function reOk(re) {
+          return re is map && re.keys().hasOnly(['id', 'uid', 'nick', 'text'])
+            && okStr(re.id, 40) && okStr(re.uid, 128)
+            && re.get('nick', '') is string && re.get('nick', '').size() <= 30
+            && re.get('text', '') is string && re.get('text', '').size() <= 140;
+        }
+        allow read: if puedeVer(code, sala(code));
+        allow create: if puedeVer(code, sala(code))
+          && chatAbierto(sala(code))
+          && request.resource.data.keys().hasOnly(['uid', 'nick', 'text', 'ts', 're'])
+          && request.resource.data.uid == me()
+          && okStr(request.resource.data.text, 400)
+          && optStr(request.resource.data, 'nick', 30)
+          && request.resource.data.ts is number
+          && (!('re' in request.resource.data) || reOk(request.resource.data.re));
+        allow delete: if signedIn() && (resource.data.uid == me() || isAdmin()
+          || esHostDe(sala(code)) || inactiva(sala(code)));
       }
 
       match /stats/{uid} {
-        allow read: if signedIn();
-        allow write: if signedIn() && request.auth.uid == uid;
+        allow read: if puedeVer(code, sala(code));
+        allow create, update: if puedeVer(code, sala(code)) && me() == uid;
+        allow delete: if signedIn() && (me() == uid || isAdmin() || esHostDe(sala(code)) || inactiva(sala(code)));
       }
+    }
+
+    // Ticketera: ideas y bugs. Todos los leen; votar es agregar o quitar el propio uid de "votos".
+    function ticketOk(d) {
+      return d.keys().hasOnly(['tipo', 'titulo', 'descripcion', 'contexto', 'autor', 'nick', 'estado', 'votos', 'respuesta', 'createdAt', 'updatedAt'])
+        && d.tipo in ['mejora', 'bug', 'otro']
+        && okStr(d.titulo, 120)
+        && d.descripcion is string && d.descripcion.size() <= 2000
+        && optStr(d, 'contexto', 400) && optStr(d, 'respuesta', 1000) && optStr(d, 'nick', 30)
+        && d.estado in ['nuevo', 'revision', 'planificado', 'en_curso', 'hecho', 'descartado']
+        && d.votos is list && d.votos.size() <= 5000;
+    }
+    function votoValido() {
+      let antes = resource.data.votos;
+      let despues = request.resource.data.votos;
+      return (!(me() in antes) && (me() in despues) && despues.hasAll(antes) && despues.size() == antes.size() + 1)
+        || ((me() in antes) && !(me() in despues) && antes.hasAll(despues) && despues.size() == antes.size() - 1);
+    }
+    match /tickets/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && ticketOk(request.resource.data)
+        && request.resource.data.autor == me()
+        && request.resource.data.estado == 'nuevo'
+        && request.resource.data.votos == [me()]
+        && request.resource.data.get('respuesta', '') == '';
+      allow update: if signedIn() && ticketOk(request.resource.data) && (
+        (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'respuesta', 'updatedAt']))
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votos']) && votoValido())
+      );
+      allow delete: if isAdmin() || (signedIn() && resource.data.autor == me() && resource.data.estado == 'nuevo');
+    }
+
+    // Creador de la app: se agrega a mano desde la consola (admins/{uid}, con cualquier campo).
+    match /admins/{uid} {
+      allow read: if signedIn() && me() == uid;
+      allow write: if false;
     }
   }
 }
