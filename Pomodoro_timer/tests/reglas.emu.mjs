@@ -74,6 +74,14 @@ test("chat cerrado mientras se estudia", async () => {
   await assertSucceeds(as("ana").collection("rooms/pub01/chat").add(msg("ana")));
 });
 
+test("silencio del chat: lo decide el anfitrión", async () => {
+  await seed(db => db.doc("rooms/pub01").update({ phase: "focus", running: true, endsAt: now + 600000 }));
+  await assertFails(as("ana").doc("rooms/pub01").update({ chatSilencio: false }));
+  await assertSucceeds(as("host").doc("rooms/pub01").update({ chatSilencio: false }));
+  await assertSucceeds(as("ana").collection("rooms/pub01/chat").add(msg("ana")));    // con silencio apagado, se chatea estudiando
+  await assertSucceeds(as("ana").doc("rooms/pub01").set({ running: false }, { merge: true })); // el resto sigue igual
+});
+
 test("chat: respuestas y campos válidos", async () => {
   const c = as("ana").collection("rooms/pub01/chat");
   await assertSucceeds(c.add(msg("ana", { re: { id: "m1", uid: "ana", nick: "Ana", text: "hola" } })));

@@ -5,7 +5,7 @@ export const NOVEDADES = [
     v: "2026-10-30", titulo: "Salas privadas, chat con respuestas e ideas",
     items: [
       "**Salas privadas**: no aparecen en la lista y para entrar hace falta el código y la clave. El link que copiás ya lleva la clave.",
-      "**Chat en silencio mientras estudian**: se puede escribir en las pausas o con el reloj parado.",
+      "**Chat en silencio mientras estudian**: se puede escribir en las pausas o con el reloj parado. El anfitrión lo puede apagar desde la pestaña Sala.",
       "**Respuestas en el chat**: tocá ↩ en un mensaje para contestarlo.",
       "El chat separa los mensajes **por día**.",
       "Si cambiás tu nombre, **se actualiza también en los mensajes que ya mandaste**.",

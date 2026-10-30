@@ -7,6 +7,7 @@
 //   db   → Cloud Firestore (salas, chat, estadísticas)
 //   room → Realtime Database (quién está conectado, reacciones y avisos)
 //   user → Inicio de sesión anónimo (un id por navegador, sin cuentas)
+// Además, claude.track(evento, datos) manda eventos a Google Analytics (si hay measurementId).
 // No hace falta tocar nada acá: la configuración va en firebase-config.js.
 // ─────────────────────────────────────────────────────────────────────────────
 import { firebaseConfig } from "./firebase-config.js";
@@ -41,6 +42,25 @@ const EMU = (() => {
   try { if (new URLSearchParams(location.search).has("emu")) sessionStorage.setItem("cucu.emu", "1"); return sessionStorage.getItem("cucu.emu") === "1"; } catch (e) { return false; }
 })();
 
+// ---------- Google Analytics ----------
+// Se carga aparte y sin esperar: si un bloqueador lo frena, la app sigue igual. Con emuladores no se manda nada.
+let analytics = null;
+const pendientes = [];
+function startAnalytics(app, cfg) {
+  if (EMU || !cfg.measurementId) return;
+  import("https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js")
+    .then(async m => {
+      if (!(await m.isSupported())) return;
+      const a = m.getAnalytics(app);
+      analytics = (name, params) => m.logEvent(a, name, params);
+      pendientes.splice(0).forEach(([n, p]) => analytics(n, p));
+    })
+    .catch(() => {});
+}
+function track(name, params) {
+  try { if (analytics) analytics(name, params || {}); else if (pendientes.length < 50) pendientes.push([name, params || {}]); } catch (e) {}
+}
+
 // ---------- arranque: config + sesión anónima ----------
 let ready = null;
 function init() {
@@ -50,6 +70,7 @@ function init() {
     if (!cfg.apiKey || /PEG(A|Á)/i.test(cfg.apiKey)) throw Object.assign(new Error("Falta completar firebase-config.js"), { code: "config" });
     if (!cfg.databaseURL) throw Object.assign(new Error("Falta databaseURL en firebase-config.js (creá la Realtime Database y volvé a copiar la configuración)"), { code: "config" });
     const app = initializeApp(cfg);
+    startAnalytics(app, cfg);
     const auth = getAuth(app);
     if (EMU) connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
     const user = await new Promise((resolve, reject) => {
@@ -193,6 +214,7 @@ function makeUser(c) {
 // ---------- punto de entrada que usa la app ----------
 const cache = {};
 export const claude = {
+  track,
   use(name) {
     if (!(name in cache)) {
       cache[name] = init()

@@ -8,7 +8,7 @@ const multiline = s => esc(s).replace(/\n/g, "<br>");
 const fecha = ms => new Date(ms).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" });
 
 // el: contenedor; uid/nick/admin son funciones porque se conocen recién cuando conecta Firebase.
-export function crearIdeas({ el, db, uid, nick, admin, toast, store }) {
+export function crearIdeas({ el, db, uid, nick, admin, toast, store, track = () => {} }) {
   const T = { open: false, ntipo: "mejora", titulo: "", desc: "", tipo: "", estado: "abiertos", mios: false };
   let tickets = {}, off = null, error = "";
 
@@ -102,6 +102,7 @@ export function crearIdeas({ el, db, uid, nick, admin, toast, store }) {
     try {
       await db.collection("tickets").add(t);
       store.set("cucu.ultimoTicket", String(Date.now()));
+      track("ticket_creado", { tipo: t.tipo });
       Object.assign(T, { open: false, titulo: "", desc: "", estado: "abiertos", tipo: "" });
       toast("¡Gracias! Tu ticket quedó publicado."); render();
     } catch (e) { toast("No se pudo enviar el ticket. Probá de nuevo."); }
@@ -109,7 +110,7 @@ export function crearIdeas({ el, db, uid, nick, admin, toast, store }) {
   async function votar(id) {
     const t = tickets[id]; if (!t) return;
     const voted = (t.votos || []).includes(uid());
-    try { await db.doc("tickets/" + id).update({ votos: voted ? db.arrayRemove(uid()) : db.arrayUnion(uid()) }); }
+    try { await db.doc("tickets/" + id).update({ votos: voted ? db.arrayRemove(uid()) : db.arrayUnion(uid()) }); if (!voted) track("voto_ticket"); }
     catch (e) { toast("No se pudo registrar el voto"); }
   }
   async function borrar(id) {

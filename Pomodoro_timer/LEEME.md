@@ -12,7 +12,7 @@
 - **Estadísticas de sesión:** Minutos estudiados, rachas activas y ranking diario.
 - **Audio y Ambientales:** Alertas sonoras (cucú, zen, gong, alarma) y sonidos de fondo (lluvia, café, naturaleza, lo-fi).
 - **Salas públicas o privadas:** las privadas no aparecen en la lista y se entra con código y clave (el link copiado ya la lleva). El anfitrión puede cambiarla de una a otra.
-- **Chat con respuestas y separado por día.** Mientras corre un bloque de estudio el chat queda en silencio; se abre en las pausas. Si alguien se cambia el nombre, se actualiza en sus mensajes viejos.
+- **Chat con respuestas y separado por día.** Mientras corre un bloque de estudio el chat queda en silencio y se abre en las pausas (el anfitrión lo puede apagar en la pestaña Sala). Si alguien se cambia el nombre, se actualiza en sus mensajes viejos.
 - **Siempre hay anfitrión:** si se va, la sala le ofrece el lugar a quien está hace más tiempo; si nadie acepta, queda asignado igual. El anfitrión también puede pasarlo desde Gente.
 - **Ideas y bugs y Novedades** en el inicio, como en Parcialito.
 - **Limpieza automática:** las salas sin uso hace 7 días y sin nadie conectado se borran solas.
@@ -105,6 +105,25 @@ Quien tenga un documento en la colección `admins` de Firestore ve todas las sal
 3. Recargá la app: aparece **Panel del creador** arriba.
 
 El ID es por navegador (la sesión es anónima): si usás la app en otro dispositivo, o borrás los datos del navegador, repetí los pasos con el ID nuevo.
+
+El panel muestra números del momento (conectados, estudiando, salas con gente) y del día (pomodoros completos, minutos estudiados entre todos, salas usadas y creadas, tickets nuevos), calculados con las 100 salas con actividad más reciente.
+
+## 📊 Analítica (Google Analytics)
+
+Si `firebase-config.js` tiene `measurementId`, la app manda eventos a Google Analytics. Se ven en la consola de Firebase → **Analytics** (tarda hasta 24 h; para verlos al momento, **DebugView**). Con los emuladores (`?emu`) no se manda nada, y si un bloqueador frena Analytics la app sigue igual.
+
+| Evento | Cuándo | Datos |
+|---|---|---|
+| `sala_creada` | Se crea una sala | `privada`, `minutos_estudio` |
+| `sala_entrar` | Alguien entra a una sala | `privada` |
+| `sala_visibilidad` | El anfitrión la pasa a pública o privada | `privada` |
+| `pomodoro_completo` | Alguien completa un bloque de estudio | `minutos`, `personas` |
+| `mensaje_chat` | Se manda un mensaje | `respuesta` |
+| `anfitrion_oferta` | Alguien acepta o rechaza ser anfitrión | `decision` |
+| `ticket_creado` / `voto_ticket` | En Ideas y bugs | `tipo` |
+| `novedades_vistas` | Alguien abre una novedad nueva | `version` |
+
+Para usar los datos (`privada`, `minutos`, etc.) en los informes, registralos en **Analytics → Definiciones personalizadas** como dimensiones o métricas.
 
 ## 🧪 Probar en local
 

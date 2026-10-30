@@ -264,7 +264,9 @@ select.t{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radi
 .news li{margin-bottom:6px}
 
 /* panel del creador */
-.adm-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:16px 0;max-width:860px}
+.adm-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0 16px;max-width:860px}
+.adm-h{margin:18px 0 0;font-size:15px}
+.adm-note{font-size:13px;max-width:860px;margin:-6px 0 16px}
 .adm-rooms{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-width:860px}
 .adm-rooms li{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 14px}
 .adm-rooms .ai{flex:1;min-width:180px}
@@ -358,7 +360,11 @@ body.zen .house{width:min(500px,62vh,90vw)}
     <section id="v-creador" class="hidden">
       <div class="vhead"><h2>Panel del creador</h2><div class="row"><button class="btn small ghost" id="admRefresh">Actualizar</button><button class="btn small danger" id="admClean">Borrar salas inactivas</button></div></div>
       <p class="muted vlead">Todas las salas, también las privadas. Podés entrar a cualquiera sin clave, ver su clave y borrarlas. Los tickets se moderan desde Ideas y bugs.</p>
+      <h3 class="adm-h">Ahora</h3>
+      <div class="adm-sum" id="admNow"></div>
+      <h3 class="adm-h">Hoy</h3>
       <div class="adm-sum" id="admSum"></div>
+      <p class="muted adm-note">Cuentan las 100 salas con actividad más reciente. Visitas, países, dispositivos y la evolución día a día están en <a href="https://console.firebase.google.com/project/cuku-55ce8/analytics" target="_blank" rel="noopener">Google Analytics</a> (tarda hasta 24 h en mostrar los datos).</p>
       <ul class="adm-rooms" id="admRooms"></ul>
     </section>
     <div id="v-salas">
@@ -555,6 +561,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
             <div style="margin-top:10px"><button class="btn small" id="saveDur">Guardar tiempos</button></div>
             <h4>Permisos</h4>
             <label class="toggle"><span>Solo el anfitrión y los moderadores manejan el reloj<small id="hostLine"></small></span><input type="checkbox" class="sw" id="lockSw"></label>
+            <label class="toggle"><span>Chat en silencio mientras estudian<small>Solo se puede escribir en las pausas o con el reloj parado. Lo cambia el anfitrión.</small></span><input type="checkbox" class="sw" id="silenceSw"></label>
             <p class="muted" style="font-size:13px;margin:4px 0 0">El anfitrión puede nombrar moderadores y pasarle su lugar a otra persona desde la pestaña Gente. Si el anfitrión se va, la sala le ofrece el lugar a quien esté hace más tiempo.</p>
             <div style="margin-top:16px"><button class="btn small danger" id="delRoom">Borrar sala</button></div>
           </div>
@@ -633,6 +640,8 @@ import { crearIdeas } from "./ideas.js";
   const HOST_BEAT = 40000, HOST_STALE = 120000, HOST_GRACE = 20000, OFFER_MS = 30000, INACTIVA = 7 * 864e5;
   const newCode = () => { const a = "abcdefghjkmnpqrstuvwxyz23456789"; let s = ""; for (let i = 0; i < 5; i++) s += a[Math.floor(Math.random() * a.length)]; return s; };
   const doneToday = d => d.day === today() ? (d.doneToday || 0) : 0;
+  // Eventos para Google Analytics (los ve el creador en la consola de Firebase). Nunca frena la app.
+  const track = (name, params) => { try { if (window.claude && window.claude.track) window.claude.track(name, params); } catch (e) {} };
 
   let db = null, room = null, user = null, myId = null, iAmAdmin = false;
   let current = null;                 // { code, data, clave }
@@ -650,7 +659,7 @@ import { crearIdeas } from "./ideas.js";
     d = Object.assign({}, d);
     const def = { name: "Sala de estudio", focusMin: 25, breakMin: 5, longMin: 15, phase: "focus", round: 0, running: false, endsAt: 0,
       hostId: null, mods: [], lock: false, autoBreak: true, autoFocus: false, goal: "", goalN: 8, music: "", day: today(),
-      doneToday: 0, log: [], why: "", phaseStart: 0, pausedAt: 0, updatedAt: 0, privada: false, hostSeen: 0 };
+      doneToday: 0, log: [], why: "", phaseStart: 0, pausedAt: 0, updatedAt: 0, privada: false, hostSeen: 0, chatSilencio: true };
     for (const k in def) if (d[k] === undefined || d[k] === null) d[k] = def[k];
     if (!PH[d.phase]) d.phase = "focus";
     if (!Array.isArray(d.mods)) d.mods = [];
@@ -927,6 +936,7 @@ import { crearIdeas } from "./ideas.js";
     if (kind === "done") {
       if (ms >= 0.6 * (lastFocusDur || 25 * 60000)) {
         st.poms++; st.streak++; st.best = Math.max(st.best, st.streak);
+        track("pomodoro_completo", { minutos: Math.round(ms / 60000), personas: focusCount() });
         if (st.streak > 1 && st.streak % 2 === 0) setTimeout(() => toast(`Racha de ${st.streak} pomodoros seguidos 🔥`), 1600);
       } else st.streak = 0;
     } else if (kind === "interrupted" && ms > 0) st.streak = 0;
@@ -1275,7 +1285,7 @@ import { crearIdeas } from "./ideas.js";
     try { await db.doc(`rooms/${current.code}/chat/${m.id}`).delete(); } catch (e) { toast("No se pudo borrar el mensaje"); }
   }
   // Mientras corre un bloque de estudio no se chatea (las reglas también lo frenan)
-  const chatOpen = () => { const d = current && current.data; return !d || !(d.phase === "focus" && d.running && remainingMs(d) > 0); };
+  const chatOpen = () => { const d = current && current.data; return !d || !d.chatSilencio || !(d.phase === "focus" && d.running && remainingMs(d) > 0); };
   function updateChatLock() {
     if (!current) return;
     const closed = !chatOpen(), dis = closed || readOnly;
@@ -1307,6 +1317,7 @@ import { crearIdeas } from "./ideas.js";
     $("chatInput").value = ""; cancelReply();
     try {
       await db.collection(`rooms/${current.code}/chat`).add(msg);
+      track("mensaje_chat", { respuesta: msg.re ? "si" : "no" });
       renderChat(true);
       // Solo el anfitrión (o el creador) recorta el chat viejo: los demás no pueden borrar mensajes ajenos
       if ((isHost() || iAmAdmin) && chatDocs.length > 70) { const old = chatDocs.slice(0, chatDocs.length - 70); for (const o of old) { try { await db.doc(`rooms/${current.code}/chat/${o.id}`).delete(); } catch (e) {} } }
@@ -1385,11 +1396,11 @@ import { crearIdeas } from "./ideas.js";
     if (document.activeElement !== $("goalInput")) $("goalInput").value = d.goal || "";
     setGN(d.goalN || 8);
     $("autoBreak").checked = !!d.autoBreak; $("autoFocus").checked = !!d.autoFocus;
-    $("lockSw").checked = !!d.lock;
+    $("lockSw").checked = !!d.lock; $("silenceSw").checked = !!d.chatSilencio;
     ["goalInput", "gMinus", "gPlus", "goalSave", "autoBreak", "autoFocus", "saveDur", "musicSave"].forEach(id => $(id).disabled = !ctl);
     roomSteps.el.querySelectorAll("button").forEach(b => b.disabled = !ctl);
     $("roomPresets").querySelectorAll("button").forEach(b => b.disabled = !ctl);
-    $("lockSw").disabled = !adm; $("delRoom").disabled = !(isHost() || iAmAdmin || localMode);
+    $("lockSw").disabled = !adm; $("silenceSw").disabled = !adm; $("delRoom").disabled = !(isHost() || iAmAdmin || localMode);
     $("hostLine").textContent = !d.hostId ? "Esta sala no tiene anfitrión: cualquiera puede manejarla." : isHost() ? "Vos sos el anfitrión de esta sala." : `Anfitrión: ${nameOf(d.hostId, "quien creó la sala")}`;
     const canVis = !localMode && (isHost() || iAmAdmin);
     $("roomVis").querySelectorAll("button").forEach(b => { b.setAttribute("aria-pressed", String((b.dataset.vis === "priv") === !!d.privada)); b.disabled = !canVis; });
@@ -1422,6 +1433,7 @@ import { crearIdeas } from "./ideas.js";
       await db.doc("rooms/" + code).update(patch);
       if (current && current.code === code) applyLocal(patch);
       toast(on ? "La sala ahora es privada. Copiá el link con clave para invitar" : "La sala ahora es pública");
+      track("sala_visibilidad", { privada: on ? "si" : "no" });
       rememberRoom();
     } catch (e) { toast("No se pudo cambiar quién puede entrar"); }
   }
@@ -1429,6 +1441,11 @@ import { crearIdeas } from "./ideas.js";
   $("goalSave").onclick = () => { writeRoom({ goal: $("goalInput").value.trim().slice(0, 80), goalN }); toast("Meta guardada"); };
   $("autoBreak").onchange = () => writeRoom({ autoBreak: $("autoBreak").checked });
   $("autoFocus").onchange = () => writeRoom({ autoFocus: $("autoFocus").checked });
+  $("silenceSw").onchange = () => {
+    if (!canAdmin()) { $("silenceSw").checked = !!current.data.chatSilencio; return; }
+    writeRoom({ chatSilencio: $("silenceSw").checked });
+    toast($("silenceSw").checked ? "🤫 El chat queda en silencio mientras estudian" : "💬 Ahora se puede chatear también mientras estudian");
+  };
   $("lockSw").onchange = () => { if (!canAdmin()) { $("lockSw").checked = !!current.data.lock; return; } writeRoom({ lock: $("lockSw").checked }); toast($("lockSw").checked ? "Ahora solo el anfitrión y los moderadores manejan el reloj" : "Ahora cualquiera puede manejar el reloj"); };
   $("saveDur").onclick = () => {
     const v = roomSteps.vals, d = current.data, patch = { focusMin: v.f, breakMin: v.b, longMin: v.l };
@@ -1492,6 +1509,7 @@ import { crearIdeas } from "./ideas.js";
     current = { code, data: norm(snap.data()), clave: clave ? String(clave).trim() : null };
     myStatsCache = null; chatDocs = []; statsDocs = []; peers = []; nameBook = {}; chatSeen = now();
     showRoom();
+    track("sala_entrar", { privada: current.data.privada ? "si" : "no" });
     subs.push(ref.onSnapshot(s => {
       if (!current || current.code !== code) return;
       if (!s.exists) { toast("La sala fue borrada"); forgetRoom(code); leaveRoom(); return; }
@@ -1641,9 +1659,9 @@ import { crearIdeas } from "./ideas.js";
     offerTimer = setInterval(() => { const left = Math.ceil((offerUntil - now()) / 1000); $("hostLeft").textContent = left > 0 ? `(${left})` : ""; if (left <= 0) declineHost(); }, 500);
   }
   function closeOffer() { clearInterval(offerTimer); offerTimer = 0; const dlg = $("hostDlg"); if (dlg.open) dlg.close(); }
-  function declineHost() { declined.add(myId); closeOffer(); if (named) named.emit("host", { no: true }).catch(() => {}); checkHost(); }
+  function declineHost() { track("anfitrion_oferta", { decision: "no" }); declined.add(myId); closeOffer(); if (named) named.emit("host", { no: true }).catch(() => {}); checkHost(); }
   $("hostYes").onclick = () => {
-    accepted = true; closeOffer();
+    accepted = true; closeOffer(); track("anfitrion_oferta", { decision: "si" });
     const d = current && current.data;
     if (d && d.hostId && (d.hostSeen || 0) + HOST_STALE > now()) toast("Listo. En unos segundos quedás como anfitrión");
     checkHost();
@@ -1680,6 +1698,7 @@ import { crearIdeas } from "./ideas.js";
         }
       }
       $("newName").value = ""; $("newGoal").value = "";
+      track("sala_creada", { privada: priv ? "si" : "no", minutos_estudio: v.f });
       await enterRoom(code, clave);
       if (priv) { selectTab("room"); toast("Sala privada creada. Copiá el link: ya lleva la clave"); }
       else toast("Sala creada. Pasá el código: " + code);
@@ -1759,7 +1778,7 @@ import { crearIdeas } from "./ideas.js";
   }
 
   // ================= secciones del inicio =================
-  const ideas = crearIdeas({ el: $("v-ideas"), db: null, uid: () => myId, nick: () => $("myNick").value.trim(), admin: () => iAmAdmin, toast, store });
+  const ideas = crearIdeas({ el: $("v-ideas"), db: null, uid: () => myId, nick: () => $("myNick").value.trim(), admin: () => iAmAdmin, toast, store, track });
   const VIEWS = ["salas", "ideas", "novedades", "creador"];
   function showView() {
     let v = location.hash.slice(1);
@@ -1774,7 +1793,7 @@ import { crearIdeas } from "./ideas.js";
   const novPendiente = () => NOVEDADES.length > 0 && store.get("cucu.novedades") !== NOVEDADES[0].v;
   $("novDot").classList.toggle("hidden", !novPendiente());
   function renderNovedades() {
-    if (NOVEDADES.length) store.set("cucu.novedades", NOVEDADES[0].v);
+    if (NOVEDADES.length) { if (novPendiente()) track("novedades_vistas", { version: NOVEDADES[0].v }); store.set("cucu.novedades", NOVEDADES[0].v); }
     $("novDot").classList.add("hidden");
     const box = $("v-novedades");
     box.innerHTML = '<div class="vhead"><h2>Novedades</h2></div><p class="muted vlead">Lo que fue cambiando en Cucú. ¿Se te ocurre algo más? <a href="#ideas">Proponelo en Ideas y bugs</a>.</p>';
@@ -1800,8 +1819,17 @@ import { crearIdeas } from "./ideas.js";
     const counts = await Promise.all(docs.map(x => room ? room.peek("s-" + x.id).catch(() => 0) : 0));
     const last = x => Math.max(x.d.updatedAt || 0, x.d.hostSeen || 0);
     const tile = (n, l) => `<div class="tile"><b>${n}</b><span>${l}</span></div>`;
-    $("admSum").innerHTML = tile(docs.length, "salas") + tile(docs.filter(x => x.d.privada).length, "privadas")
-      + tile(counts.reduce((a, b) => a + b, 0), "conexiones ahora") + tile(docs.filter(x => last(x) < now() - INACTIVA).length, "sin uso hace +7 días")
+    const sum = a => a.reduce((x, y) => x + y, 0);
+    const desde = new Date(now()).setHours(0, 0, 0, 0);
+    const estudiando = sum(docs.map((x, i) => x.d.phase === "focus" && x.d.running ? counts[i] : 0));
+    // Minutos-persona de los bloques terminados hoy (cada bloque guarda su duración y cuántos estudiaban)
+    const minHoy = sum(docs.map(x => sum((x.d.log || []).filter(b => b && b.e >= desde).map(b => (b.m || 0) * (b.n || 1)))));
+    $("admNow").innerHTML = tile(sum(counts), "conectados") + tile(estudiando, "estudiando")
+      + tile(counts.filter(n => n > 0).length, "salas con gente") + tile(docs.length, "salas en total") + tile(docs.filter(x => x.d.privada).length, "privadas")
+      + tile(docs.filter(x => last(x) < now() - INACTIVA).length, "sin uso hace +7 días");
+    $("admSum").innerHTML = tile(sum(docs.map(x => doneToday(x.d))), "pomodoros completos")
+      + tile(minHoy >= 600 ? Math.round(minHoy / 60) + " h" : minHoy + " min", "estudiados entre todos")
+      + tile(docs.filter(x => last(x) >= desde).length, "salas usadas") + tile(docs.filter(x => (x.d.createdAt || 0) >= desde).length, "salas creadas")
       + tile(ideas.abiertos(), "tickets nuevos");
     ul.innerHTML = "";
     if (!docs.length) ul.innerHTML = '<li class="empty">No hay salas.</li>';
