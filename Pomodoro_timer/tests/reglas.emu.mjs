@@ -174,6 +174,15 @@ test("tareas de la sala: solo si están activas; tachar y borrar", async () => {
   await assertFails(as("ana").doc("rooms/priv1/tareas/t4").set(t));                 // privada sin clave
 });
 
+test("tareas de la sala: el orden lo cambian anfitrión y moderadores", async () => {
+  await seed(db => db.doc("rooms/pub01").update({ tareasSala: true, mods: ["mod"] }));
+  await assertSucceeds(as("ana").doc("rooms/pub01/tareas/t1").set({ text: "Uno", by: "ana", at: now, orden: now, done: false }));
+  await assertFails(as("ana").doc("rooms/pub01/tareas/t1").update({ orden: 5 }));
+  await assertSucceeds(as("mod").doc("rooms/pub01/tareas/t1").update({ orden: 5 }));
+  await assertSucceeds(as("host").doc("rooms/pub01/tareas/t1").update({ orden: 2.5 }));
+  await assertFails(as("host").doc("rooms/pub01/tareas/t1").update({ orden: 1, text: "otro" }));
+});
+
 test("chat: GIFs solo de GIPHY o Tenor", async () => {
   const c = as("ana").collection("rooms/pub01/chat");
   await assertSucceeds(c.add(msg("ana", { text: "", gif: "https://media2.giphy.com/media/abc123/200.gif" })));

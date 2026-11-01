@@ -4,9 +4,11 @@ export const NOVEDADES = [
   {
     v: "2026-11-01", titulo: "Tareas, GIFs y modo zen con tu lista",
     items: [
-      "**Mis tareas**: anotá lo que querés hacer, tachalo cuando termines y marcá con ▶ en cuál estás (se ve en Gente). Te siguen a cualquier sala.",
+      "**Mis tareas**: anotá lo que querés hacer y tachalo cuando termines. La primera sin tachar se muestra en Gente como lo que estás haciendo (con ▶ elegís otra). Te siguen a cualquier sala.",
+      "**Ordená las tareas arrastrando** el asa ⋮⋮.",
+      "Si no tenés tareas, podés escribir **en qué estás** a mano en Gente, como antes.",
       "**Tareas de la sala**: una lista compartida que el anfitrión activa desde la pestaña Sala.",
-      "**Emojis y GIFs** en el chat.",
+      "**Emojis y GIFs** en el chat, con un selector chico con buscador.",
       "En el **modo zen** ves tu lista de tareas al costado. Con el ojo la ocultás.",
       "El anfitrión puede **cambiar el nombre** de la sala y, en las privadas, **cambiar la clave**."
     ]

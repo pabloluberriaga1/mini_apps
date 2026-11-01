@@ -137,22 +137,27 @@ service cloud.firestore {
       }
 
       // Tareas compartidas: solo si el anfitrión las activó. Cualquiera de la sala agrega y tacha;
-      // borran el autor, el anfitrión, los moderadores y el creador.
+      // borran el autor, el anfitrión, los moderadores y el creador. El orden lo cambian el anfitrión,
+      // los moderadores y el creador.
       match /tareas/{id} {
         function activas() { return sala(code).get('tareasSala', false) == true; }
+        function modera() { return isAdmin() || esHostDe(sala(code)) || me() in sala(code).get('mods', []); }
+        function cambia(ks) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(ks); }
         allow read: if puedeVer(code, sala(code));
         allow create: if puedeVer(code, sala(code)) && activas()
-          && request.resource.data.keys().hasOnly(['text', 'by', 'nick', 'at', 'done', 'doneBy', 'doneNick'])
+          && request.resource.data.keys().hasOnly(['text', 'by', 'nick', 'at', 'orden', 'done', 'doneBy', 'doneNick'])
           && request.resource.data.by == me()
           && okStr(request.resource.data.text, 120)
           && optStr(request.resource.data, 'nick', 30)
           && request.resource.data.at is number
+          && request.resource.data.get('orden', 0) is number
           && request.resource.data.done == false;
-        allow update: if puedeVer(code, sala(code)) && activas()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['done', 'doneBy', 'doneNick'])
-          && request.resource.data.done is bool
-          && (request.resource.data.done == false || request.resource.data.get('doneBy', '') == me())
-          && optStr(request.resource.data, 'doneNick', 30);
+        allow update: if puedeVer(code, sala(code)) && activas() && (
+          (cambia(['done', 'doneBy', 'doneNick'])
+            && request.resource.data.done is bool
+            && (request.resource.data.done == false || request.resource.data.get('doneBy', '') == me())
+            && optStr(request.resource.data, 'doneNick', 30))
+          || (cambia(['orden']) && request.resource.data.orden is number && modera()));
         allow delete: if signedIn() && (resource.data.by == me() || isAdmin() || esHostDe(sala(code))
           || me() in sala(code).get('mods', []) || inactiva(sala(code)));
       }

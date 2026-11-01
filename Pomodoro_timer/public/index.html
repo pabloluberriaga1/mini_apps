@@ -315,7 +315,17 @@ dialog.dlg p{margin:0 0 16px;color:var(--muted)}
 body:not(.zen) .zennow{display:none}
 .tadd{display:flex;gap:6px;margin-top:10px}
 .tadd input{flex:1;min-width:0;padding:9px 11px}
-.tlist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px}
+.tlist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px;align-content:start}
+/* la lista se desplaza: el campo para agregar y los botones de abajo quedan siempre a la vista */
+.tasks .tlist{max-height:min(46vh,380px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.taskcol .tasks .tlist{max-height:calc(100vh - 300px)}
+.tgrip{flex:none;width:14px;height:28px;border:0;background:transparent;padding:0;color:var(--muted);font-size:12px;letter-spacing:-3px;cursor:grab;touch-action:none;opacity:.35;transition:opacity .15s}
+.tlist li:hover .tgrip,.tgrip:focus-visible{opacity:1}
+@media (hover:none){.tgrip{opacity:.7}}
+.tlist li.drag{background:var(--surface);box-shadow:0 8px 22px -10px rgba(0,0,0,.4);position:relative;z-index:1}
+.tlist li.drag .tgrip{cursor:grabbing}
+.tbtn.play1[aria-pressed="false"]{opacity:.55}
+.tbtn.play1[aria-pressed="false"]:hover{opacity:1}
 .tlist li{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:12px;font-size:15px}
 .tlist li:hover{background:var(--soft)}
 .tlist li.now{background:color-mix(in srgb,var(--phase) 12%,var(--surface))}
@@ -337,25 +347,40 @@ li.now .tbtn.play1{color:var(--phase)}
 .zennow b{color:var(--ink)}
 .zentasks{display:none}
 body.zen .taskcol{display:none!important}
-body.zen .zentasks.has{display:block;position:fixed;left:16px;top:calc(16px + env(safe-area-inset-top,0px));width:min(280px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow-y:auto;z-index:9}
+body.zen .zentasks.has{display:block;position:fixed;left:16px;top:calc(16px + env(safe-area-inset-top,0px));width:min(280px,calc(100vw - 32px));z-index:9}
+.zentasks #zenList{max-height:calc(100vh - 100px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .zentasks #zenList{margin:8px 0 0;background:color-mix(in srgb,var(--surface) 80%,transparent);border:1px solid var(--line);border-radius:18px;padding:10px 10px 4px}
 .zentasks.off #zenList{display:none}
-@media (max-width:700px){body.zen .zentasks.has{top:auto;bottom:16px;max-height:40vh}}
+@media (max-width:700px){body.zen .zentasks.has{top:auto;bottom:16px}.zentasks #zenList{max-height:34vh}}
 
 /* chat: emojis y GIFs */
 #tab-chat{position:relative}
-.cbtn{flex:none;height:44px;min-width:40px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);font-size:19px;padding:0 6px}
-.cbtn.gifb{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--muted)}
-.cbtn:hover:not(:disabled){border-color:var(--phase);background:var(--surface)}
-.chatform{flex-wrap:nowrap}
-.chatform input{min-width:0}
-.pop{position:absolute;left:18px;right:18px;bottom:76px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 14px 40px -16px rgba(0,0,0,.35);z-index:5}
-#emojiPop{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:2px}
-#emojiPop.hidden{display:none}
-#emojiPop button{border:0;background:transparent;border-radius:10px;height:38px;font-size:22px;padding:0}
-#emojiPop button:hover{background:var(--soft)}
-.gifgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;max-height:230px;overflow-y:auto}
-.gifgrid button{border:0;padding:0;background:var(--soft);border-radius:10px;overflow:hidden;height:86px}
+.chatform{flex-wrap:nowrap;align-items:center;gap:6px;margin-top:10px}
+.cbox{flex:1;min-width:0;display:flex;align-items:center;gap:2px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);padding:0 4px 0 12px}
+.cbox:focus-within{border-color:var(--phase);background:var(--surface)}
+.cbox input{flex:1;min-width:0;border:0;background:transparent;padding:8px 0;font-size:15px;outline:none}
+.cico{flex:none;border:0;background:transparent;width:30px;height:30px;border-radius:8px;font-size:18px;line-height:1;display:grid;place-items:center;padding:0;color:var(--muted);filter:grayscale(.6);transition:filter .15s,background .15s}
+.cico:hover:not(:disabled),.cico[aria-expanded="true"]{background:var(--line);filter:none}
+.cico.gifb{width:auto;height:20px;padding:0 4px;margin:0 3px;font-size:10px;font-weight:800;letter-spacing:.04em;border:1.5px solid currentColor;border-radius:5px;filter:none}
+.cico.gifb:hover:not(:disabled),.cico.gifb[aria-expanded="true"]{background:transparent;color:var(--ink)}
+.csend{flex:none;width:38px;height:38px;border:0;border-radius:50%;background:var(--phase);color:var(--onphase);display:grid;place-items:center;transition:transform .12s}
+.csend:active{transform:scale(.92)}
+.csend svg{width:17px;height:17px}
+.pop{position:absolute;right:18px;bottom:62px;width:min(304px,calc(100% - 36px));background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:0 14px 40px -16px rgba(0,0,0,.35);z-index:5}
+.epick{display:flex;flex-direction:column;height:300px}
+.epick.hidden{display:none}
+.esearch{padding:6px 10px;font-size:14px;border-radius:9px}
+.ebody{flex:1;overflow-y:auto;margin-top:4px;overscroll-behavior:contain}
+.ebody h5{margin:6px 2px 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-family:"Atkinson Hyperlegible",sans-serif}
+.egrid{display:grid;grid-template-columns:repeat(8,1fr)}
+.egrid button{border:0;background:transparent;border-radius:6px;height:32px;font-size:21px;line-height:1;padding:0}
+.egrid button:hover,.egrid button:focus-visible{background:var(--soft)}
+.ecats{display:flex;gap:2px;border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.ecats button{flex:1;border:0;background:transparent;border-radius:7px;height:28px;font-size:16px;padding:0;filter:grayscale(.8);opacity:.75}
+.ecats button[aria-pressed="true"],.ecats button:hover{background:var(--soft);filter:none;opacity:1}
+#gifQ{padding:6px 10px;font-size:14px;border-radius:9px}
+.gifgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px;max-height:220px;overflow-y:auto}
+.gifgrid button{border:0;padding:0;background:var(--soft);border-radius:8px;overflow:hidden;height:72px}
 .gifgrid img{width:100%;height:100%;object-fit:cover;display:block}
 .msg img.gif{display:block;max-width:min(220px,100%);border-radius:12px;margin-top:3px;background:var(--soft)}
 .msg.mine img.gif{margin-left:auto}
@@ -563,17 +588,23 @@ body.zen .house{width:min(500px,62vh,90vw)}
             <div class="chatlist" id="chatList" aria-live="polite"></div>
             <div class="chatclosed hidden" id="chatClosed" role="status">🤫 Mientras estudian, el chat está en silencio. Se abre en la pausa, en <b id="chatOpenIn">--:--</b>.</div>
             <div class="replybar hidden" id="replyBar"><span id="replyTxt"></span><button type="button" id="replyX" aria-label="Cancelar la respuesta">✕</button></div>
-            <div class="pop hidden" id="emojiPop" role="dialog" aria-label="Emojis"></div>
+            <div class="pop epick hidden" id="emojiPop" role="dialog" aria-label="Emojis">
+              <input class="t esearch" id="emojiQ" maxlength="30" placeholder="Buscar emoji" autocomplete="off" aria-label="Buscar emoji">
+              <div class="ebody" id="emojiBody"></div>
+              <div class="ecats" id="emojiCats" role="group" aria-label="Categorías"></div>
+            </div>
             <div class="pop hidden" id="gifPop" role="dialog" aria-label="GIFs">
               <input class="t" id="gifQ" maxlength="60" autocomplete="off">
               <div class="gifgrid" id="gifGrid"></div>
               <p class="muted" id="gifNote" style="font-size:12px;margin:6px 0 0"></p>
             </div>
             <div class="chatform">
-              <button class="cbtn" id="emojiBtn" type="button" aria-label="Emojis" title="Emojis">😊</button>
-              <button class="cbtn gifb" id="gifBtn" type="button" aria-label="Mandar un GIF" title="GIF">GIF</button>
-              <input class="t" id="chatInput" maxlength="400" placeholder="Escribí un mensaje o pegá un link" autocomplete="off">
-              <button class="btn small" id="chatSend">Enviar</button>
+              <div class="cbox">
+                <input id="chatInput" maxlength="400" placeholder="Escribí un mensaje" autocomplete="off" aria-label="Mensaje">
+                <button class="cico gifb" id="gifBtn" type="button" aria-label="Mandar un GIF" title="GIF">GIF</button>
+                <button class="cico" id="emojiBtn" type="button" aria-label="Emojis" title="Emojis">😊</button>
+              </div>
+              <button class="csend" id="chatSend" type="button" aria-label="Enviar" title="Enviar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></button>
             </div>
           </div>
 
@@ -581,7 +612,11 @@ body.zen .house{width:min(500px,62vh,90vw)}
 
           <div class="tabpanel hidden" id="tab-people" role="tabpanel">
             <ul class="people" id="people"></ul>
-            <p class="muted" style="font-size:13px;margin:8px 0 0">Para mostrar en qué estás, tocá ▶ en una de tus tareas.</p>
+            <div id="myTaskBox">
+              <label class="f" for="myTask">¿En qué estás? <span style="font-size:13px">(opcional)</span></label>
+              <input class="t" id="myTask" maxlength="80" placeholder="Ej: guía 3, ejercicios 4 a 9">
+            </div>
+            <p class="muted hidden" id="myTaskNote" style="font-size:13px;margin:12px 0 0"></p>
             <label class="f" for="myNick">Tu nombre en la sala</label>
             <input class="t" id="myNick" maxlength="30" placeholder="Tu nombre">
           </div>
@@ -707,6 +742,7 @@ import "./firebase-backend.js";
 import { NOVEDADES } from "./novedades.js";
 import { crearIdeas } from "./ideas.js";
 import { crearTareas } from "./tareas.js";
+import { EMOJI_CATS } from "./emojis.js";
 (() => {
   // ================= helpers & state =================
   const $ = id => document.getElementById(id);
@@ -1237,7 +1273,7 @@ import { crearTareas } from "./tareas.js";
       db, code: current.code, uid: myId, nick: () => $("myNick").value.trim().slice(0, 30),
       activas: !!current.data.tareasSala, modera: isHost() || isMod() || iAmAdmin, nombre: nameOf
     } : null,
-    alCambiar: () => { if (current) presSoon(); }
+    alCambiar: () => { syncMyTask(); if (current) presSoon(); }
   });
   const anchoMQ = matchMedia("(min-width:1180px)");
   function ubicarTareas() {
@@ -1260,7 +1296,15 @@ import { crearTareas } from "./tareas.js";
     });
   }
   renderStatusPick();
-  const myPresence = () => ({ uid: myId, nick: $("myNick").value.trim().slice(0, 30), task: tareas.actualTexto().slice(0, 80), st: myStatus });
+  // En qué estás: la tarea actual; si no tenés tareas pendientes, lo que escribas a mano en Gente
+  const myPresence = () => ({ uid: myId, nick: $("myNick").value.trim().slice(0, 30), task: (tareas.actualTexto() || $("myTask").value.trim()).slice(0, 80), st: myStatus });
+  function syncMyTask() {
+    const t = tareas.actualTexto();
+    $("myTaskBox").classList.toggle("hidden", !!t); $("myTaskNote").classList.toggle("hidden", !t);
+    if (t) $("myTaskNote").replaceChildren("Se muestra tu tarea: ", Object.assign(document.createElement("b"), { textContent: t }), ". La cambiás con ▶ en tus tareas.");
+  }
+  $("myTask").value = store.get("cucu.task") || "";
+  $("myTask").oninput = () => { store.set("cucu.task", $("myTask").value); presSoon(); };
   function pushPresence() { if (named) named.presence(myPresence()).catch(() => {}); }
   let presT; const presSoon = () => { clearTimeout(presT); presT = setTimeout(pushPresence, 300); schedulePeople(); };
   let nickT;
@@ -1450,19 +1494,67 @@ import { crearTareas } from "./tareas.js";
   // Los GIFs solo pueden venir de GIPHY o Tenor (las reglas de Firestore también lo controlan)
   const GIF_RE = /^https:\/\/((media[0-9]*|i)\.giphy\.com|media[0-9]*\.tenor\.com)\/\S+$/;
   const gifOk = g => typeof g === "string" && g.length <= 400 && GIF_RE.test(g);
-  const CHAT_EMOJIS = "😀 😂 🥲 😅 😊 😍 🥰 😎 🤓 🤔 😴 🥱 😮‍💨 😭 😤 🤯 🥳 🙌 👏 👍 👎 🙏 💪 🤝 ✌️ 👀 🔥 ✨ ⭐ 💯 ❤️ 💙 💚 ☕ 🍕 📚 📝 🧠 ⏰ 🎉 ✅ ❌".split(" ");
-  function closePops(except) { ["emojiPop", "gifPop"].forEach(id => { if (id !== except) $(id).classList.add("hidden"); }); }
-  function togglePop(id) { const el = $(id), open = el.classList.contains("hidden"); closePops(id); el.classList.toggle("hidden", !open); return open; }
-  CHAT_EMOJIS.forEach(e => {
-    const b = document.createElement("button"); b.type = "button"; b.textContent = e; b.setAttribute("aria-label", e);
-    b.onclick = () => {
-      const i = $("chatInput"); if (i.disabled) return;
-      const a = i.selectionStart ?? i.value.length, z = i.selectionEnd ?? i.value.length;
-      i.value = (i.value.slice(0, a) + e + i.value.slice(z)).slice(0, 400); i.focus(); i.setSelectionRange(a + e.length, a + e.length);
-    };
-    $("emojiPop").appendChild(b);
+  function closePops(except) {
+    ["emojiPop", "gifPop"].forEach(id => { if (id !== except) $(id).classList.add("hidden"); });
+    $("emojiBtn").setAttribute("aria-expanded", String(except === "emojiPop")); $("gifBtn").setAttribute("aria-expanded", String(except === "gifPop"));
+  }
+  function togglePop(id) { const el = $(id), open = el.classList.contains("hidden"); closePops(open ? id : null); el.classList.toggle("hidden", !open); return open; }
+
+  // Selector de emojis chico, como el de Discord: buscador, usados hace poco y categorías
+  const emojiNombre = new Map(EMOJI_CATS.flatMap(c => c.emojis.map(([e, k]) => [e, k])));
+  const recientes = () => { try { const l = JSON.parse(store.get("cucu.emojis") || "[]"); return Array.isArray(l) ? l.filter(e => emojiNombre.has(e)) : []; } catch (e) { return []; } };
+  function ponerEmoji(e) {
+    const i = $("chatInput"); if (i.disabled) return;
+    const a = i.selectionStart ?? i.value.length, z = i.selectionEnd ?? i.value.length;
+    i.value = (i.value.slice(0, a) + e + i.value.slice(z)).slice(0, 400); i.setSelectionRange(a + e.length, a + e.length);
+    store.set("cucu.emojis", JSON.stringify([e].concat(recientes().filter(x => x !== e)).slice(0, 16)));
+  }
+  function grillaEmojis(l) {
+    const g = document.createElement("div"); g.className = "egrid";
+    l.forEach(e => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = e;
+      const n = (emojiNombre.get(e) || "").split(" ")[0]; b.title = n; b.setAttribute("aria-label", n || e);
+      b.onclick = ev => { ponerEmoji(e); if (!ev.shiftKey) { closePops(); $("chatInput").focus(); } };   // con Shift se ponen varios
+      g.appendChild(b);
+    });
+    return g;
+  }
+  const sinTildes = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  function renderEmojis() {
+    const q = sinTildes($("emojiQ").value.trim()), body = $("emojiBody"); catFija = null;
+    body.replaceChildren(); body.scrollTop = 0;
+    $("emojiCats").classList.toggle("hidden", !!q);
+    if (q) {
+      // primero los que se llaman así (primera palabra), después los que lo mencionan
+      const rank = k => { const w = k.split(" "); return w[0].startsWith(q) ? 0 : w.some(x => x.startsWith(q)) ? 1 : 2; };
+      const l = [...emojiNombre].map(([e, k]) => [e, rank(k)]).filter(x => x[1] < 2).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+      body.appendChild(l.length ? grillaEmojis(l) : Object.assign(document.createElement("p"), { className: "empty", textContent: "No hay emojis con ese nombre." }));
+      return;
+    }
+    const rec = recientes();
+    const secs = (rec.length ? [{ id: "rec", nombre: "Usados hace poco", lista: rec }] : []).concat(EMOJI_CATS.map(c => ({ id: c.id, nombre: c.nombre, lista: c.emojis.map(x => x[0]) })));
+    secs.forEach(c => { const h = document.createElement("h5"); h.textContent = c.nombre; h.id = "ecat-" + c.id; body.append(h, grillaEmojis(c.lista)); });
+    marcarCat();
+  }
+  // Las categorías de abajo saltan a su sección; se marca la que se está viendo
+  const catBtns = [{ id: "rec", icono: "🕘", nombre: "Usados hace poco" }].concat(EMOJI_CATS).map(c => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = c.icono; b.title = c.nombre; b.setAttribute("aria-label", c.nombre); b.dataset.cat = c.id;
+    b.onclick = () => { const h = document.getElementById("ecat-" + c.id); if (h) { catFija = c.id; $("emojiBody").scrollTop = h.offsetTop - $("emojiBody").offsetTop; marcarCat(); } };
+    $("emojiCats").appendChild(b); return b;
   });
-  $("emojiBtn").onclick = () => togglePop("emojiPop");
+  // catFija: la categoría tocada queda marcada aunque al final de la lista no se pueda desplazar hasta ella
+  let catFija = null;
+  function marcarCat() {
+    const body = $("emojiBody"), y = body.scrollTop + 8; let cur = catFija;
+    if (!cur) body.querySelectorAll("h5").forEach(h => { if (h.offsetTop - body.offsetTop <= y) cur = h.id.slice(5); });
+    if (!cur) { const h = body.querySelector("h5"); cur = h ? h.id.slice(5) : null; }
+    catBtns.forEach(b => { b.classList.toggle("hidden", b.dataset.cat === "rec" && !recientes().length); b.setAttribute("aria-pressed", String(b.dataset.cat === cur)); });
+  }
+  $("emojiBody").addEventListener("scroll", marcarCat, { passive: true });
+  ["wheel", "touchstart", "keydown"].forEach(ev => $("emojiBody").addEventListener(ev, () => { catFija = null; }, { passive: true }));
+  $("emojiQ").oninput = renderEmojis;
+  $("emojiQ").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const b = $("emojiBody").querySelector(".egrid button"); if (b) b.click(); } };
+  $("emojiBtn").onclick = () => { if (togglePop("emojiPop")) { $("emojiQ").value = ""; renderEmojis(); if (matchMedia("(hover:hover)").matches) $("emojiQ").focus(); } };
   document.addEventListener("click", e => { if (!e.target.closest(".pop, #emojiBtn, #gifBtn")) closePops(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") closePops(); });
 
@@ -2127,7 +2219,7 @@ import { crearTareas } from "./tareas.js";
 
   // ================= boot =================
   $("myNick").value = store.get("cucu.nick") || "";
-  renderSoundPanel(); renderMine(); ubicarTareas(); showView();
+  renderSoundPanel(); renderMine(); ubicarTareas(); syncMyTask(); showView();
   function goLocal() {
     if (db) return; localMode = true; $("soloNote").classList.remove("hidden");
     showBanner("No se pudo conectar con Firebase", "Revisá firebase-config.js y que estén activados el inicio de sesión anónimo, Firestore y Realtime Database (pasos 2 a 5 del LEEME). Mientras tanto, todo funciona solo en este dispositivo." + (window.cucuBackendError ? " Detalle: " + window.cucuBackendError : ""));
