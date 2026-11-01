@@ -114,6 +114,8 @@ input[type=range]{width:100%;accent-color:var(--phase)}
 .codepill .c{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:20px;letter-spacing:.22em}
 .stage{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:20px;align-items:start}
 .stage>*{min-width:0}
+.taskcol{display:none}
+@media (min-width:1180px){.stage{grid-template-columns:250px minmax(0,1fr) minmax(320px,350px)}.taskcol{display:block;position:sticky;top:16px}#tasksTabBtn{display:none}}
 @media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
 .goalrow input{min-width:0}
 @media (max-width:420px){.reactbar .sep{display:none}}
@@ -301,6 +303,64 @@ dialog.dlg::backdrop{background:rgba(10,14,20,.45)}
 dialog.dlg h3{font-size:21px;margin-bottom:6px}
 dialog.dlg p{margin:0 0 16px;color:var(--muted)}
 
+/* tareas */
+.lcol{display:flex;flex-direction:column;gap:20px;min-width:0}
+.tasks h3{font-size:17px;display:flex;align-items:center;gap:8px}
+.tasks h3 small{font-family:"Atkinson Hyperlegible",sans-serif;font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
+.tseg{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:14px;border:1px solid var(--line)}
+.tseg button{flex:1;border:0;background:transparent;border-radius:10px;padding:7px 8px;font-size:14px;color:var(--muted);font-weight:700}
+.tseg button[aria-pressed="true"]{background:var(--phase);color:var(--onphase)}
+.tnote{font-size:13px;margin:10px 0 0}
+.zennow{display:block}
+body:not(.zen) .zennow{display:none}
+.tadd{display:flex;gap:6px;margin-top:10px}
+.tadd input{flex:1;min-width:0;padding:9px 11px}
+.tlist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px}
+.tlist li{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:12px;font-size:15px}
+.tlist li:hover{background:var(--soft)}
+.tlist li.now{background:color-mix(in srgb,var(--phase) 12%,var(--surface))}
+.tlist .tt{flex:1;min-width:0;overflow-wrap:anywhere}
+.tlist .tt small{display:block;font-size:12px;color:var(--muted)}
+.tlist li.done .tt>span{text-decoration:line-through;color:var(--muted)}
+.tchk{width:22px;height:22px;flex:none;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0;font-size:12px;font-weight:800;color:var(--onphase)}
+.tchk:hover{border-color:var(--phase)}
+li.done .tchk{background:var(--phase);border-color:var(--phase)}
+.tbtn{border:0;background:transparent;border-radius:8px;width:28px;height:28px;flex:none;color:var(--muted);font-size:13px;padding:0}
+.tbtn:hover{background:var(--surface);color:var(--ink)}
+.tbtn.x{opacity:0;transition:opacity .15s}
+.tlist li:hover .tbtn.x,.tlist li:focus-within .tbtn.x{opacity:1}
+@media (hover:none){.tbtn.x{opacity:.8}}
+li.now .tbtn.play1{color:var(--phase)}
+.tfoot{display:flex;gap:14px;justify-content:flex-end;margin-top:8px;font-size:13px}
+.tfoot .linkbtn{color:var(--muted)}
+.zennow{margin-top:12px;font-size:17px;color:var(--muted);text-align:center;max-width:90vw}
+.zennow b{color:var(--ink)}
+.zentasks{display:none}
+body.zen .taskcol{display:none!important}
+body.zen .zentasks.has{display:block;position:fixed;left:16px;top:calc(16px + env(safe-area-inset-top,0px));width:min(280px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow-y:auto;z-index:9}
+.zentasks #zenList{margin:8px 0 0;background:color-mix(in srgb,var(--surface) 80%,transparent);border:1px solid var(--line);border-radius:18px;padding:10px 10px 4px}
+.zentasks.off #zenList{display:none}
+@media (max-width:700px){body.zen .zentasks.has{top:auto;bottom:16px;max-height:40vh}}
+
+/* chat: emojis y GIFs */
+#tab-chat{position:relative}
+.cbtn{flex:none;height:44px;min-width:40px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);font-size:19px;padding:0 6px}
+.cbtn.gifb{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--muted)}
+.cbtn:hover:not(:disabled){border-color:var(--phase);background:var(--surface)}
+.chatform{flex-wrap:nowrap}
+.chatform input{min-width:0}
+.pop{position:absolute;left:18px;right:18px;bottom:76px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 14px 40px -16px rgba(0,0,0,.35);z-index:5}
+#emojiPop{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:2px}
+#emojiPop.hidden{display:none}
+#emojiPop button{border:0;background:transparent;border-radius:10px;height:38px;font-size:22px;padding:0}
+#emojiPop button:hover{background:var(--soft)}
+.gifgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;max-height:230px;overflow-y:auto}
+.gifgrid button{border:0;padding:0;background:var(--soft);border-radius:10px;overflow:hidden;height:86px}
+.gifgrid img{width:100%;height:100%;object-fit:cover;display:block}
+.msg img.gif{display:block;max-width:min(220px,100%);border-radius:12px;margin-top:3px;background:var(--soft)}
+.msg.mine img.gif{margin-left:auto}
+.adm-nov{max-width:760px;margin:8px 0 12px}
+
 /* zen */
 .zenexit{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:10;display:none}
 body.zen .zenexit{display:block}
@@ -366,6 +426,15 @@ body.zen .house{width:min(500px,62vh,90vw)}
       <div class="adm-sum" id="admSum"></div>
       <p class="muted adm-note">Cuentan las 100 salas con actividad más reciente. Visitas, países, dispositivos y la evolución día a día están en <a href="https://console.firebase.google.com/project/cuku-55ce8/analytics" target="_blank" rel="noopener">Google Analytics</a> (tarda hasta 24 h en mostrar los datos).</p>
       <ul class="adm-rooms" id="admRooms"></ul>
+      <h3 class="adm-h" style="margin-top:28px">Novedades</h3>
+      <form class="card adm-nov" id="novForm">
+        <label class="f" for="novTitulo" style="margin-top:0">Título</label>
+        <input class="t" id="novTitulo" maxlength="120" placeholder="Ej: Tareas y modo zen" required>
+        <label class="f" for="novItems">Ítems (uno por línea; **texto** queda en negrita)</label>
+        <textarea class="t" id="novItems" rows="5" placeholder="**Tareas**: armá tu lista y marcá en cuál estás&#10;El anfitrión puede cambiar el nombre de la sala"></textarea>
+        <div class="row" style="margin-top:12px"><button class="btn small" id="novPub" type="submit">Publicar</button><button class="btn small ghost hidden" id="novCancel" type="button">Cancelar</button></div>
+      </form>
+      <ul class="adm-rooms" id="admNov"></ul>
     </section>
     <div id="v-salas">
     <section class="hero">
@@ -394,6 +463,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
         <div style="margin-top:18px"><button class="btn" id="createBtn">Crear sala</button></div>
         <div class="err" id="createErr" style="text-align:left"></div>
       </section>
+      <div class="lcol">
       <section class="card">
         <h3>Entrar con código</h3>
         <div class="joinrow">
@@ -416,6 +486,8 @@ body.zen .house{width:min(500px,62vh,90vw)}
         <ul class="rooms" id="roomList"><li class="empty">Cargando…</li></ul>
         <p class="muted hidden" id="soloNote" style="font-size:14px;margin-top:14px">Esta vista no puede guardar datos compartidos: las salas, el chat y las estadísticas funcionan solo en este dispositivo.</p>
       </section>
+      <section class="card" id="lobbyTasks"></section>
+      </div>
     </div>
     </div>
     <p class="foot hidden" id="foot">ID de este navegador: <code id="myIdTxt"></code> <button class="linkbtn" id="copyId">copiar</button></p>
@@ -435,6 +507,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
     </div>
 
     <div class="stage">
+      <aside class="card taskcol" id="taskCol" aria-label="Tareas"></aside>
       <section class="clockcard" id="clockcard">
         <div class="cardtop">
           <div class="phasepick" role="group" aria-label="Fase">
@@ -464,6 +537,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
           <span class="sep"></span>
           <button id="nudgeAll" aria-label="Avisar a toda la sala">🔔 <span>Avisar a todos</span></button>
         </div>
+        <div class="zennow hidden" id="zenNow"></div>
         <div class="keys"><kbd>Espacio</kbd> arrancar o pausar · <kbd>S</kbd> saltar · <kbd>R</kbd> reiniciar · <kbd>Z</kbd> modo zen</div>
         <div class="floaters" id="floaters"></div>
         <div class="err" id="roomErr"></div>
@@ -478,6 +552,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
         <section class="card tabs">
           <div class="tablist" role="tablist">
             <button role="tab" data-tab="chat" aria-selected="true"><span class="ic">💬</span>Chat<span class="badge hidden" id="chatBadge"></span></button>
+            <button role="tab" data-tab="tasks" id="tasksTabBtn"><span class="ic">✅</span>Tareas</button>
             <button role="tab" data-tab="people"><span class="ic">👥</span><span id="peopleTabLbl">Gente</span></button>
             <button role="tab" data-tab="hist"><span class="ic">📈</span>Historial</button>
             <button role="tab" data-tab="sound"><span class="ic">🎧</span>Sonido</button>
@@ -488,16 +563,25 @@ body.zen .house{width:min(500px,62vh,90vw)}
             <div class="chatlist" id="chatList" aria-live="polite"></div>
             <div class="chatclosed hidden" id="chatClosed" role="status">🤫 Mientras estudian, el chat está en silencio. Se abre en la pausa, en <b id="chatOpenIn">--:--</b>.</div>
             <div class="replybar hidden" id="replyBar"><span id="replyTxt"></span><button type="button" id="replyX" aria-label="Cancelar la respuesta">✕</button></div>
+            <div class="pop hidden" id="emojiPop" role="dialog" aria-label="Emojis"></div>
+            <div class="pop hidden" id="gifPop" role="dialog" aria-label="GIFs">
+              <input class="t" id="gifQ" maxlength="60" autocomplete="off">
+              <div class="gifgrid" id="gifGrid"></div>
+              <p class="muted" id="gifNote" style="font-size:12px;margin:6px 0 0"></p>
+            </div>
             <div class="chatform">
+              <button class="cbtn" id="emojiBtn" type="button" aria-label="Emojis" title="Emojis">😊</button>
+              <button class="cbtn gifb" id="gifBtn" type="button" aria-label="Mandar un GIF" title="GIF">GIF</button>
               <input class="t" id="chatInput" maxlength="400" placeholder="Escribí un mensaje o pegá un link" autocomplete="off">
               <button class="btn small" id="chatSend">Enviar</button>
             </div>
           </div>
 
+          <div class="tabpanel hidden" id="tab-tasks" role="tabpanel"></div>
+
           <div class="tabpanel hidden" id="tab-people" role="tabpanel">
             <ul class="people" id="people"></ul>
-            <label class="f" for="myTask">¿En qué estás?</label>
-            <input class="t" id="myTask" maxlength="80" placeholder="Ej: guía 3, ejercicios 4 a 9">
+            <p class="muted" style="font-size:13px;margin:8px 0 0">Para mostrar en qué estás, tocá ▶ en una de tus tareas.</p>
             <label class="f" for="myNick">Tu nombre en la sala</label>
             <input class="t" id="myNick" maxlength="30" placeholder="Tu nombre">
           </div>
@@ -539,13 +623,18 @@ body.zen .house{width:min(500px,62vh,90vw)}
           </div>
 
           <div class="tabpanel hidden" id="tab-room" role="tabpanel">
+            <h4>Nombre de la sala</h4>
+            <div class="row" style="flex-wrap:nowrap">
+              <input class="t" id="nameInput" maxlength="40" placeholder="Nombre de la sala" style="flex:1;min-width:0">
+              <button class="btn small" id="nameSave">Guardar</button>
+            </div>
             <h4>Quién puede entrar</h4>
             <div class="chips" id="roomVis" role="group" aria-label="Visibilidad de la sala">
               <button type="button" class="chip" data-vis="pub">🌐 Pública</button>
               <button type="button" class="chip" data-vis="priv">🔒 Privada</button>
             </div>
             <p class="muted" id="roomVisNote" style="font-size:13px;margin:6px 0 0"></p>
-            <div class="secret hidden" id="privBox" style="margin-top:8px">🔒 Clave: <code id="claveTxt">······</code><button class="btn small ghost" id="copyClave" style="margin-left:auto">Copiar link con clave</button></div>
+            <div class="secret hidden" id="privBox" style="margin-top:8px">🔒 Clave: <code id="claveTxt">······</code><span class="row" style="margin-left:auto"><button class="btn small ghost hidden" id="newClaveBtn">Cambiar clave</button><button class="btn small ghost" id="copyClave">Copiar link con clave</button></span></div>
             <h4>Meta de la sala</h4>
             <div class="goalrow">
               <input class="t" id="goalInput" maxlength="80" placeholder="Ej: Terminar la guía 3">
@@ -562,6 +651,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
             <h4>Permisos</h4>
             <label class="toggle"><span>Solo el anfitrión y los moderadores manejan el reloj<small id="hostLine"></small></span><input type="checkbox" class="sw" id="lockSw"></label>
             <label class="toggle"><span>Chat en silencio mientras estudian<small>Solo se puede escribir en las pausas o con el reloj parado. Lo cambia el anfitrión.</small></span><input type="checkbox" class="sw" id="silenceSw"></label>
+            <label class="toggle"><span>Tareas de la sala<small>Una lista compartida: cualquiera agrega y tacha. Lo cambia el anfitrión.</small></span><input type="checkbox" class="sw" id="tasksSw"></label>
             <p class="muted" style="font-size:13px;margin:4px 0 0">El anfitrión puede nombrar moderadores y pasarle su lugar a otra persona desde la pestaña Gente. Si el anfitrión se va, la sala le ofrece el lugar a quien esté hace más tiempo.</p>
             <div style="margin-top:16px"><button class="btn small danger" id="delRoom">Borrar sala</button></div>
           </div>
@@ -572,6 +662,10 @@ body.zen .house{width:min(500px,62vh,90vw)}
   </main>
 </div>
 <button class="btn ghost zenexit" id="zenExit">Salir del modo zen</button>
+<aside class="zentasks" id="zenTasks" aria-label="Tus tareas">
+  <button class="iconbtn" id="zenEye" type="button"></button>
+  <ul class="tlist" id="zenList"></ul>
+</aside>
 <div class="toast" id="toast" role="status"></div>
 <dialog class="dlg" id="hostDlg" aria-labelledby="hostDlgT">
   <h3 id="hostDlgT">🐦 La sala se quedó sin anfitrión</h3>
@@ -612,6 +706,7 @@ body.zen .house{width:min(500px,62vh,90vw)}
 import "./firebase-backend.js";
 import { NOVEDADES } from "./novedades.js";
 import { crearIdeas } from "./ideas.js";
+import { crearTareas } from "./tareas.js";
 (() => {
   // ================= helpers & state =================
   const $ = id => document.getElementById(id);
@@ -867,6 +962,8 @@ import { crearIdeas } from "./ideas.js";
     const prev = current.data;
     current.data = norm(nd);
     transitions(prev, current.data, source);
+    if (prev.name !== current.data.name) { $("roomName").textContent = current.data.name; rememberRoom(); }
+    if (!!prev.tareasSala !== !!current.data.tareasSala || prev.hostId !== current.data.hostId || prev.mods.join() !== current.data.mods.join()) tareas.render();
     render();
   }
   async function writeRoom(patch) {
@@ -1133,6 +1230,23 @@ import { crearIdeas } from "./ideas.js";
     if (document.hidden) { startFlash(`${who} te avisó`); try { if (prefs.notify && Notification.permission === "granted") new Notification("Cucú", { body: `${who} te mandó un aviso`, tag: "cucu-nudge" }); } catch (e) {} }
   }
 
+  // ================= tareas =================
+  const tareas = crearTareas({
+    store, toast, track,
+    sala: () => current && !localMode && db && myId ? {
+      db, code: current.code, uid: myId, nick: () => $("myNick").value.trim().slice(0, 30),
+      activas: !!current.data.tareasSala, modera: isHost() || isMod() || iAmAdmin, nombre: nameOf
+    } : null,
+    alCambiar: () => { if (current) presSoon(); }
+  });
+  const anchoMQ = matchMedia("(min-width:1180px)");
+  function ubicarTareas() {
+    tareas.ubicar(!current ? $("lobbyTasks") : anchoMQ.matches ? $("taskCol") : $("tab-tasks"));
+    if (current && anchoMQ.matches && activeTab === "tasks") selectTab("chat");
+    tareas.render();
+  }
+  anchoMQ.addEventListener("change", ubicarTareas);
+
   // ================= status & presence =================
   function renderStatusPick() {
     const box = $("statusPick"); box.innerHTML = "";
@@ -1146,10 +1260,9 @@ import { crearIdeas } from "./ideas.js";
     });
   }
   renderStatusPick();
-  const myPresence = () => ({ uid: myId, nick: $("myNick").value.trim().slice(0, 30), task: $("myTask").value.trim().slice(0, 80), st: myStatus });
+  const myPresence = () => ({ uid: myId, nick: $("myNick").value.trim().slice(0, 30), task: tareas.actualTexto().slice(0, 80), st: myStatus });
   function pushPresence() { if (named) named.presence(myPresence()).catch(() => {}); }
   let presT; const presSoon = () => { clearTimeout(presT); presT = setTimeout(pushPresence, 300); schedulePeople(); };
-  $("myTask").oninput = () => { store.set("cucu.task", $("myTask").value); presSoon(); };
   let nickT;
   $("myNick").oninput = () => {
     store.set("cucu.nick", $("myNick").value); presSoon();
@@ -1262,8 +1375,9 @@ import { crearIdeas } from "./ideas.js";
         qb.title = "Ir al mensaje original"; qb.onclick = () => jumpTo(m.re.id);
         div.appendChild(qb);
       }
-      const mb = document.createElement("div"); mb.className = "mb"; linkify(mb, String(m.text || ""));
-      div.appendChild(mb); box.appendChild(div);
+      if (m.text) { const mb = document.createElement("div"); mb.className = "mb"; linkify(mb, String(m.text)); div.appendChild(mb); }
+      if (gifOk(m.gif)) { const im = document.createElement("img"); im.className = "gif"; im.src = m.gif; im.alt = "GIF"; im.loading = "lazy"; im.onload = () => { if (atBottom || scrollDown) box.scrollTop = box.scrollHeight; }; div.appendChild(im); }
+      box.appendChild(div);
     });
     if (atBottom || scrollDown) box.scrollTop = box.scrollHeight;
   }
@@ -1273,7 +1387,7 @@ import { crearIdeas } from "./ideas.js";
     el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
   }
   function startReply(m) {
-    replyTo = { id: m.id, uid: m.uid, nick: nameOf(m.uid, m.nick).slice(0, 30), text: String(m.text || "").slice(0, 120) };
+    replyTo = { id: m.id, uid: m.uid, nick: nameOf(m.uid, m.nick).slice(0, 30), text: (String(m.text || "") || (m.gif ? "GIF" : "")).slice(0, 120) };
     $("replyTxt").textContent = `Respondiendo a ${replyTo.nick}: ${replyTo.text}`;
     $("replyBar").classList.remove("hidden");
     if (!$("chatInput").disabled) $("chatInput").focus();
@@ -1292,7 +1406,8 @@ import { crearIdeas } from "./ideas.js";
     $("chatClosed").classList.toggle("hidden", !closed);
     if (closed) $("chatOpenIn").textContent = fmt(remainingMs(current.data));
     if ($("chatInput").disabled === dis) return;
-    $("chatInput").disabled = dis; $("chatSend").disabled = dis;
+    $("chatInput").disabled = dis; $("chatSend").disabled = dis; $("emojiBtn").disabled = dis; $("gifBtn").disabled = dis;
+    if (dis) closePops();
     $("chatInput").placeholder = readOnly ? "Como espectador no podés escribir" : closed ? "El chat se abre en la pausa ☕" : "Escribí un mensaje o pegá un link";
   }
   function linkify(el, text) {
@@ -1308,26 +1423,88 @@ import { crearIdeas } from "./ideas.js";
     const n = chatDocs.filter(m => m.ts > chatSeen && m.uid !== myId).length;
     const b = $("chatBadge"); b.textContent = n > 9 ? "9+" : n; b.classList.toggle("hidden", !n || activeTab === "chat");
   }
-  async function sendChat() {
-    const text = $("chatInput").value.trim().slice(0, 400); if (!text || !current) return;
+  async function sendChat(gif) {
+    const text = gif ? "" : $("chatInput").value.trim().slice(0, 400); if ((!text && !gif) || !current) return;
     if (localMode) return toast("El chat necesita una sala compartida");
     if (!chatOpen()) return toast("Mientras estudian, el chat está en silencio. Se abre en la pausa ☕");
     const msg = { uid: myId, nick: $("myNick").value.trim().slice(0, 30), text, ts: now() };
+    if (gif) msg.gif = gif;
     if (replyTo) msg.re = replyTo;
-    $("chatInput").value = ""; cancelReply();
+    if (!gif) $("chatInput").value = "";
+    cancelReply(); closePops();
     try {
       await db.collection(`rooms/${current.code}/chat`).add(msg);
-      track("mensaje_chat", { respuesta: msg.re ? "si" : "no" });
+      track("mensaje_chat", { respuesta: msg.re ? "si" : "no", gif: gif ? "si" : "no" });
       renderChat(true);
       // Solo el anfitrión (o el creador) recorta el chat viejo: los demás no pueden borrar mensajes ajenos
       if ((isHost() || iAmAdmin) && chatDocs.length > 70) { const old = chatDocs.slice(0, chatDocs.length - 70); for (const o of old) { try { await db.doc(`rooms/${current.code}/chat/${o.id}`).delete(); } catch (e) {} } }
     } catch (e) {
-      $("chatInput").value = text; if (msg.re) startReply(msg.re);
+      if (!gif) $("chatInput").value = text; if (msg.re) startReply(msg.re);
       toast(e && e.code === "permission_denied" ? (chatOpen() ? "La base de datos rechazó el mensaje. Revisá las reglas de Firestore." : "Mientras estudian, el chat está en silencio") : "No se pudo enviar el mensaje");
     }
   }
-  $("chatSend").onclick = sendChat;
+  $("chatSend").onclick = () => sendChat();
   $("chatInput").onkeydown = e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); sendChat(); } };
+
+  // ----- emojis y GIFs -----
+  // Los GIFs solo pueden venir de GIPHY o Tenor (las reglas de Firestore también lo controlan)
+  const GIF_RE = /^https:\/\/((media[0-9]*|i)\.giphy\.com|media[0-9]*\.tenor\.com)\/\S+$/;
+  const gifOk = g => typeof g === "string" && g.length <= 400 && GIF_RE.test(g);
+  const CHAT_EMOJIS = "😀 😂 🥲 😅 😊 😍 🥰 😎 🤓 🤔 😴 🥱 😮‍💨 😭 😤 🤯 🥳 🙌 👏 👍 👎 🙏 💪 🤝 ✌️ 👀 🔥 ✨ ⭐ 💯 ❤️ 💙 💚 ☕ 🍕 📚 📝 🧠 ⏰ 🎉 ✅ ❌".split(" ");
+  function closePops(except) { ["emojiPop", "gifPop"].forEach(id => { if (id !== except) $(id).classList.add("hidden"); }); }
+  function togglePop(id) { const el = $(id), open = el.classList.contains("hidden"); closePops(id); el.classList.toggle("hidden", !open); return open; }
+  CHAT_EMOJIS.forEach(e => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = e; b.setAttribute("aria-label", e);
+    b.onclick = () => {
+      const i = $("chatInput"); if (i.disabled) return;
+      const a = i.selectionStart ?? i.value.length, z = i.selectionEnd ?? i.value.length;
+      i.value = (i.value.slice(0, a) + e + i.value.slice(z)).slice(0, 400); i.focus(); i.setSelectionRange(a + e.length, a + e.length);
+    };
+    $("emojiPop").appendChild(b);
+  });
+  $("emojiBtn").onclick = () => togglePop("emojiPop");
+  document.addEventListener("click", e => { if (!e.target.closest(".pop, #emojiBtn, #gifBtn")) closePops(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closePops(); });
+
+  const giphyKey = () => (window.claude && window.claude.giphyKey) || "";
+  let gifT = 0, gifSeq = 0;
+  $("gifBtn").onclick = () => {
+    if (!togglePop("gifPop")) return;
+    const k = giphyKey();
+    $("gifQ").placeholder = k ? "Buscar GIFs" : "Pegá el link de un GIF de GIPHY o Tenor";
+    $("gifNote").textContent = k ? "Con la tecnología de GIPHY" : "Copiá el link del GIF (o la dirección de la imagen) y pegalo acá. Se manda con Enter.";
+    $("gifQ").value = ""; $("gifGrid").replaceChildren(); $("gifQ").focus();
+    if (k) buscarGifs("");
+  };
+  $("gifQ").oninput = () => { if (!giphyKey()) return; clearTimeout(gifT); gifT = setTimeout(() => buscarGifs($("gifQ").value.trim()), 400); };
+  $("gifQ").onkeydown = e => {
+    if (e.key !== "Enter" || e.isComposing) return; e.preventDefault();
+    const v = $("gifQ").value.trim(); if (!v) return;
+    const url = linkDeGif(v);
+    if (url) return sendChat(url);
+    if (!giphyKey() || /^https?:/.test(v)) toast(/tenor\.com\/view/.test(v) ? "De Tenor, copiá la dirección de la imagen (empieza con media.tenor.com)" : "Ese link no es de un GIF de GIPHY o Tenor");
+  };
+  // Un link de la página de GIPHY (giphy.com/gifs/nombre-ID) se convierte en el link de la imagen
+  function linkDeGif(v) {
+    if (gifOk(v)) return v;
+    const m = /^https:\/\/giphy\.com\/(?:gifs|stickers)\/(?:[\w-]*-)?([A-Za-z0-9]+)\/?(?:[?#].*)?$/.exec(v);
+    return m ? `https://media.giphy.com/media/${m[1]}/giphy.gif` : null;
+  }
+  async function buscarGifs(qs) {
+    const seq = ++gifSeq, grid = $("gifGrid");
+    try {
+      const u = `https://api.giphy.com/v1/gifs/${qs ? "search" : "trending"}?api_key=${encodeURIComponent(giphyKey())}&limit=18&rating=pg-13&lang=es${qs ? "&q=" + encodeURIComponent(qs) : ""}`;
+      const r = await fetch(u); if (!r.ok) throw new Error(r.status);
+      const j = await r.json(); if (seq !== gifSeq) return;
+      const items = (j.data || []).map(g => g.images || {}).map(im => ({ prev: (im.fixed_height_small || im.fixed_height || {}).url, full: (im.fixed_height || {}).url })).filter(x => gifOk(x.full) && x.prev);
+      grid.replaceChildren(...items.map(x => {
+        const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label", "Mandar este GIF");
+        const im = document.createElement("img"); im.src = x.prev; im.alt = ""; im.loading = "lazy"; b.appendChild(im);
+        b.onclick = () => sendChat(x.full); return b;
+      }));
+      if (!items.length) grid.innerHTML = '<p class="empty" style="grid-column:1/-1">No se encontraron GIFs.</p>';
+    } catch (e) { if (seq === gifSeq) grid.innerHTML = '<p class="empty" style="grid-column:1/-1">No se pudieron cargar los GIFs.</p>'; }
+  }
 
   // ================= history & stats =================
   async function renderHistory() {
@@ -1400,6 +1577,10 @@ import { crearIdeas } from "./ideas.js";
     ["goalInput", "gMinus", "gPlus", "goalSave", "autoBreak", "autoFocus", "saveDur", "musicSave"].forEach(id => $(id).disabled = !ctl);
     roomSteps.el.querySelectorAll("button").forEach(b => b.disabled = !ctl);
     $("roomPresets").querySelectorAll("button").forEach(b => b.disabled = !ctl);
+    if (document.activeElement !== $("nameInput")) $("nameInput").value = d.name || "";
+    $("nameInput").disabled = !adm; $("nameSave").disabled = !adm;
+    $("tasksSw").checked = !!d.tareasSala; $("tasksSw").disabled = !adm || localMode;
+    $("newClaveBtn").classList.toggle("hidden", !(d.privada && !localMode && (isHost() || iAmAdmin)));
     $("lockSw").disabled = !adm; $("silenceSw").disabled = !adm; $("delRoom").disabled = !(isHost() || iAmAdmin || localMode);
     $("hostLine").textContent = !d.hostId ? "Esta sala no tiene anfitrión: cualquiera puede manejarla." : isHost() ? "Vos sos el anfitrión de esta sala." : `Anfitrión: ${nameOf(d.hostId, "quien creó la sala")}`;
     const canVis = !localMode && (isHost() || iAmAdmin);
@@ -1446,6 +1627,38 @@ import { crearIdeas } from "./ideas.js";
     writeRoom({ chatSilencio: $("silenceSw").checked });
     toast($("silenceSw").checked ? "🤫 El chat queda en silencio mientras estudian" : "💬 Ahora se puede chatear también mientras estudian");
   };
+  $("nameSave").onclick = () => {
+    if (!canAdmin()) return toast("Solo el anfitrión puede cambiar el nombre");
+    const v = $("nameInput").value.trim().slice(0, 40);
+    if (!v) return toast("Poné un nombre para la sala");
+    if (v === current.data.name) return;
+    writeRoom({ name: v }); $("roomName").textContent = v; rememberRoom(); toast("Nombre guardado");
+  };
+  $("nameInput").onkeydown = e => { if (e.key === "Enter") $("nameSave").click(); };
+  $("tasksSw").onchange = () => {
+    if (!canAdmin()) { $("tasksSw").checked = !!current.data.tareasSala; return; }
+    writeRoom({ tareasSala: $("tasksSw").checked }); tareas.render();
+    toast($("tasksSw").checked ? "✅ Ahora la sala tiene una lista de tareas compartida" : "Tareas de la sala ocultas (no se borran)");
+  };
+  // Clave nueva: los conectados siguen adentro (se les manda la clave); al resto se le pide la nueva
+  $("newClaveBtn").onclick = async () => {
+    if (!current || !current.data.privada || !(isHost() || iAmAdmin)) return;
+    if (!confirm("¿Cambiar la clave? Los que no estén conectados ahora van a necesitar la clave nueva.")) return;
+    const code = current.code, clave = newClave(), quedan = new Set(presentUids().concat([myId]));
+    $("newClaveBtn").disabled = true;
+    try {
+      const sec = db.doc(`rooms/${code}/secreto/clave`);
+      await sec.delete(); await sec.set({ clave });
+      current.clave = clave; $("claveTxt").textContent = clave;
+      if (named) await named.emit("clave", { c: clave }).catch(() => {});
+      const ms = await db.collection(`rooms/${code}/miembros`).get();
+      for (const m of ms.docs) if (!quedan.has(m.id)) await db.doc(`rooms/${code}/miembros/${m.id}`).delete().catch(() => {});
+      await db.doc(`rooms/${code}/miembros/${myId}`).set({ clave, at: now() }).catch(() => {});
+      track("clave_cambiada");
+      toast("Clave nueva lista. Copiá el link para invitar"); $("copyClave").focus();
+    } catch (e) { toast("No se pudo cambiar la clave"); }
+    finally { $("newClaveBtn").disabled = false; }
+  };
   $("lockSw").onchange = () => { if (!canAdmin()) { $("lockSw").checked = !!current.data.lock; return; } writeRoom({ lock: $("lockSw").checked }); toast($("lockSw").checked ? "Ahora solo el anfitrión y los moderadores manejan el reloj" : "Ahora cualquiera puede manejar el reloj"); };
   $("saveDur").onclick = () => {
     const v = roomSteps.vals, d = current.data, patch = { focusMin: v.f, breakMin: v.b, longMin: v.l };
@@ -1464,7 +1677,7 @@ import { crearIdeas } from "./ideas.js";
   // Borra lo de adentro (lo que se pueda leer) y después la sala. Lo usan el anfitrión,
   // el panel del creador y la limpieza de salas inactivas.
   async function borrarSala(code) {
-    for (const sub of ["chat", "stats", "miembros", "secreto"]) {
+    for (const sub of ["chat", "stats", "tareas", "miembros", "secreto"]) {
       try { const s = await db.collection(`rooms/${code}/${sub}`).get(); for (const x of s.docs) await db.doc(`rooms/${code}/${sub}/${x.id}`).delete().catch(() => {}); } catch (e) {}
     }
     await db.doc("rooms/" + code).delete();
@@ -1475,7 +1688,7 @@ import { crearIdeas } from "./ideas.js";
   function selectTab(t) {
     activeTab = t;
     document.querySelectorAll(".tablist button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
-    ["chat", "people", "hist", "sound", "room"].forEach(k => $("tab-" + k).classList.toggle("hidden", k !== t));
+    ["chat", "tasks", "people", "hist", "sound", "room"].forEach(k => $("tab-" + k).classList.toggle("hidden", k !== t));
     if (t === "chat") { chatSeen = Math.max(chatSeen, ...chatDocs.map(m => m.ts || 0), 0); updateBadge(); const box = $("chatList"); box.scrollTop = box.scrollHeight; }
     if (t === "hist") renderHistory();
     if (t === "sound") renderSoundPanel();
@@ -1509,6 +1722,7 @@ import { crearIdeas } from "./ideas.js";
     current = { code, data: norm(snap.data()), clave: clave ? String(clave).trim() : null };
     myStatsCache = null; chatDocs = []; statsDocs = []; peers = []; nameBook = {}; chatSeen = now();
     showRoom();
+    tareas.conectar(db, code);
     track("sala_entrar", { privada: current.data.privada ? "si" : "no" });
     subs.push(ref.onSnapshot(s => {
       if (!current || current.code !== code) return;
@@ -1552,12 +1766,12 @@ import { crearIdeas } from "./ideas.js";
         subs.push(named.on("react", m => { const e = m.data && m.data.e; if (EMOJIS.includes(e)) floatEmoji(e, m.isMe ? "" : peerName(m.peer, m.by)); }, () => {}));
         subs.push(named.on("nudge", onNudge, () => {}));
         subs.push(named.on("host", m => { if (m.data && m.data.no && m.by) { declined.add(m.by); checkHost(); } }, () => {}));
-        // El anfitrión hizo privada la sala: los que ya estaban se anotan con la clave nueva
+        // El anfitrión hizo privada la sala (o cambió la clave): los que ya estaban se anotan con la clave nueva
         subs.push(named.on("clave", m => {
           const c = m.data && m.data.c;
           if (m.sameTab || typeof c !== "string" || !current || current.code !== code) return;
-          current.clave = c;
-          db.doc(`rooms/${code}/miembros/${myId}`).set({ clave: c, at: now() }).catch(() => {});
+          current.clave = c; $("claveTxt").textContent = c;
+          db.doc(`rooms/${code}/miembros/${myId}`).set({ clave: c, at: now() }).catch(() => {});   // si ya estaba anotado, sigue con su acceso
         }, () => {}));
         pushPresence();
       } catch (e) {}
@@ -1574,7 +1788,7 @@ import { crearIdeas } from "./ideas.js";
     rememberRoom();
     if (d.privada && !current.clave && !localMode) loadClave();
     bubKey = ""; focusAcc = 0; lastFocusDur = d.dur;
-    render(); selectTab(activeTab); renderChat(true); schedulePeople();
+    render(); ubicarTareas(); selectTab(activeTab === "tasks" && anchoMQ.matches ? "chat" : activeTab); renderChat(true); schedulePeople();
     try { history.replaceState(null, "", "?sala=" + current.code); } catch (e) {}
     if (!$("myNick").value.trim()) { selectTab("people"); setTimeout(() => { $("myNick").focus(); toast("Escribí tu nombre para que la sala sepa quién sos"); }, 400); }
     window.scrollTo({ top: 0 });
@@ -1586,7 +1800,7 @@ import { crearIdeas } from "./ideas.js";
     subs.forEach(u => { try { u(); } catch (e) {} }); subs = [];
     if (named) { named.leave().catch(() => {}); named = null; }
     current = null; peers = []; chatDocs = []; statsDocs = []; nameBook = {};
-    resetHostState(); cancelReply();
+    resetHostState(); cancelReply(); closePops(); tareas.desconectar(); ubicarTareas();
     setZen(false);
     document.documentElement.style.setProperty("--phase", "var(--focus)");
     document.title = "Cucú · salas para estudiar";
@@ -1790,16 +2004,30 @@ import { crearIdeas } from "./ideas.js";
     if (v === "creador") renderCreador();
   }
   window.addEventListener("hashchange", () => { if (!current) showView(); });
-  const novPendiente = () => NOVEDADES.length > 0 && store.get("cucu.novedades") !== NOVEDADES[0].v;
+  // Las novedades se publican desde el panel del creador (colección "novedades").
+  // Las de novedades.js se muestran solo mientras la colección está vacía; el creador las pasa a la base al abrir su panel.
+  let novedades = NOVEDADES.slice(), novDocs = null;
+  const novFecha = n => new Date(n.createdAt || n.v + "T12:00");
+  const novPendiente = () => novedades.length > 0 && store.get("cucu.novedades") !== novedades[0].v;
   $("novDot").classList.toggle("hidden", !novPendiente());
+  function escucharNovedades() {
+    db.collection("novedades").orderBy("createdAt", "desc").limit(30).onSnapshot(s => {
+      novDocs = s.docs.map(x => Object.assign({ id: x.id }, x.data())).filter(n => typeof n.titulo === "string" && Array.isArray(n.items));
+      novedades = novDocs.length ? novDocs : NOVEDADES.slice();
+      $("novDot").classList.toggle("hidden", !novPendiente());
+      if (!current && location.hash === "#novedades") renderNovedades();
+      if (iAmAdmin) { pasarNovedades(); renderAdmNov(); }
+    }, () => {});
+  }
   function renderNovedades() {
-    if (NOVEDADES.length) { if (novPendiente()) track("novedades_vistas", { version: NOVEDADES[0].v }); store.set("cucu.novedades", NOVEDADES[0].v); }
+    if (novedades.length) { if (novPendiente()) track("novedades_vistas", { version: novedades[0].v }); store.set("cucu.novedades", novedades[0].v); }
     $("novDot").classList.add("hidden");
     const box = $("v-novedades");
     box.innerHTML = '<div class="vhead"><h2>Novedades</h2></div><p class="muted vlead">Lo que fue cambiando en Cucú. ¿Se te ocurre algo más? <a href="#ideas">Proponelo en Ideas y bugs</a>.</p>';
-    NOVEDADES.forEach(n => {
+    if (!novedades.length) box.insertAdjacentHTML("beforeend", '<p class="empty">Todavía no hay novedades.</p>');
+    novedades.forEach(n => {
       const art = document.createElement("article"); art.className = "card news";
-      const dt = document.createElement("p"); dt.className = "nd"; dt.textContent = new Date(n.v + "T12:00").toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" });
+      const dt = document.createElement("p"); dt.className = "nd"; dt.textContent = novFecha(n).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" });
       const h = document.createElement("h3"); h.textContent = n.titulo;
       const ul = document.createElement("ul");
       n.items.forEach(it => { const li = document.createElement("li"); String(it).split("**").forEach((part, i) => { if (i % 2) { const b = document.createElement("b"); b.textContent = part; li.appendChild(b); } else li.append(part); }); ul.appendChild(li); });
@@ -1807,11 +2035,49 @@ import { crearIdeas } from "./ideas.js";
     });
   }
 
+  // ----- novedades en el panel del creador -----
+  let novEditando = null, novPasadas = false;
+  async function pasarNovedades() {
+    if (novPasadas || !novDocs || novDocs.length || !NOVEDADES.length) return;
+    novPasadas = true;
+    for (const n of NOVEDADES) await db.doc("novedades/n-" + n.v).set({ v: n.v, titulo: n.titulo, items: n.items, createdAt: Date.parse(n.v + "T00:00") }).catch(() => {});
+  }
+  function renderAdmNov() {
+    const ul = $("admNov"); ul.innerHTML = "";
+    if (!novDocs || !novDocs.length) { ul.innerHTML = '<li class="empty">Todavía no publicaste novedades.</li>'; return; }
+    novDocs.forEach(n => {
+      const li = document.createElement("li"), ai = document.createElement("div"); ai.className = "ai";
+      const b = document.createElement("b"); b.textContent = n.titulo;
+      const sp = document.createElement("span"); sp.textContent = `${novFecha(n).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })} · ${n.items.length} ${n.items.length === 1 ? "ítem" : "ítems"}`;
+      ai.append(b, sp);
+      const ed = document.createElement("button"); ed.className = "btn small ghost"; ed.textContent = "Editar";
+      ed.onclick = () => { novEditando = n.id; $("novTitulo").value = n.titulo; $("novItems").value = n.items.join("\n"); $("novPub").textContent = "Guardar cambios"; $("novCancel").classList.remove("hidden"); $("novTitulo").focus(); };
+      const del = document.createElement("button"); del.className = "btn small danger"; del.textContent = "Borrar";
+      del.onclick = async () => { if (!confirm(`¿Borrar la novedad “${n.titulo}”?`)) return; try { await db.doc("novedades/" + n.id).delete(); toast("Novedad borrada"); if (novEditando === n.id) novReset(); } catch (e) { toast("No se pudo borrar"); } };
+      li.append(ai, ed, del); ul.appendChild(li);
+    });
+  }
+  function novReset() { novEditando = null; $("novForm").reset(); $("novPub").textContent = "Publicar"; $("novCancel").classList.add("hidden"); }
+  $("novCancel").onclick = novReset;
+  $("novForm").onsubmit = async e => {
+    e.preventDefault(); if (!iAmAdmin || !db) return;
+    const titulo = $("novTitulo").value.trim().slice(0, 120);
+    const items = $("novItems").value.split("\n").map(x => x.trim().replace(/^[-•*]\s+/, "").slice(0, 400)).filter(Boolean).slice(0, 30);
+    if (!titulo || !items.length) return toast("Poné un título y al menos un ítem");
+    $("novPub").disabled = true;
+    try {
+      if (novEditando) { await db.doc("novedades/" + novEditando).update({ titulo, items }); toast("Novedad actualizada"); }
+      else { const t = now(); await db.collection("novedades").add({ v: String(t), titulo, items, createdAt: t }); toast("Novedad publicada: a todos les aparece el aviso"); }
+      novReset();
+    } catch (err) { toast("No se pudo guardar. ¿Publicaste las reglas nuevas?"); }
+    finally { $("novPub").disabled = false; }
+  };
+
   // ================= panel del creador =================
   const ago = ms => { const m = Math.round((now() - ms) / 60000); return !ms ? "nunca" : m < 1 ? "recién" : m < 60 ? `hace ${m} min` : m < 2880 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} días`; };
   async function renderCreador() {
     if (!iAmAdmin || !db) return;
-    ideas.mostrar(db);
+    ideas.mostrar(db); pasarNovedades(); renderAdmNov();
     const ul = $("admRooms"); ul.innerHTML = '<li class="empty">Cargando…</li>';
     let docs;
     try { docs = (await db.collection("rooms").orderBy("updatedAt", "desc").limit(100).get()).docs.map(x => ({ id: x.id, d: norm(x.data() || {}) })); }
@@ -1860,9 +2126,8 @@ import { crearIdeas } from "./ideas.js";
   $("copyId").onclick = async () => { try { await navigator.clipboard.writeText(myId); toast("ID copiado"); } catch (e) { toast(myId); } };
 
   // ================= boot =================
-  $("myTask").value = store.get("cucu.task") || "";
   $("myNick").value = store.get("cucu.nick") || "";
-  renderSoundPanel(); renderMine(); showView();
+  renderSoundPanel(); renderMine(); ubicarTareas(); showView();
   function goLocal() {
     if (db) return; localMode = true; $("soloNote").classList.remove("hidden");
     showBanner("No se pudo conectar con Firebase", "Revisá firebase-config.js y que estén activados el inicio de sesión anónimo, Firestore y Realtime Database (pasos 2 a 5 del LEEME). Mientras tanto, todo funciona solo en este dispositivo." + (window.cucuBackendError ? " Detalle: " + window.cucuBackendError : ""));
@@ -1882,9 +2147,10 @@ import { crearIdeas } from "./ideas.js";
     if (user) { try { if (await user.can("data.write") === false) setReadOnly(); } catch (e) {} }
     // ¿Es el creador? (admins/{uid}, se agrega a mano desde la consola de Firebase)
     if (myId) db.doc("admins/" + myId).get().then(s => {
-      iAmAdmin = !!s.exists; $("navCreador").classList.toggle("hidden", !iAmAdmin);
+      iAmAdmin = !!s.exists; $("navCreador").classList.toggle("hidden", !iAmAdmin); tareas.render();
       ideas.refrescar(); if (!current) showView(); if (current) { renderRoomPanel(); renderChat(); schedulePeople(); }
     }).catch(() => {});
+    escucharNovedades();
     db.collection("rooms").where("privada", "==", false).orderBy("updatedAt", "desc").limit(10).onSnapshot(s => {
       listDocs = s.docs.map(x => ({ id: x.id, d: norm(x.data() || {}) })); if (!current) renderList();
     }, () => { $("roomList").innerHTML = '<li class="empty">No se pudo cargar la lista de salas. Revisá las reglas y los índices de Firestore.</li>'; });

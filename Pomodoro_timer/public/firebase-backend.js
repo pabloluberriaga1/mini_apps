@@ -10,7 +10,8 @@
 // Además, claude.track(evento, datos) manda eventos a Google Analytics (si hay measurementId).
 // No hace falta tocar nada acá: la configuración va en firebase-config.js.
 // ─────────────────────────────────────────────────────────────────────────────
-import { firebaseConfig } from "./firebase-config.js";
+// firebase-config.js puede exportar también giphyKey (opcional, para buscar GIFs en el chat)
+import * as cfgMod from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
@@ -33,6 +34,7 @@ function wrapErr(e) {
   return err;
 }
 const W = p => p.catch(e => { throw wrapErr(e); });
+const firebaseConfig = cfgMod.firebaseConfig;
 const clean = o => JSON.parse(JSON.stringify(o === undefined ? null : o)); // Firebase no acepta undefined
 
 // ---------- emuladores ----------
@@ -215,6 +217,7 @@ function makeUser(c) {
 const cache = {};
 export const claude = {
   track,
+  giphyKey: typeof cfgMod.giphyKey === "string" ? cfgMod.giphyKey : "",
   use(name) {
     if (!(name in cache)) {
       cache[name] = init()

@@ -2,6 +2,16 @@
 // **texto** se muestra en negrita.
 export const NOVEDADES = [
   {
+    v: "2026-11-01", titulo: "Tareas, GIFs y modo zen con tu lista",
+    items: [
+      "**Mis tareas**: anotá lo que querés hacer, tachalo cuando termines y marcá con ▶ en cuál estás (se ve en Gente). Te siguen a cualquier sala.",
+      "**Tareas de la sala**: una lista compartida que el anfitrión activa desde la pestaña Sala.",
+      "**Emojis y GIFs** en el chat.",
+      "En el **modo zen** ves tu lista de tareas al costado. Con el ojo la ocultás.",
+      "El anfitrión puede **cambiar el nombre** de la sala y, en las privadas, **cambiar la clave**."
+    ]
+  },
+  {
     v: "2026-10-30", titulo: "Salas privadas, chat con respuestas e ideas",
     items: [
       "**Salas privadas**: no aparecen en la lista y para entrar hace falta el código y la clave. El link que copiás ya lleva la clave.",

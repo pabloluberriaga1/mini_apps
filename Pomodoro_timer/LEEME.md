@@ -14,9 +14,12 @@
 - **Salas públicas o privadas:** las privadas no aparecen en la lista y se entra con código y clave (el link copiado ya la lleva). El anfitrión puede cambiarla de una a otra.
 - **Chat con respuestas y separado por día.** Mientras corre un bloque de estudio el chat queda en silencio y se abre en las pausas (el anfitrión lo puede apagar en la pestaña Sala). Si alguien se cambia el nombre, se actualiza en sus mensajes viejos.
 - **Siempre hay anfitrión:** si se va, la sala le ofrece el lugar a quien está hace más tiempo; si nadie acepta, queda asignado igual. El anfitrión también puede pasarlo desde Gente.
-- **Ideas y bugs y Novedades** en el inicio, como en Parcialito.
+- **Tareas:** tu lista personal (se guarda en el navegador y te sigue a cualquier sala, también desde el inicio), con ▶ para marcar en cuál estás (se ve en Gente). El anfitrión puede activar una lista **compartida de la sala** desde la pestaña Sala; un selector arriba elige cuál ver.
+- **Emojis y GIFs en el chat.** Los GIFs solo pueden ser de GIPHY o Tenor. Con `giphyKey` en `firebase-config.js` hay buscador; sin clave, se pega el link.
+- **El anfitrión** puede cambiar el nombre de la sala y, en las privadas, cambiar la clave (los conectados siguen adentro; el resto necesita la nueva).
+- **Ideas y bugs y Novedades** en el inicio, como en Parcialito. Las novedades se publican, editan y borran desde el Panel del creador.
 - **Limpieza automática:** las salas sin uso hace 7 días y sin nadie conectado se borran solas.
-- **Modo Zen:** Vista a pantalla completa para eliminar distracciones.
+- **Modo Zen:** Vista a pantalla completa para eliminar distracciones, con tu lista de tareas al costado (se oculta con el ojo).
 - **Serverless y Gratuito:** Funciona en el navegador sin instalaciones, montado sobre **Firebase (Plan Spark)** sin necesidad de tarjeta de crédito.
 
 > **💡 El origen de Cucú:** Nació como una alternativa de rescate durante la época de finales y parciales, cuando las caídas de servidores en plataformas comerciales dejaban colgados a los grupos de estudio.
@@ -31,8 +34,9 @@
 | `public/firebase-backend.js` | Lógica de conexión y comunicación con Firebase. *(No requiere modificaciones)*. |
 | `public/firebase-config.example.js` | Plantilla de la configuración. Copiala como `public/firebase-config.js` (**único archivo editable**, no se sube al repo). |
 | `public/ideas.js` | Ideas y bugs: tickets, votos y moderación. |
-| `public/novedades.js` | Lista de novedades. Para anunciar un cambio, agregá una entrada arriba con una `v` nueva (a todos les aparece el punto). |
-| `firestore.rules` | Reglas de seguridad para Firestore (salas, privadas, chat, estadísticas y tickets). |
+| `public/tareas.js` | Tareas personales y de la sala. |
+| `public/novedades.js` | Novedades iniciales. La primera vez que el creador abre su panel pasan a Firestore; después se publican desde el panel. |
+| `firestore.rules` | Reglas de seguridad para Firestore (salas, privadas, chat, tareas, estadísticas, tickets y novedades). |
 | `firestore.indexes.json` | Índice para la lista de salas públicas. |
 | `tests/reglas.emu.mjs` | Pruebas de las reglas contra el emulador (`npm install` y `npm run test:reglas`). |
 | `database.rules.json` | Reglas de seguridad para Realtime Database (estados, reacciones y presencia). |

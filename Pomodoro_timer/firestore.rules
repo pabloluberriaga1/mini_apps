@@ -4,7 +4,7 @@ rules_version = '2';
 // Todos entran con sesión anónima (sin cuentas). Las reglas cuidan que:
 //  - las salas privadas solo las vea quien entró con la clave (o el anfitrión y el creador);
 //    el anfitrión puede pasar la sala de pública a privada y al revés,
-//  - solo el anfitrión cambie el bloqueo del reloj, el silencio del chat y los moderadores,
+//  - solo el anfitrión cambie el nombre, el bloqueo del reloj, el silencio del chat, las tareas de la sala y los moderadores,
 //  - el anfitrión pase a otra persona solo si lo pasa él o si dejó de estar (2 min sin señal),
 //  - con el reloj bloqueado, solo anfitrión y moderadores lo manejen,
 //  - mientras se estudia no se pueda escribir en el chat (si el anfitrión lo activó),
@@ -28,7 +28,8 @@ service cloud.firestore {
         && d.mods is list && d.mods.size() <= 20
         && d.log is list && d.log.size() <= 30
         && d.focusMin is number && d.breakMin is number && d.longMin is number
-        && d.get('privada', false) is bool;
+        && d.get('privada', false) is bool
+        && d.get('tareasSala', false) is bool;
     }
 
     // 7 días sin cambios en el reloj ni señal del anfitrión
@@ -80,15 +81,16 @@ service cloud.firestore {
                     || exists(/databases/$(database)/documents/rooms/$(code)/secreto/clave))))
         && (isAdmin()
             || isHost()
-            // cualquiera maneja el reloj, sin tocar anfitrión, bloqueo ni moderadores
+            // cualquiera maneja el reloj, sin tocar anfitrión, nombre, bloqueo, moderadores ni ajustes del anfitrión
             || (igual('hostId', null) && igual('lock', false) && igual('mods', []) && igual('chatSilencio', true)
+                && igual('name', '') && igual('tareasSala', false)
                 && (resource.data.get('lock', false) != true || isMod()))
             // tomar el lugar de anfitrión cuando el anterior se fue
             || (request.resource.data.get('hostId', null) == me() && hostAusente() && soloCambia(['hostId', 'hostSeen'])));
 
       allow delete: if signedIn() && (isAdmin() || esHostDe(resource.data) || inactiva(resource.data));
 
-      // La clave de una sala privada. Nadie la puede cambiar; la ven quienes ya entraron.
+      // La clave de una sala privada. Para cambiarla, el anfitrión la borra y crea otra; la ven quienes ya entraron.
       match /secreto/{d} {
         allow read: if puedeVer(code, sala(code));
         allow create: if d == 'clave' && (esHostDe(sala(code)) || isAdmin())
@@ -114,17 +116,45 @@ service cloud.firestore {
             && re.get('nick', '') is string && re.get('nick', '').size() <= 30
             && re.get('text', '') is string && re.get('text', '').size() <= 140;
         }
+        // GIF: solo links de GIPHY o Tenor (así no se puede meter cualquier imagen)
+        function gifOk(g) {
+          return g is string && g.size() <= 400
+            && g.matches('^https://(media[0-9]*|i)[.]giphy[.]com/[^ ]+$|^https://media[0-9]*[.]tenor[.]com/[^ ]+$');
+        }
         allow read: if puedeVer(code, sala(code));
         allow create: if puedeVer(code, sala(code))
           && chatAbierto(sala(code))
-          && request.resource.data.keys().hasOnly(['uid', 'nick', 'text', 'ts', 're'])
+          && request.resource.data.keys().hasOnly(['uid', 'nick', 'text', 'ts', 're', 'gif'])
           && request.resource.data.uid == me()
-          && okStr(request.resource.data.text, 400)
+          && (!('gif' in request.resource.data) || gifOk(request.resource.data.gif))
+          && (okStr(request.resource.data.text, 400)
+              || ('gif' in request.resource.data && request.resource.data.text == ''))
           && optStr(request.resource.data, 'nick', 30)
           && request.resource.data.ts is number
           && (!('re' in request.resource.data) || reOk(request.resource.data.re));
         allow delete: if signedIn() && (resource.data.uid == me() || isAdmin()
           || esHostDe(sala(code)) || inactiva(sala(code)));
+      }
+
+      // Tareas compartidas: solo si el anfitrión las activó. Cualquiera de la sala agrega y tacha;
+      // borran el autor, el anfitrión, los moderadores y el creador.
+      match /tareas/{id} {
+        function activas() { return sala(code).get('tareasSala', false) == true; }
+        allow read: if puedeVer(code, sala(code));
+        allow create: if puedeVer(code, sala(code)) && activas()
+          && request.resource.data.keys().hasOnly(['text', 'by', 'nick', 'at', 'done', 'doneBy', 'doneNick'])
+          && request.resource.data.by == me()
+          && okStr(request.resource.data.text, 120)
+          && optStr(request.resource.data, 'nick', 30)
+          && request.resource.data.at is number
+          && request.resource.data.done == false;
+        allow update: if puedeVer(code, sala(code)) && activas()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['done', 'doneBy', 'doneNick'])
+          && request.resource.data.done is bool
+          && (request.resource.data.done == false || request.resource.data.get('doneBy', '') == me())
+          && optStr(request.resource.data, 'doneNick', 30);
+        allow delete: if signedIn() && (resource.data.by == me() || isAdmin() || esHostDe(sala(code))
+          || me() in sala(code).get('mods', []) || inactiva(sala(code)));
       }
 
       match /stats/{uid} {
@@ -162,6 +192,18 @@ service cloud.firestore {
         || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votos']) && votoValido())
       );
       allow delete: if isAdmin() || (signedIn() && resource.data.autor == me() && resource.data.estado == 'nuevo');
+    }
+
+    // Novedades: las lee cualquiera y las publica el creador desde su panel.
+    match /novedades/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['v', 'titulo', 'items', 'createdAt'])
+        && okStr(request.resource.data.v, 40)
+        && okStr(request.resource.data.titulo, 120)
+        && request.resource.data.items is list && request.resource.data.items.size() <= 30
+        && request.resource.data.createdAt is number;
+      allow delete: if isAdmin();
     }
 
     // Creador de la app: se agrega a mano desde la consola (admins/{uid}, con cualquier campo).

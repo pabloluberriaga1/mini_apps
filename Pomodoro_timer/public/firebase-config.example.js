@@ -10,3 +10,7 @@ export const firebaseConfig = {
   messagingSenderId: "000000000000",
   appId: "1:000000000000:web:0000000000000000"
 };
+
+// Opcional: clave de GIPHY (developers.giphy.com) para buscar GIFs en el chat.
+// Sin clave, en el chat se puede pegar el link de un GIF de GIPHY o Tenor.
+export const giphyKey = "";

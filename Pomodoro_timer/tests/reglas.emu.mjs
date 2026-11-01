@@ -137,3 +137,57 @@ test("tickets: crear, votar y moderar", async () => {
   await assertFails(as("beto").doc("tickets/t1").update({ estado: "hecho" }));
   await assertSucceeds(as("yo").doc("tickets/t1").update({ estado: "hecho", respuesta: "Listo", updatedAt: 2 }));
 });
+
+test("nombre de la sala y tareas de la sala: los cambia el anfitrión", async () => {
+  await assertFails(as("ana").doc("rooms/pub01").update({ name: "Otra" }));
+  await assertSucceeds(as("host").doc("rooms/pub01").update({ name: "Otra" }));
+  await assertFails(as("ana").doc("rooms/pub01").update({ tareasSala: true }));
+  await assertSucceeds(as("host").doc("rooms/pub01").update({ tareasSala: true }));
+  await assertSucceeds(as("ana").doc("rooms/pub01").set({ running: true }, { merge: true }));   // el reloj sigue libre
+});
+
+test("cambiar la clave: el anfitrión la reemplaza y saca a los que no están", async () => {
+  await seed(db => db.doc("rooms/priv1/miembros/ana").set({ clave: "abc123", at: 1 }));
+  await assertFails(as("ana").doc("rooms/priv1/secreto/clave").delete());
+  await assertSucceeds(as("host").doc("rooms/priv1/secreto/clave").delete());
+  await assertSucceeds(as("host").doc("rooms/priv1/secreto/clave").set({ clave: "nueva1" }));
+  await assertSucceeds(as("host").doc("rooms/priv1/miembros/ana").delete());
+  await assertFails(as("ana").doc("rooms/priv1").get());
+  await assertFails(as("ana").doc("rooms/priv1/miembros/ana").set({ clave: "abc123", at: 2 }));
+  await assertSucceeds(as("ana").doc("rooms/priv1/miembros/ana").set({ clave: "nueva1", at: 2 }));
+});
+
+test("tareas de la sala: solo si están activas; tachar y borrar", async () => {
+  const t = { text: "Guía 3", by: "ana", nick: "Ana", at: now, done: false };
+  await assertFails(as("ana").doc("rooms/pub01/tareas/t1").set(t));                 // apagadas
+  await seed(db => db.doc("rooms/pub01").update({ tareasSala: true, mods: ["mod"] }));
+  await assertSucceeds(as("ana").doc("rooms/pub01/tareas/t1").set(t));
+  await assertFails(as("ana").doc("rooms/pub01/tareas/t2").set({ ...t, by: "beto" }));
+  await assertFails(as("beto").doc("rooms/pub01/tareas/t1").update({ text: "otra" }));
+  await assertFails(as("beto").doc("rooms/pub01/tareas/t1").update({ done: true, doneBy: "ana" }));
+  await assertSucceeds(as("beto").doc("rooms/pub01/tareas/t1").update({ done: true, doneBy: "beto", doneNick: "Beto" }));
+  await assertSucceeds(as("ana").doc("rooms/pub01/tareas/t1").update({ done: false }));
+  await assertFails(as("beto").doc("rooms/pub01/tareas/t1").delete());
+  await assertSucceeds(as("mod").doc("rooms/pub01/tareas/t1").delete());
+  await seed(db => db.doc("rooms/pub01/tareas/t3").set(t));
+  await assertSucceeds(as("ana").doc("rooms/pub01/tareas/t3").delete());
+  await assertFails(as("ana").doc("rooms/priv1/tareas/t4").set(t));                 // privada sin clave
+});
+
+test("chat: GIFs solo de GIPHY o Tenor", async () => {
+  const c = as("ana").collection("rooms/pub01/chat");
+  await assertSucceeds(c.add(msg("ana", { text: "", gif: "https://media2.giphy.com/media/abc123/200.gif" })));
+  await assertSucceeds(c.add(msg("ana", { text: "jaja", gif: "https://media.tenor.com/xyz/tenor.gif" })));
+  await assertFails(c.add(msg("ana", { text: "", gif: "https://malo.com/x.gif" })));
+  await assertFails(c.add(msg("ana", { text: "" })));
+});
+
+test("novedades: las lee cualquiera, las publica el creador", async () => {
+  const n = { v: "123", titulo: "Algo nuevo", items: ["uno"], createdAt: 1 };
+  await assertSucceeds(env.unauthenticatedContext().firestore().collection("novedades").get());
+  await assertFails(as("ana").doc("novedades/n1").set(n));
+  await assertSucceeds(as("yo").doc("novedades/n1").set(n));
+  await assertSucceeds(as("yo").doc("novedades/n1").update({ titulo: "Editada" }));
+  await assertFails(as("yo").doc("novedades/n2").set({ ...n, extra: 1 }));
+  await assertSucceeds(as("yo").doc("novedades/n1").delete());
+});
